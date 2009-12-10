@@ -1,0 +1,14 @@
+- Initialization
+  - Create Attribute (descriptor)
+    - name:
+    - defaults:
+    - allowed_types:
+  - Create _attributes in types for Base, Type, Attribute
+- Kahnsept Methods
+  - Set Attribute
+    - Asign _anti_<attrbiute> is value is a Kahsept
+    - Don't allow duplicate values
+  - Remove Attribute
+  - GetAntiAttribute
+- Kahnsept Display Form
+

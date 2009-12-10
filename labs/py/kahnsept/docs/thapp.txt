@@ -1,0 +1,89 @@
+Objects:
+-Term
+-Committee
+-Brother
+-Position
+-Duty
+-Task
+
+--------------
+
+Committee:
+-Positions: (chair, members, supervisor)
+-Duties
+
+Example Committee: PR 
+-Positions: PR Chair, PR Members, PR supervisor, webmaster
+-Duties: Prep Delivery, Send Delivery
+
+--------------
+
+Brother:
+-Contact Info (phone, home address... etc)
+-Positions
+-Duties
+
+Example Brother: Chris Koss
+-Contact info: (425-246....)
+-Positions: PR Chair, Social Committee Member
+
+--------------
+
+Position:
+-Term: (semester)
+-Brother:
+-Duties: 
+
+Example Position: PR Chair
+-Term: Fall09
+-Brother: Chris Koss
+-Duties: Prepare Delivery, Send Delivery, Website Updates
+
+--------------
+
+Duty:
+-Committee: 
+-Owner: (position)
+-Supervisor: (position)
+-Frequency:
+
+Example Duty: Prepare Delivery
+-Committee: PR
+-Owner: PR Member
+-Supervisor: PR Chair
+-Frequency: Every Sunday
+
+Example Duty: Send Delivery
+-Committee: PR
+-Owner: PR Member
+-Supervisor: PR Chair
+-Frequency: Every Monday
+
+--------------
+
+Task:
+-Owner: (brother)
+-Supervisor: (brother)
+-Due Date:
+-# of Bros Needed:
+-Bro's Assigned:
+-Budget:
+-PrereqTask: 
+
+Example Task: Prepare Jungle Exchange Delivery
+-Owner: Kevin Wee
+-Supervisor: Chris Koss
+-Due Date: Sunday 11/29/09
+-# of Bros Needed: 1
+-Bro's Assigned: Kevin Wee
+-Budget: $0
+-PrereqTask: N/A
+
+Task:
+-Owner: Kevin Wee
+-Supervisor: Chris Koss
+-Due Date: Monday 11/30/09
+-# of Bros Needed: 4
+-Bro's Assigned: Chris, Kevin, Brian, Davis
+-Budget: $0
+-PrereqTask: Prepare Jungle Exchange Delivery

@@ -1,0 +1,147 @@
+<html>
+<head>
+<title>Kahnsept Unit Test</title>
+<script src="../scripts/namespace.js"></script>
+<script src="../scripts/base.js"></script>
+<script src="../scripts/timer.js"></script>
+<script src="unit.js"></script>
+
+<script src="../scripts/kahnsept.js"></script>
+</head>
+<body>
+<h1><script>document.write(document.title);</script></h1>
+<script>
+var UT = global_namespace.Import('startpad.jsunit');
+ts = new UT.TestSuite();
+ts.DWOutputDiv();
+</script>
+<script>
+var K = global_namespace.Import("kahnsept");
+K.Init();
+
+ts.AddTest("Initialization", function(ut)
+{
+	ut.Assert(K.kRoot);
+	ut.AssertEq(K.Get(0), K.kRoot);
+
+	var c = 0;
+	for (var i = 1; i < K.idMax; i++)
+		{
+		var kT = K.Get(i);
+		if (kT.IsA(K.kBuiltin))
+			{
+			c++;
+			ut.Assert(kT.IsA(K.kRoot));
+			}
+		}
+});
+
+ts.AddTest("IsA", function(ut)
+{
+	ut.Assert(!K.kRoot.IsA(K.kBuiltin));
+});
+
+ts.AddTest("New Kahnsept", function(ut)
+{
+	var kT = K.New();
+	ut.Assert(kT);
+	ut.Assert(kT.IsA(K.kRoot));
+
+	var kT = K.New(K.kRoot);
+	ut.Assert(kT);
+	ut.Assert(kT.IsA(K.kRoot));
+});
+
+ts.AddTest("Basic Konexion", function(ut)
+{
+	var k1 = K.New();
+	var k2 = K.New();
+
+	K.X("foo", k1, k2);
+	ut.AssertIdent(k1.GetX("foo")[0], k2);
+	ut.AssertIdent(k2.GetXIs("foo")[0], k1);
+	ut.AssertEq(k1.GetXNames(), ["name", "foo"]);
+
+	ut.AssertEq(k1.GetX("bar").length, 0);
+	ut.AssertEq(k2.GetXIs("bar").length, 0);
+
+	K.RemoveX("foo", k1, k2);
+	ut.AssertEq(k1.GetX("foo").length, 0);
+	ut.AssertEq(k2.GetXIs("foo").length, 0);
+
+	k1.X("bazz", k2);
+	ut.AssertIdent(k1.GetX("bazz")[0], k2);
+	ut.AssertIdent(k2.GetXIs("bazz")[0], k1);
+});
+
+ts.AddTest("Builtin Konexions", function(ut)
+{
+	ut.Assert(K.kBuiltin);
+	ut.Assert(K.kBuiltin.IsA(K.kRoot));
+
+	var k1 = K.New();
+	var d = new Date();
+	var tests = {date: new Date(), number:123, string: "hello", bool:true, 'undefined': undefined};
+	for (prop in tests)
+		{
+		if (!tests.hasOwnProperty(prop))
+			continue;
+		k1.X(prop, tests[prop]);
+		var kValue = k1.GetX(prop)[0];
+		ut.Assert(kValue.IsA(K.kBuiltin));
+		ut.AssertEq(kValue._value, tests[prop]);
+		}
+});
+
+ts.AddTest("Simple Inheritance", function(ut)
+{
+	var k1 = K.New();
+	k1.X("from_parent", 123);
+	var k2 = K.New(k1);
+	ut.AssertEq(K.ToString(k2.GetX("from_parent")), "123");
+	k2.X("from_parent", 456);
+	ut.AssertEq(K.ToString(k2.GetX("from_parent")), "456");
+	k2.RemoveX("from_parent");
+	ut.AssertEq(K.ToString(k2.GetX("from_parent")), "123");
+});
+
+ts.AddTest("Multiple Inheritance", function(ut)
+{
+	var k1 = K.New();
+	k1.X("p1", "a");
+	var k2 = K.New();
+	k2.X("p1", "b");
+
+	var k3 = K.New([k1, k2]);
+	ut.AssertEq(K.ToString(k3.GetX("p1")), "a, b");
+
+	k3.X("p1", "c");
+	ut.AssertEq(K.ToString(k3.GetX("p1")), "c");
+
+	var k4 = K.New(k1);
+	k4.AddParent(k2);
+	ut.AssertEq(K.ToString(k4.GetX("p1")), "a, b");
+});
+
+ts.AddTest("Parent Chains", function(ut)
+{
+	ut.AssertEq(K.kRoot.Parents().length, 0);
+	
+	var k1 = K.New(undefined, {name:"1"});
+	ut.AssertEq(k1.Parents().length, 1);
+	var k2 = K.New(k1);
+	ut.AssertEq(k2.Parents().length, 2);
+	var k3 = K.New(k1);
+	var k4 = K.New([k2, k3]);
+	ut.AssertEq(k4.Parents().length, 4);
+
+	ut.Assert(k1.GetChildren().Contains(k2));
+	ut.Assert(k2.GetChildren().Contains(k4));
+	ut.Assert(k3.GetChildren().Contains(k4));
+});
+
+ts.Run();
+ts.Report();
+</script>
+</body>
+</html>
