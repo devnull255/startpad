@@ -13,7 +13,7 @@ ts.DWOutputDiv();
 </script>
 <script>
 var Enigma = global_namespace.Import('startpad.enigma');
-Enigma.fnTrace = console.log;
+Enigma.fnTrace = function(s) {console.log(s);}
 
 ts.AddTest("Basic Reciprocal Encoding", function(ut)
 {
