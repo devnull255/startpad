@@ -34,7 +34,7 @@ NS.mRotors = {
 
 NS.mReflectors = {
 	B: {wires: "YRUHQSLDPXNGOKMIEBFZCWVJAT"},
-	C: {wires: "FVPJIAOYEDRZXWGCTKUQSBNMHL"},
+	C: {wires: "FVPJIAOYEDRZXWGCTKUQSBNMHL"}
 	};
 
 NS.fnTrace = undefined;
