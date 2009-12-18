@@ -2,9 +2,34 @@
 <html>
 <head>
 <title>Enigma Machine Simulator</title>
+<script src="namespace.js"></script>
+<script src="enigma.js"></script>
+<link rel="stylesheet" type="text/css" href="enigma-sim.css"/>
+<script>
+var Sim = global_namespace.Define('startpad.enigma.sim', function (NS) {
+	var Enigma = global_namespace.Import('startpad.enigma');
+	var machine = new Enigma.Enigma();
+	
+Enigma.fnTrace = function(s) {console.log(s);}
+
+NS.Extend(NS, {
+Init: function()
+	{
+	alert(1);
+	}
+
+});
+});
+
+</script>
 </head>
 <body>
+<div class="page">
 <h1><script>document.write(document.title);</script></h1>
-
+<label for="plain">Input:</label><textarea id="plain">
+</div>
+<script>
+Sim.Init();
+</script>
 </body>
 </html>
