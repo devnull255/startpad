@@ -1,7 +1,7 @@
 body {
 margin: 0;
 padding: 0;
-font-family: verdana, arial, sans-serif;
+font-family: Helvetica, sans-serif;
 font-size: 16px;
 }
 
@@ -13,4 +13,18 @@ margin:0;
 div.page {
 width: 980px;
 margin: auto;
+}
+
+#plain {
+width: 100%;
+height: 50px;
+font-size: 24px;
+font-family: Courier New, Courier, Fixed, monospace;
+font-weight: bold;
+}
+
+#cipher {
+font-size: 24px;
+font-family: Courier New;
+font-weight: bold;
 }

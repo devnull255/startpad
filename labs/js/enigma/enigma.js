@@ -24,54 +24,56 @@
 */
 global_namespace.Define('startpad.enigma', function (NS)
 {
-NS.mRotors = {
-	I: {wires: "EKMFLGDQVZNTOWYHXUSPAIBRCJ", notch: 'Q'},
-	II: {wires: "AJDKSIRUXBLHWTMCQGZNPYFVOE", notch: 'E'},
-	III: {wires: "BDFHJLCPRTXVZNYEIWGAKMUSQO", notch: 'V'},
-	IV: {wires: "ESOVPZJAYQUIRHXLNFTGKDCMWB", notch: 'J'},
-	V: {wires: "VZBRGITYUPSDNHLXAWMJQOFECK", notch: 'Z'}
-	};
 
-NS.mReflectors = {
+NS.Extend(NS, {
+	mRotors: {
+		I: {wires: "EKMFLGDQVZNTOWYHXUSPAIBRCJ", notch: 'Q'},
+		II: {wires: "AJDKSIRUXBLHWTMCQGZNPYFVOE", notch: 'E'},
+		III: {wires: "BDFHJLCPRTXVZNYEIWGAKMUSQO", notch: 'V'},
+		IV: {wires: "ESOVPZJAYQUIRHXLNFTGKDCMWB", notch: 'J'},
+		V: {wires: "VZBRGITYUPSDNHLXAWMJQOFECK", notch: 'Z'}
+		},
+
+	mReflectors: {
 	B: {wires: "YRUHQSLDPXNGOKMIEBFZCWVJAT"},
 	C: {wires: "FVPJIAOYEDRZXWGCTKUQSBNMHL"}
-	};
+	},
 
-NS.fnTrace = undefined;
-
-var codeA = 'A'.charCodeAt(0);
-
-function IFromCh(ch)
-{
-	ch = ch.toUpperCase();
-	return ch.charCodeAt(0) - codeA;
-}
-
-function ChFromI(i)
-{
-	return String.fromCharCode(i + codeA);
-}
+	fnTrace: undefined,
+	codeA: 'A'.charCodeAt(0),
 	
-function MapRotor(rotor)
-{
+MapRotor: function(rotor)
+	{
 	// Determine the relative offset (mod 26) of encoding and decoding each letter
 	// (wire position)
 	rotor.map = {};
 	rotor.mapRev = {};
 	for (var iFrom = 0; iFrom < 26; iFrom++)
 		{
-		var iTo = IFromCh(rotor.wires.charAt(iFrom));
+		var iTo = NS.IFromCh(rotor.wires.charAt(iFrom));
 		rotor.map[iFrom] = (26 + iTo - iFrom) % 26;
 		rotor.mapRev[iTo] = (26 + iFrom - iTo) % 26;
 		}
-}
+	},
+	
+IFromCh: function(ch)
+	{
+	ch = ch.toUpperCase();
+	return ch.charCodeAt(0) - NS.codeA;
+	},
+
+ChFromI: function(i)
+	{
+	return String.fromCharCode(i + NS.codeA);
+	}
+});
 
 // Compute forward and reverse mappings for rotors and reflectors
 for (var sRotor in NS.mRotors)
-	MapRotor(NS.mRotors[sRotor]);
+	NS.MapRotor(NS.mRotors[sRotor]);
 	
 for (var sReflector in NS.mReflectors)
-	MapRotor(NS.mReflectors[sReflector]);
+	NS.MapRotor(NS.mReflectors[sReflector]);
 
 NS.Enigma = function(settings)
 {
@@ -103,13 +105,13 @@ Init: function(settings)
 	this.position = [];
 	for (var i in this.settings.rotors)
 		{
-		this.position[i] = (IFromCh(this.settings.position[i]));
+		this.position[i] = (NS.IFromCh(this.settings.position[i]));
 		}
 	
 	this.rings = [];
 	for (var i in this.settings.rings)
 		{
-		this.rings[i] = IFromCh(this.settings.rings[i]);
+		this.rings[i] = NS.IFromCh(this.settings.rings[i]);
 		}
 	
 	this.settings.plugs = this.settings.plugs.toUpperCase();
@@ -124,13 +126,13 @@ Init: function(settings)
 
 	for (var i = 0; i < this.settings.plugs.length; i += 2)
 		{
-		var iFrom = IFromCh(this.settings.plugs[i]);
-		var iTo = IFromCh(this.settings.plugs[i+1]);
+		var iFrom = NS.IFromCh(this.settings.plugs[i]);
+		var iTo = NS.IFromCh(this.settings.plugs[i+1]);
 	
 		if (this.mPlugs[iFrom] != iFrom)
-			console.warn("Redefinition of plug setting for " + ChFromI(iFrom));
+			console.warn("Redefinition of plug setting for " + NS.ChFromI(iFrom));
 		if (this.mPlugs[iTo] != iTo)
-			console.warn("Redefinition of plug setting for " + ChFromI(iTo));
+			console.warn("Redefinition of plug setting for " + NS.ChFromI(iTo));
 			
 		this.mPlugs[iFrom] = iTo;
 		this.mPlugs[iTo] = iFrom;
@@ -156,11 +158,11 @@ toString: function()
 	
 	s += " Position: ";
 	for (var i in this.position)
-		s += ChFromI(this.position[i]);
+		s += NS.ChFromI(this.position[i]);
 	
 	var sT = "Rings: ";
 	for (var i in this.rings)
-		sT += ChFromI(this.rings[i]);
+		sT += NS.ChFromI(this.rings[i]);
 	if (sT != "Rings: AAA")
 		s += " " + sT;
 	
@@ -170,7 +172,7 @@ toString: function()
 		{
 		if (i < this.mPlugs[i])
 			{
-			sT += chSep + ChFromI(i) + ChFromI(this.mPlugs[i]);
+			sT += chSep + NS.ChFromI(i) + NS.ChFromI(this.mPlugs[i]);
 			chSep = " ";
 			}
 		}
@@ -189,13 +191,13 @@ IncrementRotors: function()
 	 */
 	
 	// Middle notch - all rotors rotate
-	if (this.position[1] == IFromCh(this.rotors[1].notch))
+	if (this.position[1] == NS.IFromCh(this.rotors[1].notch))
 		{
 		this.position[0] += 1;
 		this.position[1] += 1;
 		}
 	// Right notch - right two rotors rotate
-	else if (this.position[2] == IFromCh(this.rotors[2].notch))
+	else if (this.position[2] == NS.IFromCh(this.rotors[2].notch))
 		this.position[1] += 1;
 		
 	this.position[2] += 1;
@@ -217,7 +219,7 @@ EncodeCh: function(ch)
 		
 	this.IncrementRotors();
 	
-	i = IFromCh(ch);
+	i = NS.IFromCh(ch);
 	aTrace.push(i);
 	i = this.mPlugs[i];
 	aTrace.push(i);
@@ -242,7 +244,7 @@ EncodeCh: function(ch)
 	i = this.mPlugs[i];
 	aTrace.push(i);
 
-	var chOut = ChFromI(i);
+	var chOut = NS.ChFromI(i);
 	
 	if (this.fnTrace)
 		{
@@ -250,7 +252,7 @@ EncodeCh: function(ch)
 		var chSep = "";
 		for (var i in aTrace)
 			{
-			s += chSep + ChFromI(aTrace[i]);
+			s += chSep + NS.ChFromI(aTrace[i]);
 			chSep = "->";
 			}
 		this.fnTrace(s + " " + this.toString());
