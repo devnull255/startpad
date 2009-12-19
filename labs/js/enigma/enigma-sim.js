@@ -40,7 +40,7 @@ UpdateDisplay: function()
 	DOM.ReadValues(NS.aInitFields, NS.mParts, NS.mState);
 
 	machine.Init(Enigma.SettingsFromStrings(NS.mState));
-	var sCipher = machine.Encode(sPlain);
+	var sCipher = Enigma.GroupLetters(machine.Encode(sPlain));
 	DOM.SetText(NS.mParts.cipher, sCipher);
 	
 	for (var i = 1; i <= 3; i++)
