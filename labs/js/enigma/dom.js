@@ -167,6 +167,12 @@ BindIDs: function(aIDs)
 		}
 	return mParts;
 	},
+	
+InitValues: function(aNames, mpFields, mpValues)
+	{
+	for (var i = 0; i < aNames.length; i++)
+		mpFields[aNames[i]].value = mpValues[aNames[i]];
+	},
 
 /* Poor-man's JQuery compatible selector.
 
@@ -236,4 +242,6 @@ SetText: function(elt, st)
 	else
 		elt.innerText = st;
 	}
-});}); // startpad.DOM
+});
+
+}); // startpad.DOM

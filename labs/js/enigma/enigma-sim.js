@@ -12,17 +12,16 @@ global_namespace.Define('startpad.enigma.sim', function (NS) {
 Enigma.fnTrace = function(s) {console.log(s);}
 
 NS.Extend(NS, {
+	aInitFields: ['rotors', 'position', 'rings', 'plugs'],
+
 Init: function()
 	{
 	NS.mParts = DOM.BindIDs();
 	NS.mParts.plain.focus();
 	
-	var mState = machine.StateStrings();
+	NS.mState = machine.StateStrings();
 	
-	NS.mParts.init_rotors.value = mState.rotors;
-	NS.mParts.init_position.value = mState.position;
-	NS.mParts.init_rings.value = mState.rings;
-	NS.mParts.init_plugs.value = mState.plugs;
+	DOM.InitValues(NS.aInitFields, NS.mParts, NS.mState);
 	
 	Event.AddEventFn(NS.mParts.plain, 'change', NS.UpdateDisplay);
 	Event.AddEventFn(NS.mParts.plain, 'keydown', function(){});

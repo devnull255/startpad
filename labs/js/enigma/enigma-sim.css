@@ -24,14 +24,14 @@ width: 980px;
 margin: auto;
 }
 
-#rotors {
+#rotor_display {
 font-size: 48px;
 font-family: Courier New, Courier, Fixed, monospace;
 font-weight: bold;
 text-align: center;
 }
 
-#rotors span {
+#rotor_display span {
 border: 3px solid black;
 padding: 15px;
 margin: 0 10px;
