@@ -24,6 +24,7 @@
 */
 global_namespace.Define('startpad.enigma', function (NS)
 {
+	var Base = NS.Import('startpad.base');
 
 NS.Extend(NS, {
 	mRotors: {
@@ -152,33 +153,47 @@ Init: function(settings)
 toString: function()
 	{
 	var s = "";
+	var mState = this.StateStrings();
 	
-	s += "Enigma Rotors: ";
-	s += this.settings.rotors.join("-");
+	s += "Enigma Rotors: " + mState.rotors;
+	s += " Position: " + mState.position;
+
+	if (mState.rings != "AAA")
+		s += " Rings: " + mState.rings;
+
+	if (mState.plugs != "")
+		s += " Plugboard: " + mState.plugs;
+
+	return s;
+	},
 	
-	s += " Position: ";
-	for (var i in this.position)
-		s += NS.ChFromI(this.position[i]);
+StateStrings: function()
+	{
+	var mState = {};
+
+	mState.rotors = this.settings.rotors.join('-');
+	mState.position = Base.Map(this.position, NS.ChFromI).join('')
+	mState.rings = Base.Map(this.rings, NS.ChFromI).join('')
 	
-	var sT = "Rings: ";
-	for (var i in this.rings)
-		sT += NS.ChFromI(this.rings[i]);
-	if (sT != "Rings: AAA")
-		s += " " + sT;
-	
-	var sT = "Plugboard: "
+	mState.plugs = "";
 	var chSep = "";
 	for (var i = 0; i < 26; i++)
 		{
 		if (i < this.mPlugs[i])
 			{
-			sT += chSep + NS.ChFromI(i) + NS.ChFromI(this.mPlugs[i]);
+			mState.plugs += chSep + NS.ChFromI(i) + NS.ChFromI(this.mPlugs[i]);
 			chSep = " ";
 			}
 		}
-	if (sT != "Plugboard: ")
-		s += " " + sT;
 
+	return mState;
+	},
+	
+PositionString: function()
+	{
+	var s = "";
+	for (var i in this.position)
+		s += NS.ChFromI(this.position[i]);
 	return s;
 	},
 	

@@ -8,55 +8,36 @@
 <script src="dom.js"></script>
 <script src="events.js"></script>
 <script src="enigma.js"></script>
+<script src="enigma-sim.js"></script>
 <link rel="stylesheet" type="text/css" href="enigma-sim.css"/>
 <script>
-/*
-	Web UI for the Enigma machine simulator.
-	
-	Copyright (c) 2009, Mike Koss - mckoss@startpad.org
-*/
-var Sim = global_namespace.Define('startpad.enigma.sim', function (NS) {
-	var Enigma = global_namespace.Import('startpad.enigma');
-	var machine = new Enigma.Enigma();
-	var DOM = global_namespace.Import('startpad.DOM');
-	var Event = global_namespace.Import('startpad.events');
-	
-Enigma.fnTrace = function(s) {console.log(s);}
-
-NS.Extend(NS, {
-Init: function()
-	{
-	NS.mParts = DOM.BindIDs();
-	NS.mParts.plain.focus();
-	
-	Event.AddEventFn(NS.mParts.plain, 'change', NS.UpdateDisplay);
-	Event.AddEventFn(NS.mParts.plain, 'keydown', function(){});
-	Event.AddEventFn(NS.mParts.plain, 'keyup', function(evt)
-		{
-		NS.UpdateDisplay();
-		});
-	
-	NS.UpdateDisplay();
-	},
-	
-UpdateDisplay: function()
-	{
-	var sPlain = NS.mParts.plain.value;
-	machine.Init();
-	var sCipher = machine.Encode(sPlain);
-	DOM.SetText(NS.mParts.cipher, sCipher);
-	}
-
-});
-});
-
+var Sim = global_namespace.Import('startpad.enigma.sim');
 </script>
 </head>
 <body>
 <div class="page">
+
 <h1><script>document.write(document.title);</script></h1>
+<p>by Mike Koss</p>
+<hr/>
+
+<h2>Initialization</h2>
+
+<label for="init_rotors">Rotors:</label><input type="text" id="init_rotors"/>
+<br/><label for="init_position">Rotor Start:</label><input type="text" id="init_position"/>
+<br/><label for="init_rings">Rings:</label><input type="text" id="init_rings"/>
+<br/><label for="init_plugs">Plugs:</label><input type="text" id="init_plugs"/>
+
+<h2>Encoding</h2>
+<div id="rotors">
+<span id="rot_1"></span><span id="rot_2"></span><span id="rot_3"></span>
+</div>
+
+<label for="plain">Enter message:</label>
 <textarea id="plain"></textarea>
+
 <div id="cipher"></div>
+
 </div>
 <script>Sim.Init();</script>
 </body>

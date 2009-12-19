@@ -66,6 +66,37 @@ DeDupArray: function(a)
 		if (a[i-1] == a[i])
 			a.splice(i, 1);
 		}
+	},
+	
+Map: function(a, fn)
+	{
+	var aRes = [];
+	for (var i = 0; i < a.length; i++)
+		aRes.push(fn(a[i]));
+	return aRes;
+	},
+	
+Filter: function(a, fn)
+	{
+	var aRes = [];
+	for (var i = 0; i < a.length; i++)
+		{
+		if (fn(a[i]))
+			aRes.push(a[i]);
+		}
+	return aRes;
+	},
+	
+Reduce: function(a, fn)
+	{
+	if (a.length < 2)
+		return a[0];
+
+	var res = a[0];
+	for (var i = 1; i < a.length-1; i++)
+		res = fn(res, a[i]);
+
+	return res;
 	}
 });
 
