@@ -84,6 +84,14 @@ SettingsFromStrings: function(mState)
 	if (mState.plugs)
 		mSettings.plugs = mState.plugs;
 	return mSettings;
+	},
+	
+GroupLetters: function(s)
+	{
+	s = s.toUpperCase();
+	s = s.replace(/[^A-Z]/g, '');
+	var a = s.split(/(.{5})/);
+	return Base.Filter(a, function (s) {return s.length > 0;}).join(' ');
 	}
 });
 

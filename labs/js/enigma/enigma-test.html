@@ -118,6 +118,15 @@ ts.AddTest("Settings From Strings", function(ut)
 		"Enigma Rotors: III-II-I Position: UVW Rings: XYZ Plugboard: AB CD");
 });
 
+ts.AddTest("Group Letters", function(ut)
+{
+	ut.AssertEq(Enigma.GroupLetters("a"), "A");
+	ut.AssertEq(Enigma.GroupLetters("aaaaa"), "AAAAA");
+	ut.AssertEq(Enigma.GroupLetters("aaaaaa"), "AAAAA A");
+	ut.AssertEq(Enigma.GroupLetters("aaaaaaaaaaaaaa"), "AAAAA AAAAA AAAA");
+	
+});
+
 ts.Run();
 ts.Report();
 
