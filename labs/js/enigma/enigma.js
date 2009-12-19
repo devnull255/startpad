@@ -4,23 +4,22 @@
    
    Copyright (c) 2009, Mike Koss
    
-   See Paper Enigma at:
-   	http://mckoss.com/Crypto/Enigma.htm
+   References:
+   	  Paper Enigma - http://mckoss.com/Crypto/Enigma.htm
+   	  Enigma Simulator - http://bit.ly/enigma-machine
+   	  Enigma History - http://en.wikipedia.org/wiki/Enigma_machine
    	
    Usage:
    
       var enigma = global_namespace.Import('startpad.enigma');
       var machine = new enigma.Enigma();
       var cipher = machine.Encode("plain text");
+      
       machine.Init();
       var plain = machine.Encode(cipher);  -> "PLAIN TEXT"
    
    Rotor settings from:
    	http://homepages.tesco.net/~andycarlson/enigma/simulating_enigma.html
-   
-   TODO
-   	- Ring Settings - notch moves relative to wires
-   	- Plugboard
 */
 global_namespace.Define('startpad.enigma', function (NS)
 {

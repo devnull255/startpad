@@ -8,11 +8,13 @@ global_namespace.Define('startpad.enigma.sim', function (NS) {
 	var machine = new Enigma.Enigma();
 	var DOM = NS.Import('startpad.DOM');
 	var Event = NS.Import('startpad.events');
+	var Format = NS.Import('startpad.format-util');
 	
 Enigma.fnTrace = function(s) {console.log(s);}
 
 NS.Extend(NS, {
 	aInitFields: ['rotors', 'position', 'rings', 'plugs'],
+	sTwitter: "http://twitter.com/home?source=Enigma&status={code} - http://bit.ly/enigma-machine",
 
 Init: function()
 	{
@@ -42,6 +44,9 @@ UpdateDisplay: function()
 	machine.Init(Enigma.SettingsFromStrings(NS.mState));
 	var sCipher = Enigma.GroupLetters(machine.Encode(sPlain));
 	DOM.SetText(NS.mParts.cipher, sCipher);
+	
+	NS.mParts.twitter.setAttribute('href',
+		Format.ReplaceKeys(NS.sTwitter, {code:sCipher}));
 	
 	for (var i = 1; i <= 3; i++)
 		DOM.SetText(NS.mParts['rot_'+i], Enigma.ChFromI(machine.position[i-1]));
