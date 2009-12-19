@@ -173,6 +173,12 @@ InitValues: function(aNames, mpFields, mpValues)
 	for (var i = 0; i < aNames.length; i++)
 		mpFields[aNames[i]].value = mpValues[aNames[i]];
 	},
+	
+ReadValues: function(aNames, mpFields, mpValues)
+	{
+	for (var i = 0; i < aNames.length; i++)
+		mpValues[aNames[i]] = mpFields[aNames[i]].value;
+	},
 
 /* Poor-man's JQuery compatible selector.
 

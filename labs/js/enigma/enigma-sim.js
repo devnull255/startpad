@@ -24,8 +24,8 @@ Init: function()
 	DOM.InitValues(NS.aInitFields, NS.mParts, NS.mState);
 	
 	Event.AddEventFn(NS.mParts.plain, 'change', NS.UpdateDisplay);
-	Event.AddEventFn(NS.mParts.plain, 'keydown', function(){});
-	Event.AddEventFn(NS.mParts.plain, 'keyup', function(evt)
+	Event.AddEventFn(window, 'keydown', function(){});
+	Event.AddEventFn(window, 'keyup', function(evt)
 		{
 		NS.UpdateDisplay();
 		});
