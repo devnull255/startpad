@@ -17,10 +17,12 @@ Init: function()
 	NS.mParts = DOM.BindIDs();
 	NS.mParts.plain.focus();
 	
-	NS.mParts.init_rotors.value = machine.RotorString();
-	NS.mParts.init_position.value = machine.PositionString();
-	NS.mParts.init_rings.value = machine.RingsString();
-	NS.mParts.init_plugs.value = machine.PlugsString();
+	var mState = machine.StateStrings();
+	
+	NS.mParts.init_rotors.value = mState.rotors;
+	NS.mParts.init_position.value = mState.position;
+	NS.mParts.init_rings.value = mState.rings;
+	NS.mParts.init_plugs.value = mState.plugs;
 	
 	Event.AddEventFn(NS.mParts.plain, 'change', NS.UpdateDisplay);
 	Event.AddEventFn(NS.mParts.plain, 'keydown', function(){});
