@@ -13,7 +13,7 @@ global_namespace.Define('startpad.enigma.sim', function (NS) {
 Enigma.fnTrace = function(s) {console.log(s);}
 
 NS.Extend(NS, {
-	aInitFields: ['rotors', 'position', 'rings', 'plugs'],
+	aInitFields: ['rotors', 'position', 'rings', 'plugs', 'keep_spacing'],
 	sTwitter: "http://twitter.com/home?source=Enigma&status={code} - http://bit.ly/enigma-machine",
 
 Init: function()
@@ -26,11 +26,8 @@ Init: function()
 	DOM.InitValues(NS.aInitFields, NS.mParts, NS.mState);
 	
 	Event.AddEventFn(NS.mParts.plain, 'change', NS.UpdateDisplay);
-	Event.AddEventFn(window, 'keydown', function(){});
-	Event.AddEventFn(window, 'keyup', function(evt)
-		{
-		NS.UpdateDisplay();
-		});
+	Event.AddEventFn(window, 'keyup', NS.UpdateDisplay);
+	Event.AddEventFn(NS.mParts.keep_spacing, 'click', NS.UpdateDisplay);
 	
 	NS.UpdateDisplay();
 	},
@@ -42,7 +39,9 @@ UpdateDisplay: function()
 	DOM.ReadValues(NS.aInitFields, NS.mParts, NS.mState);
 
 	machine.Init(Enigma.SettingsFromStrings(NS.mState));
-	var sCipher = Enigma.GroupLetters(machine.Encode(sPlain));
+	var sCipher = machine.Encode(sPlain);
+	if (!NS.mState.keep_spacing)
+		sCipher = Enigma.GroupLetters(sCipher);
 	DOM.SetText(NS.mParts.cipher, sCipher);
 	
 	NS.mParts.twitter.setAttribute('href',

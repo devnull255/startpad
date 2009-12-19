@@ -177,7 +177,16 @@ InitValues: function(aNames, mpFields, mpValues)
 ReadValues: function(aNames, mpFields, mpValues)
 	{
 	for (var i = 0; i < aNames.length; i++)
-		mpValues[aNames[i]] = mpFields[aNames[i]].value;
+		{
+		var field = mpFields[aNames[i]];
+		var value;
+		
+		if (field.type == 'checkbox')
+			value = field.checked;
+		else
+			value = field.value;
+		mpValues[aNames[i]] = value;
+		}
 	},
 
 /* Poor-man's JQuery compatible selector.
