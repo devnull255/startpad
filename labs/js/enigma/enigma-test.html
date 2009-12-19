@@ -89,6 +89,35 @@ ts.AddTest("Plugboard Settings", function(ut)
 	ut.AssertEq(enigma.Encode(cipher), "ABCDEF");
 });
 
+ts.AddTest("Settings From Strings", function(ut)
+{
+	var enigma = new Enigma.Enigma();
+	
+	var mState = enigma.StateStrings();
+	ut.AssertEq(mState, {
+		rotors: "I-II-III",
+		reflector: "B",
+		position: "MCK",
+		rings: "AAA",
+		plugs: ""
+		});
+		
+	mState = {
+		rotors: "III-II-I",
+		reflector: "C",
+		rings: "XYZ",
+		position: "UVW",
+		plugs: "AB CD"
+		};
+		
+	var mSettings = Enigma.SettingsFromStrings(mState);
+	console.log(mSettings);
+	enigma.Init(mSettings);
+	
+	ut.AssertEq(enigma.toString(),
+		"Enigma Rotors: III-II-I Position: UVW Rings: XYZ Plugboard: AB CD");
+});
+
 ts.Run();
 ts.Report();
 

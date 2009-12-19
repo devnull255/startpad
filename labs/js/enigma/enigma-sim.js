@@ -36,7 +36,10 @@ Init: function()
 UpdateDisplay: function()
 	{
 	var sPlain = NS.mParts.plain.value;
-	machine.Init();
+	
+	DOM.ReadValues(NS.aInitFields, NS.mParts, NS.mState);
+
+	machine.Init(Enigma.SettingsFromStrings(NS.mState));
 	var sCipher = machine.Encode(sPlain);
 	DOM.SetText(NS.mParts.cipher, sCipher);
 	

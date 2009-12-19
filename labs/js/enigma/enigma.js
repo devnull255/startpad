@@ -66,6 +66,24 @@ IFromCh: function(ch)
 ChFromI: function(i)
 	{
 	return String.fromCharCode(i + NS.codeA);
+	},
+	
+/* Create a valid settings map, given a collection of string-based
+   settings (in the format of StateStrings). */
+SettingsFromStrings: function(mState)
+	{
+	var mSettings = {};
+	if (mState.rotors)
+		mSettings.rotors = mState.rotors.split('-');
+	if (mState.reflector)
+		mSettings.reflector = mState.reflector;
+	if (mState.position)
+		mSettings.position = mState.position.split('');
+	if (mState.rings)
+		mSettings.rings = mState.rings.split('');
+	if (mState.plugs)
+		mSettings.plugs = mState.plugs;
+	return mSettings;
 	}
 });
 
@@ -174,6 +192,7 @@ StateStrings: function()
 	mState.rotors = this.settings.rotors.join('-');
 	mState.position = Base.Map(this.position, NS.ChFromI).join('')
 	mState.rings = Base.Map(this.rings, NS.ChFromI).join('')
+	mState.reflector = this.settings.reflector;
 	
 	mState.plugs = "";
 	var chSep = "";
@@ -191,10 +210,7 @@ StateStrings: function()
 	
 PositionString: function()
 	{
-	var s = "";
-	for (var i in this.position)
-		s += NS.ChFromI(this.position[i]);
-	return s;
+	return Base.Map(this.position, NS.ChFromI).join('')
 	},
 	
 IncrementRotors: function()
