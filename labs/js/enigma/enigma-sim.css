@@ -132,3 +132,7 @@ color: white;
 background-color: black;
 padding: 5px;
 }
+
+#key_out {
+color: red;
+}

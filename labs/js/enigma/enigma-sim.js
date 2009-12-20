@@ -14,7 +14,8 @@ Enigma.fnTrace = function(s) {console.log(s);}
 
 NS.Extend(NS, {
 	aInitFields: ['rotors', 'position', 'rings', 'plugs', 'keep_spacing'],
-	sTwitter: "http://twitter.com/home?source=Enigma&status={code} - http://bit.ly/enigma-machine",
+	sTwitter: "http://twitter.com/home?source=Enigma&status={key}{code} - http://bit.ly/enigma-machine",
+	reMessageKey: /^([A-Z]{3})(\1)/i,
 
 Init: function()
 	{
@@ -37,15 +38,36 @@ UpdateDisplay: function()
 	var sPlain = NS.mParts.plain.value;
 	
 	DOM.ReadValues(NS.aInitFields, NS.mParts, NS.mState);
-
+	
 	machine.Init(Enigma.SettingsFromStrings(NS.mState));
 	var sCipher = machine.Encode(sPlain);
+	var sKeyOut = sCipher.substr(0,6) + " ";
+	
+	// Special case message key in either text - 3 charcters repeated twice
+	var sKey = ""
+	if (NS.reMessageKey.test(sPlain))
+		sKey = sPlain.substr(0,3);
+	else if (NS.reMessageKey.test(sCipher))
+		sKey = sCipher.substr(0,3);
+	
+	if (sKey)
+		{
+		NS.mState.position = sKey;
+		machine.Init(Enigma.SettingsFromStrings(NS.mState));
+		sCipher = machine.Encode(sPlain.substr(6).Trim());
+		}
+	else
+		sKeyOut = "";
+	
+	console.log("key out", sKeyOut);	
+	DOM.SetText(NS.mParts.key_out, sKeyOut);
+
 	if (!NS.mState.keep_spacing)
 		sCipher = Enigma.GroupLetters(sCipher);
-	DOM.SetText(NS.mParts.cipher, sCipher);
+	DOM.SetText(NS.mParts.cipher_out, sCipher);
 	
 	NS.mParts.twitter.setAttribute('href',
-		Format.ReplaceKeys(NS.sTwitter, {code:sCipher}));
+		Format.ReplaceKeys(NS.sTwitter, {code:sCipher, key:sKeyOut}));
 	
 	for (var i = 1; i <= 3; i++)
 		DOM.SetText(NS.mParts['rot_'+i], Enigma.ChFromI(machine.position[i-1]));
