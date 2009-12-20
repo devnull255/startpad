@@ -58,8 +58,7 @@ UpdateDisplay: function()
 		}
 	else
 		sKeyOut = "";
-	
-	console.log("key out", sKeyOut);	
+		
 	DOM.SetText(NS.mParts.key_out, sKeyOut);
 
 	if (!NS.mState.keep_spacing)
