@@ -1,0 +1,55 @@
+<html>
+<head>
+<title>Mersene Twister Test Page</title>
+<script src="namespace.js"></script>
+<script src="mersene_twister.js"></script>
+<script src="unit.js"></script>
+</head>
+<body>
+<h1><script>document.write(document.title);</script></h1>
+<SCRIPT>
+ts = new UT.TestSuite();
+ts.DWOutputDiv();
+</script>
+<script>
+var MT = global_namespace.Import('startpad.random.mt');
+
+ts.AddTest("Int32", function(ut)
+{
+	var expected = [
+		1067595299,  955945823,  477289528, 4107218783, 4228976476,
+		3344332714, 3355579695, 227628506,  810200273, 2591290167,
+		2560260675, 3242736208,  646746669, 1479517882,4245472273
+		];
+		
+	MT.init_by_array([0x123, 0x234, 0x345, 0x456]);
+	
+	for (var i = 0; i < expected.length; i++)
+		{
+		ut.AssertEq(MT.genrand_int32(), expected[i]);
+		}
+});
+
+ts.AddTest("Real1", function(ut)
+{
+	var expected = [
+		0.24856890, 0.22257348, 0.11112763, 0.95628639, 0.98463532,
+		0.77866314, 0.78128178, 0.05299889, 0.18863945, 0.60333176,
+		0.59610714, 0.75500836, 0.15058244, 0.34447710, 0.98847604,
+		0.26621219, 0.89958089, 0.74995262, 0.41295089, 0.26512361
+		];
+		
+	MT.init_by_array([0x123, 0x234, 0x345, 0x456]);
+	
+	for (var i = 0; i < expected.length; i++)
+		{
+		ut.AssertLT(Math.abs(MT.genrand_real1()-expected[i]), 0.00000001);
+		}
+});
+
+ts.Run();
+ts.Report();
+
+</script>
+</body>
+</html>
