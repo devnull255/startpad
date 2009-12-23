@@ -25,8 +25,10 @@ global_namespace.Define('startpad.enigma', function (NS)
 {
 	var Base = NS.Import('startpad.base');
 	var Random = NS.Import('startpad.random');
+	var Format = NS.Import('startpad.format-util');
 
 NS.Extend(NS, {
+	alpha: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
 	mRotors: {
 		I: {wires: "EKMFLGDQVZNTOWYHXUSPAIBRCJ", notch: 'Q'},
 		II: {wires: "AJDKSIRUXBLHWTMCQGZNPYFVOE", notch: 'E'},
@@ -98,6 +100,8 @@ StringsFromSettings: function(mSettings)
 		mState.rings = mSettings.rings.join('');
 	if (mSettings.reflector)
 		mState.reflector = mSettings.reflector;
+	if (mSettings.plugs)
+		mState.plugs = mSettings.plugs;
 	return mState;
 	},
 	
@@ -105,8 +109,7 @@ GroupLetters: function(s)
 	{
 	s = s.toUpperCase();
 	s = s.replace(/[^A-Z]/g, '');
-	var a = s.split(/(.{5})/);
-	return Base.Filter(a, function (s) {return s.length > 0;}).join(' ');
+	return Format.GroupBy(s, 5);
 	},
 
 /* Set the Enigma machine settings using a passkey as a
@@ -123,6 +126,7 @@ SettingsFromPasskey: function(s)
 	settings.rings = [];
 	for (var i = 0; i < 3; i++)
 		settings.rings.push(NS.ChFromI(Random.randint(0, 25)));
+	settings.plugs = Format.GroupBy(Random.sample(NS.alpha.split(''), 20).join(''), 2);
 	return settings;
 	}
 });

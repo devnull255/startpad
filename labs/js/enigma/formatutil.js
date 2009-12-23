@@ -52,6 +52,16 @@ FormatDate: function(d)
 	return NS.ReplaceKeys("{y}-{m}-{d}", {y:d.getFullYear(), m:d.getMonth()+1, d:d.getDate()});
 	},
 
+/* Divide the string into n-letter groups */	
+GroupBy: function(s, n, chSep)
+	{
+	if (chSep == undefined)
+		chSep = ' ';
+	var re = new RegExp("(.{" + n + "})");
+	var a = s.split(re);
+	return Base.Filter(a, function (s) {return s.length > 0;}).join(chSep);
+	},
+
 // Return an integer as a string using a fixed number of digits, c. (require a sign with fSign).
 SDigits: function(val, c, fSign)
 	{

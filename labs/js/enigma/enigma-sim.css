@@ -114,6 +114,10 @@ font-weight: bold;
 width: 270px;
 }
 
+#init_form input[type="text"]#plugs {
+font-size: 14px;
+}
+
 #init_form input[type="button"] {
 font-size: 24px;
 font-family: Courier New, Courier, Fixed, monospace;
