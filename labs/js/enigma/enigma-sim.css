@@ -114,6 +114,13 @@ font-weight: bold;
 width: 270px;
 }
 
+#init_form input[type="button"] {
+font-size: 24px;
+font-family: Courier New, Courier, Fixed, monospace;
+font-weight: bold;
+width: 270px;
+}
+
 #plain {
 width: 100%;
 height: 100px;

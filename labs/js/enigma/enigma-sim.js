@@ -27,10 +27,23 @@ Init: function()
 	DOM.InitValues(NS.aInitFields, NS.mParts, NS.mState);
 	
 	Event.AddEventFn(NS.mParts.plain, 'change', NS.UpdateDisplay);
+	Event.AddEventFn(window, 'keydown', NS.UpdateDisplay);
 	Event.AddEventFn(window, 'keyup', NS.UpdateDisplay);
 	Event.AddEventFn(NS.mParts.keep_spacing, 'click', NS.UpdateDisplay);
+	Event.AddEventFn(NS.mParts.passkey, 'click', NS.GetPasskey);
 	
 	NS.UpdateDisplay();
+	},
+	
+GetPasskey: function()
+	{
+	var s = prompt("Enter passkey to set initial Enigma settings.", Format.FormatDate(new Date()));
+	if (s)
+		{
+		var mStrings = Enigma.StringsFromSettings(Enigma.SettingsFromPasskey(s));
+		DOM.InitValues(['rotors', 'position', 'rings', 'plugs'], NS.mParts, mStrings);
+		NS.UpdateDisplay();
+		}
 	},
 	
 UpdateDisplay: function()

@@ -171,7 +171,10 @@ BindIDs: function(aIDs)
 InitValues: function(aNames, mpFields, mpValues)
 	{
 	for (var i = 0; i < aNames.length; i++)
-		mpFields[aNames[i]].value = mpValues[aNames[i]];
+		{
+		if (mpValues[aNames[i]] != undefined)
+			mpFields[aNames[i]].value = mpValues[aNames[i]];
+		}
 	},
 	
 ReadValues: function(aNames, mpFields, mpValues)

@@ -3,6 +3,8 @@
 <title>Engima Test Page</title>
 <script src="namespace.js"></script>
 <script src="base.js"></script>
+<script src="mersene_twister.js"></script>
+<script src="random.js"></script>
 <script src="enigma.js"></script>
 <script src="unit.js"></script>
 </head>
@@ -14,6 +16,7 @@ ts.DWOutputDiv();
 </script>
 <script>
 var Enigma = global_namespace.Import('startpad.enigma');
+var Random = global_namespace.Import('startpad.random');
 Enigma.fnTrace = function(s) {console.log(s);}
 
 ts.AddTest("Basic Reciprocal Encoding", function(ut)
@@ -125,6 +128,14 @@ ts.AddTest("Group Letters", function(ut)
 	ut.AssertEq(Enigma.GroupLetters("aaaaaa"), "AAAAA A");
 	ut.AssertEq(Enigma.GroupLetters("aaaaaaaaaaaaaa"), "AAAAA AAAAA AAAA");
 	
+});
+
+ts.AddTest("Settings from Passkey", function(ut)
+{
+	var settings = Enigma.SettingsFromPasskey("");
+	ut.AssertEq(settings.rotors.length, 3);
+	ut.AssertEq(settings.position.length, 3);
+	ut.AssertEq(settings.rings.length, 3);
 });
 
 ts.Run();

@@ -9,6 +9,7 @@
 <script src="events.js"></script>
 <script src="enigma.js"></script>
 <script src="enigma-sim.js"></script>
+<script src="mersene_twister.js"></script>
 <script src="random.js"></script>
 <link rel="stylesheet" type="text/css" href="enigma-sim.css"/>
 <script>
@@ -52,6 +53,10 @@ var Sim = global_namespace.Import('startpad.enigma.sim');
 			<li>
 				<label for="plugs">Plugboard:</label>
 				<input type="text" id="plugs"/>
+			</li>
+			<li>
+				<label for="passkey"></label>
+				<input type="button" id="passkey" value="Set from passkey"/>
 			</li>
 		</ol>
 	</fieldset>

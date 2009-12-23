@@ -46,6 +46,11 @@ FormatNumber: function(val, digits)
 	
 	return sInt + sFrac;
 	},
+	
+FormatDate: function(d)
+	{
+	return NS.ReplaceKeys("{y}-{m}-{d}", {y:d.getFullYear(), m:d.getMonth()+1, d:d.getDate()});
+	},
 
 // Return an integer as a string using a fixed number of digits, c. (require a sign with fSign).
 SDigits: function(val, c, fSign)

@@ -86,6 +86,21 @@ SettingsFromStrings: function(mState)
 	return mSettings;
 	},
 	
+StringsFromSettings: function(mSettings)
+	{
+	var mState = {};
+
+	if (mSettings.rotors)
+		mState.rotors = mSettings.rotors.join('-');
+	if (mSettings.position)
+		mState.position = mSettings.position.join('');
+	if (mSettings.rings)
+		mState.rings = mSettings.rings.join('');
+	if (mSettings.reflector)
+		mState.reflector = mSettings.reflector;
+	return mState;
+	},
+	
 GroupLetters: function(s)
 	{
 	s = s.toUpperCase();
@@ -101,7 +116,14 @@ SettingsFromPasskey: function(s)
 	var settings = {};
 	
 	Random.seed(s);
-	
+	settings.rotors = Random.sample(['I', 'II', 'III', 'IV', 'V'], 3);
+	settings.position = [];
+	for (var i = 0; i < 3; i++)
+		settings.position.push(NS.ChFromI(Random.randint(0,25)));
+	settings.rings = [];
+	for (var i = 0; i < 3; i++)
+		settings.rings.push(NS.ChFromI(Random.randint(0, 25)));
+	return settings;
 	}
 });
 
@@ -205,13 +227,9 @@ toString: function()
 	
 StateStrings: function()
 	{
-	var mState = {};
+	var mState = NS.StringsFromSettings(this.settings);
+	mState.position = Base.Map(this.position, NS.ChFromI).join('');
 
-	mState.rotors = this.settings.rotors.join('-');
-	mState.position = Base.Map(this.position, NS.ChFromI).join('')
-	mState.rings = Base.Map(this.rings, NS.ChFromI).join('')
-	mState.reflector = this.settings.reflector;
-	
 	mState.plugs = "";
 	var chSep = "";
 	for (var i = 0; i < 26; i++)
