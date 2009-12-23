@@ -1,9 +1,10 @@
 <html>
 <head>
-<title>Mersene Twister Test Page</title>
+<title>Random Number Generator Test Page</title>
 <script src="namespace.js"></script>
 <script src="base.js"></script>
 <script src="mersene_twister.js"></script>
+<script src="random.js"></script>
 <script src="unit.js"></script>
 </head>
 <body>
@@ -14,8 +15,9 @@ ts.DWOutputDiv();
 </script>
 <script>
 var MT = global_namespace.Import('startpad.random.mt');
+var Random = global_namespace.Import('startpad.random');
 
-ts.AddTest("Int32", function(ut)
+ts.AddTest("Mersene Int32", function(ut)
 {
 	var expected = [
 		1067595299,  955945823,  477289528, 4107218783, 4228976476,
@@ -31,7 +33,7 @@ ts.AddTest("Int32", function(ut)
 		}
 });
 
-ts.AddTest("Real1", function(ut)
+ts.AddTest("Mersene Real1", function(ut)
 {
 	var expected = [
 		0.24856890, 0.22257348, 0.11112763, 0.95628639, 0.98463532,
@@ -48,7 +50,7 @@ ts.AddTest("Real1", function(ut)
 		}
 });
 
-ts.AddTest("Res53", function(ut)
+ts.AddTest("Mersene Res53", function(ut)
 {
 	var expected = [
 	0.2485689015878, 0.1111276295504, 0.9846353141864, 0.7812817771211, 0.1886394515882,
@@ -63,6 +65,46 @@ ts.AddTest("Res53", function(ut)
 	for (var i = 0; i < expected.length; i++)
 		{
 		ut.AssertLT(Math.abs(MT.genrand_res53()-expected[i]), 0.00000001);
+		}
+});
+
+ts.AddTest("random (real)", function(ut)
+{
+	for (var i = 0; i < 20; i++)
+		{
+		var r = Random.random();
+		console.log(r);
+		ut.Assert(r >= 0 && r <= 1);
+		}
+});
+
+ts.AddTest("randomint", function(ut)
+{
+	for (var i = 0; i < 20; i++)
+		{
+		var r = Random.randint(0,100);
+		ut.Assert(Math.floor(r) == r);
+		ut.Assert(r >= 0 && r <= 100);
+		}
+});
+
+ts.AddTest("seed", function(ut)
+{
+	var seeds = [123, 0.1234, "hello", new Date(), [123, 456]];
+	for (var i = 0; i < seeds.length; i++)
+		{
+		var save = []
+		Random.seed(seeds[i]);
+		for (var j = 0; j < 30; j++)
+			{
+			save.push(Random.random())
+			}
+			
+		Random.seed(seeds[i]);
+		for (var j = 0; j < 30; j++)
+			{
+			ut.AssertEq(Random.random(), save[j]);
+			}
 		}
 });
 

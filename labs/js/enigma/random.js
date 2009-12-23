@@ -1,4 +1,4 @@
-global_namespace.Define('startpad.random.', function(NS) {
+global_namespace.Define('startpad.random', function(NS) {
 /* Random number functions.
 
    The builtin Math.random does not afford setting an initial seed.  These
@@ -23,21 +23,30 @@ NS.Extend(NS, {
 seed: function(data)
 	{
 	if (data == undefined)
-		data = new Date();
-		
+		data = new Date().getTime();
+
 	if (typeof data == 'number')
-		data = [data];
+		{
+		MT.init_genrand(data);
+		return
+		}
 		
 	if (typeof data == 'string')
-		data = Base.map(data.split(''), String.codeFromChar);
+		data = Base.Map(data.split(''), function(ch) {return ch.charCodeAt(0);});
+		
+	MT.init_by_array(data);
 	},
 	
 randint: function(min, max)
 	{
+	var r = MT.genrand_real1();
+	
+	return Math.floor(min + (max-min)*r);
 	},
 	
 random: function()
 	{
+	return MT.genrand_real1();
 	}
 });
 

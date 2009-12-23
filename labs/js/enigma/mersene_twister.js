@@ -72,7 +72,7 @@ LOWER_MASK = 0x7fffffff; /* least significant r bits */
 var mt = new Array(N);   /* the array for the state vector  */
 var mti = N+1;           /* mti==N+1 means mt[N] is not initialized */
 
-function unsigned32 (n1) // returns a 32-bits unsiged integer from an operand to which applied a bit operator.
+function unsigned32 (n1) // returns a 32-bits unsigned integer from an operand to which applied a bit operator.
 {
 	return n1 < 0 ? (n1 ^ UPPER_MASK) + UPPER_MASK : n1;
 }
