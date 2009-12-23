@@ -244,7 +244,7 @@ genrand_real3 : function()
 genrand_res53: function()
 {
 	//c//unsigned long a=genrand_int32()>>5, b=genrand_int32()>>6;
-	var a=genrand_int32()>>>5, b=genrand_int32()>>>6;
+	var a=NS.genrand_int32()>>>5, b=NS.genrand_int32()>>>6;
 	return(a*67108864.0+b)*(1.0/9007199254740992.0);
 }
 /* These real versions are due to Isaku Wada, 2002/01/09 added */
