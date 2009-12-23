@@ -23,7 +23,10 @@ NS.Extend(NS, {
 seed: function(data)
 	{
 	if (data == undefined)
-		data = new Date().getTime();
+		data = new Date();
+		
+	if (typeof data == 'object' && data.constructor == Date)
+		data = data.getTime();
 
 	if (typeof data == 'number')
 		{
@@ -33,20 +36,51 @@ seed: function(data)
 		
 	if (typeof data == 'string')
 		data = Base.Map(data.split(''), function(ch) {return ch.charCodeAt(0);});
-		
+	
 	MT.init_by_array(data);
 	},
 	
 randint: function(min, max)
 	{
-	var r = MT.genrand_real1();
+	var r = NS.random();
 	
-	return Math.floor(min + (max-min)*r);
+	return Math.floor(min + (max-min+1)*r);
 	},
 	
 random: function()
 	{
 	return MT.genrand_real1();
+	},
+
+/* Return a random selection of k (unique) elements from array, a. */	
+sample: function(a, k)
+	{
+	// Copy input array
+	var pool = a.concat();
+	var n = a.length;
+	if (k > n)
+		k = n;
+	var result = [];
+	for (var i = 0; i < k; i++)
+		{
+		var j = NS.randint(0,n-i-1);
+		result.push(pool[j]);
+		pool[j] = pool[n-i-1];
+		}
+	return result;
+	},
+	
+shuffle: function(a)
+	{
+	var n = a.length;
+	for (var i = n-1; i > 0; i--)
+		{
+		var j = NS.randint(0, i);
+		var t = a[i];
+		a[i] = a[j];
+		a[j] = t;
+		}
+	return a;
 	}
 });
 

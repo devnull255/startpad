@@ -24,6 +24,7 @@
 global_namespace.Define('startpad.enigma', function (NS)
 {
 	var Base = NS.Import('startpad.base');
+	var Random = NS.Import('startpad.random');
 
 NS.Extend(NS, {
 	mRotors: {
@@ -91,6 +92,16 @@ GroupLetters: function(s)
 	s = s.replace(/[^A-Z]/g, '');
 	var a = s.split(/(.{5})/);
 	return Base.Filter(a, function (s) {return s.length > 0;}).join(' ');
+	},
+
+/* Set the Enigma machine settings using a passkey as a
+   seend to the random number generator. */	
+SettingsFromPasskey: function(s)
+	{
+	var settings = {};
+	
+	Random.seed(s);
+	
 	}
 });
 

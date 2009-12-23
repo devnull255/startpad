@@ -73,13 +73,13 @@ ts.AddTest("random (real)", function(ut)
 	for (var i = 0; i < 20; i++)
 		{
 		var r = Random.random();
-		console.log(r);
 		ut.Assert(r >= 0 && r <= 1);
 		}
 });
 
 ts.AddTest("randomint", function(ut)
 {
+	Random.seed();
 	for (var i = 0; i < 20; i++)
 		{
 		var r = Random.randint(0,100);
@@ -105,6 +105,50 @@ ts.AddTest("seed", function(ut)
 			{
 			ut.AssertEq(Random.random(), save[j]);
 			}
+		}
+});
+
+ts.AddTest("sample", function(ut)
+{
+	var a1 = [0,1,2,3,4];
+	
+	Random.seed();
+	for (var x = 0; x < 20; x++)
+		{
+		var aSel = Random.sample(a1, 5);
+		ut.AssertEq(aSel.length, 5);
+		var m = {};
+		for (var i = 0; i < a1.length; i++)
+			{
+			ut.AssertEq(m[aSel[i]], undefined);
+			m[aSel[i]] = true;
+			}
+		for (var i = 0; i < a1.length; i++)
+			ut.Assert(m[i]);
+		}
+		
+	aSel = Random.sample(a1, 3);
+	ut.AssertEq(aSel.length, 3);
+});
+
+ts.AddTest("shuffle", function(ut)
+{
+	var a1 = [0,1,2,3,4];
+	
+	Random.seed();
+	
+	for (x = 0; x < 20; x++)
+		{
+		Random.shuffle(a1);
+		ut.AssertEq(a1.length, 5);
+		var m = {};
+		for (var i = 0; i < a1.length; i++)
+			{
+			ut.AssertEq(m[a1[i]], undefined);
+			m[a1[i]] = true;
+			}
+		for (var i = 0; i < a1.length; i++)
+			ut.Assert(m[i]);
 		}
 });
 
