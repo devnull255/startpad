@@ -9,9 +9,48 @@ import sys
 import re
 import shelve
 
+from enum import *
+
 local_cache = "kahnsept.bin"
 
 TRACE = True
+
+class Entity(object):
+    """
+    Entities are the definitions of all Instances in Kahnsept.
+    
+    They are collections of Properties.
+    """
+    def __init__(self, name):
+        self.name = name
+        self._props = []
+        
+    def add_prop(self, prop):
+        if prop not in self._props:
+            self._props.append(prop)
+
+"""
+The allowed cardinalities of a property
+"""             
+arity = enum('single', # 0..1
+             'multiple', # 0..n
+             'one', # 1..1 
+             'many' # 1..n
+             )
+        
+class Property(object):
+    """
+    Properties definitions contain:
+    
+    - type (entity)
+    - tag (name) - optional
+    - cardinality (min and max values allowed)
+    """
+    def __init__(self, entity, tag=None, arity=arity.single):
+        self.entity = entity
+        self.tag = tag
+        self.arity = arity
+        
         
 class MapWrapper(object):
     """

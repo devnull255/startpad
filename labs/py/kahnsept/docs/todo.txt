@@ -1,3 +1,29 @@
+Local Python Command-Line entity relationship version
+
+Classes:
+1 Entity
+  Methods:
+  	add_prop(prop)
+4 Instance
+  instance.prop = value (set value)
+  instance.prop (read value)
+  instance.prop.append(value)
+  instance.prop.remove(value)
+  del instance.prop (remove value) or instance.prop = None
+  instance._id
+  Instance.get(_id) (<_id> syntax would be nice)
+2 Prop
+  - Entity(type)
+  - [tag_name]
+  - cardinality
+3 Built-in Entities:
+	- number
+	- text
+	- date
+	
+? Do we have type heirarchies (sub-classes of Entities?)
+
+==== version 1 ===
 - Initialization
   - Create Attribute (descriptor)
     - name:
