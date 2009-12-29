@@ -22,6 +22,8 @@ Classes:
 	- date
 	
 ? Do we have type heirarchies (sub-classes of Entities?)
+- default values
+- type check property assignments
 
 ==== version 1 ===
 - Initialization

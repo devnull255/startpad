@@ -24,15 +24,22 @@ class Entity(object):
     def __init__(self, name):
         self.name = name
         self._props = []
+        self._mProps = {}
         
     def add_prop(self, prop):
         if prop not in self._props:
             self._props.append(prop)
+            
+    def new(self):
+        """
+        Return an instance of this Entity type
+        """
+        return Instance(self)
 
 """
 The allowed cardinalities of a property
 """             
-arity = enum('single', # 0..1
+card = enum('single', # 0..1
              'multiple', # 0..n
              'one', # 1..1 
              'many' # 1..n
@@ -46,10 +53,37 @@ class Property(object):
     - tag (name) - optional
     - cardinality (min and max values allowed)
     """
-    def __init__(self, entity, tag=None, arity=arity.single):
+    def __init__(self, entity, tag=None, card=card.single):
         self.entity = entity
         self.tag = tag
-        self.arity = arity
+        self.card = card
+        
+class Instance(object):
+    """
+    An instance of an Entity definition.
+    
+    instance.x - get the value of the property defined to an x type (or tagged x)
+    """
+    idNext = 0
+
+    def __init__(self, entity):
+        self.__dict__['_entity'] = entity
+        self.__dict__['_mValues'] = {}
+        self.__dict__['_id'] = Instance.idNext
+        Instance.idNext += 1
+        
+    def __getattr__(self, prop_name):
+        return self._mValues[prop_name]
+    
+    def __setattr__(self, prop_name, value):
+        if value is None:
+            del self._mValues[prop_name]
+            return
+        
+        self._mValues[prop_name] = value
+        
+    def __repr__(self):
+        return simplejson.dumps(self._mValues, indent=4)
         
         
 class MapWrapper(object):
