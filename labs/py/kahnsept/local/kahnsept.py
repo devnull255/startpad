@@ -21,6 +21,18 @@ class Entity(object):
     
     They are collections of Properties.
     """
+    _mEntities = {}
+    
+    def __new__(cls, name):
+        """
+        Share instances of Entity for a given name
+        """
+        if name in cls._mEntities:
+            return cls._mEntities[name]
+        e = super(Entity, cls).__new__(cls)
+        cls._mEntities[name] = e
+        return e
+
     def __init__(self, name):
         self.name = name
         self._props = []
@@ -141,9 +153,7 @@ def interactive():
             
     sys.displayhook = json_display
     
-    d = {}
-    
-    code.interact("", local=d)
+    code.interact("", local=globals())
     
 if __name__ == '__main__':
     interactive()
