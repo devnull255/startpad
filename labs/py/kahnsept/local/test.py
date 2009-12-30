@@ -33,10 +33,10 @@ class TestBasics(unittest.TestCase):
 class TestBuiltins(unittest.TestCase):
     def test_builtin(self):
         e = kahnsept.Entity('Test')
-        e.add_prop(kahnsept.Number)
-        e.add_prop(kahnsept.Text)
-        e.add_prop(kahnsept.Boolean)
-        e.add_prop(kahnsept.Date)
+        e.add_prop(kahnsept.Property(kahnsept.Number))
+        e.add_prop(kahnsept.Property(kahnsept.Text))
+        e.add_prop(kahnsept.Property(kahnsept.Boolean))
+        e.add_prop(kahnsept.Property(kahnsept.Date))
         
         e.Number = 1
         self.assertEqual(e.Number, 1)

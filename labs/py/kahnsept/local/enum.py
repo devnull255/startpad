@@ -50,7 +50,7 @@ class enum(object):
         result = ['<enum']
         for name in self.__names:
             result.append("%s=%d" % (name, getattr(self, name)))
-        return string.join(result)+'>'
+        return ' '.join(result)+'>'
 
     def __len__(self):
         return len(self.__dict)

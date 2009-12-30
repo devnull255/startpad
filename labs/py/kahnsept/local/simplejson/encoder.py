@@ -428,6 +428,7 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr, _key_separ
             for chunk in _iterencode_dict(o, _current_indent_level):
                 yield chunk
         else:
+            yield repr(o)
             if markers is not None:
                 markerid = id(o)
                 if markerid in markers:

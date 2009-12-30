@@ -4,13 +4,14 @@ Kahnsept - Entity/Relationship system
 """
 
 import simplejson
-import code
+import code2
 import sys
 import re
 import shelve
 import datetime
 
 from enum import *
+from dyn_dict import *
 
 local_cache = "kahnsept.bin"
 
@@ -107,7 +108,7 @@ class BuiltIn(Entity):
     @staticmethod
     def init_all():
         for bi in BuiltIn.builtin_types:
-            globals()[bi] = Property(BuiltIn(BuiltIn.builtin_types(bi)))
+            globals()[bi] = BuiltIn(BuiltIn.builtin_types(bi))
         
     def add_prop(self, name):
         raise Exception("Can't add properties to builtin types")
@@ -204,7 +205,7 @@ def interactive():
             
     sys.displayhook = json_display
     
-    code.interact("", local=Entity.all_entities())
+    code2.interact("", globals=globals(), local=Entity.all_entities())
     
 if __name__ == '__main__':
     interactive()
