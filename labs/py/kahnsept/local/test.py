@@ -14,7 +14,7 @@ class TestBasics(unittest.TestCase):
     def test_property(self):
         e = kahnsept.Entity('Test')
         p = kahnsept.Property(e)
-        self.assertEqual(p.card, kahnsept.card.single)
+        self.assertEqual(p.card, kahnsept.card.multiple)
         
         p = kahnsept.Property(e, 'fred')
         self.assertEqual(p.tag, 'fred')
@@ -32,28 +32,23 @@ class TestBasics(unittest.TestCase):
         
 class TestBuiltins(unittest.TestCase):
     def test_builtin(self):
-        num = kahnsept.Number
-        text = kahnsept.Text
-        bool = kahnsept.Boolean
-        date = kahnsept.Date
-        
         e = kahnsept.Entity('Test')
-        e.add_prop(num)
-        e.add_prop(text)
-        e.add_prop(bool)
-        e.add_prop(date)
+        e.add_prop(kahnsept.Number)
+        e.add_prop(kahnsept.Text)
+        e.add_prop(kahnsept.Boolean)
+        e.add_prop(kahnsept.Date)
         
-        e.num = 1
-        self.assertEqual(e.num, 1)
+        e.Number = 1
+        self.assertEqual(e.Number, 1)
         
-        e.text = "hello"
-        self.assertEqual(e.text, "hello")
+        e.Text = "hello"
+        self.assertEqual(e.Text, "hello")
         
-        e.bool = True
-        self.assertEqual(e.bool, True)
+        e.Boolean = True
+        self.assertEqual(e.Boolean, True)
         
-        e.date = now = datetime.datetime.now()
-        self.assertEqual(e.date, now)
+        e.Date = now = datetime.datetime.now()
+        self.assertEqual(e.Date, now)
 
 if __name__ == '__main__':
     unittest.main()

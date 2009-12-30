@@ -38,10 +38,32 @@ class Entity(object):
         self.name = name
         self._props = []
         self._mProps = {}
+    
+    @classmethod    
+    def all_entities(cls):
+        return cls._mEntities
         
     def add_prop(self, prop):
+        """
+        Add a new property to the Entity.  We require that all properties be uniquely identifiable:
+        if two properties of the same type exist, they must BOTH be tagged.
+        """
+        for own_prop in self._props:
+            if own_prop.entity == prop.entity and (prop.tag is None or own_prop.tag is None):
+                raise Exception("Cannot have two properties of the same type w/o a tag name")
         if prop not in self._props:
             self._props.append(prop)
+            self._mProps
+            
+    def get_props(self, name):
+        """
+        Return all applicable properties by name.  Return all tagged props as well as type name matches.
+        """
+        props = []
+        for prop in self._props:
+            if prop.tag == name or prop.entity.name == name:
+                props.append(prop)
+        return props 
             
     def new(self):
         """
@@ -66,15 +88,14 @@ class BuiltIn(Entity):
         name = self.builtin_types(builtin_type)
         super(BuiltIn, self).__init__(name)
         self._value = self.type_defaults[builtin_type]
-        globals()[name] = self
         
     def is_instance(self, inst):
         return isinstance(inst, self.py_types[self.builtin_type])
         
     @staticmethod
     def init_all():
-        for bi in BuiltIn.builtin_types.values():
-            BuiltIn(bi)
+        for bi in BuiltIn.builtin_types:
+            globals()[bi] = Property(BuiltIn(BuiltIn.builtin_types(bi)))
         
     def add_prop(self, name):
         raise Exception("Can't add properties to builtin types")
@@ -97,7 +118,7 @@ class Property(object):
     - tag (name) - optional
     - cardinality (min and max values allowed)
     """
-    def __init__(self, entity, tag=None, card=card.single, default=None):
+    def __init__(self, entity, tag=None, card=card.multiple, default=None):
         self.entity = entity
         self.tag = tag
         self.card = card
@@ -126,6 +147,8 @@ class Instance(object):
         if value is None:
             del self._mValues[prop_name]
             return
+        
+        prop = self._entity.get_prop(prop_name)
         
         self._mValues[prop_name] = value
         
@@ -169,7 +192,7 @@ def interactive():
             
     sys.displayhook = json_display
     
-    code.interact("", local=globals())
+    code.interact("", local=Entity.all_entities())
     
 if __name__ == '__main__':
     interactive()
