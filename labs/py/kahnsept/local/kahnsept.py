@@ -67,7 +67,7 @@ class Entity(object):
         return Instance(self)
     
     def is_instance(self, inst):
-        return isinstance(inst._entity, self)
+        return isinstance(inst, Instance) and inst._entity is self
     
     def coerce_value(self, value):
         if self.is_instance(value):

@@ -21,7 +21,7 @@ def softspace(file, newvalue):
 
 class InteractiveConsole2(code.InteractiveConsole):
     def __init__(self, locals=None, filename="<console>", globals=None):
-        code.InteractiveConsole.__init__(self)
+        code.InteractiveConsole.__init__(self, locals, filename)
         self.globals = globals
         
     def runcode(self, code):

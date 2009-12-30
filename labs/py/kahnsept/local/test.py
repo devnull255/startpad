@@ -74,16 +74,20 @@ class TestCoercion(unittest.TestCase):
         e.add_prop(Property(Text))
         e.add_prop(Property(Boolean))
         e.add_prop(Property(Date))
+        e.add_prop(Property(e, 'parent'))
         
         i = e.new()
+        i2 = e.new()
         i.Number = "7"
         i.Text = 1
         i.Boolean = 1
         i.Date = "1/1/2009"
+        i.parent = i2
         self.assertEqual(i.Number, 7)
         self.assertEqual(i.Text, "1")
         self.assertEqual(i.Boolean, True)
         self.assertEqual(i.Date.date(), datetime.date(2009,1,1))
+        self.assertEqual(i.parent, i2)
         
     def test_fail(self):
         e = Entity('Test')
@@ -94,6 +98,7 @@ class TestCoercion(unittest.TestCase):
             i.Number = "a"
             
         self.assertRaises(Exception, throws)
+
 
 if __name__ == '__main__':
     unittest.main()
