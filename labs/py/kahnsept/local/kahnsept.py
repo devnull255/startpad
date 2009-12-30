@@ -119,12 +119,12 @@ class BuiltIn(Entity):
 
 
 """
-The allowed cardinalities of a property
+The allowed cardinalities of a property relationship
 """             
-card = enum('single', # 0..1
-             'multiple', # 0..n
-             'one', # 1..1 
-             'many' # 1..n
+card = enum('one_one', # 1:1 - matched (e.g. spouse)
+             'one_many', # 1:* - partition (e.g., children)
+             'many_one', # *:1 - reference (e.g., father)
+             'many_many' # *:* - multi-set (e.g., siblings)
              )
         
 class Property(object):
@@ -135,7 +135,7 @@ class Property(object):
     - tag (name) - optional
     - cardinality (min and max values allowed)
     """
-    def __init__(self, entity, tag=None, card=card.multiple, default=None):
+    def __init__(self, entity, tag=None, card=card.many_one, default=None):
         self.entity = entity
         self.tag = tag
         self.card = card

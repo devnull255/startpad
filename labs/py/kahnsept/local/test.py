@@ -98,7 +98,86 @@ class TestCoercion(unittest.TestCase):
             i.Number = "a"
             
         self.assertRaises(Exception, throws)
+        
+class TestSample(unittest.TestCase):
+    def setUp(self):
+        Test = Entity('Test')
+        Question = Entity('Question')
+        QuestionType = Entity('QuestionType')
+        Score = Entity('Score')
+        User = Entity('User')
+        UserAnswer = Entity('UserAnswer')
+        ScoringDimension = Entity('ScoringDimension')
+        PossibleAnswer = Entity('PossibleAnswer')
+        
+        Test.add_prop(Text, 'title')
+        User.add_prop(Text, 'name')
+        Question.add_prop(Text, 'prompt')
+        QuestionType.add_prop(Text)
+        Score.add_prop(Number, 'amplitude')
+        ScoringDimension.add_prop(Text)
+        UserAnswer.add_prop(Text, 'data')
+        UserAnswer.add_prop(Date)
+        PossibleAnswer.add_prop(Text, 'data')
+        PossibleAnswer.add_prop(Number, 'delta_score')
+        
+        Related(Test, Question, card.many_many)
+        Related(Test, Score, card.one_many)
+        
+        Related(Question, PossibleAnswer, card.one_many)
+        Related(Question, UserAnswer, card.one_many)
+        
+        Related(QuestionType, Question, card.one_many)
 
+        Related(PossibleAnswer, UserAnswer, card.one_many)
+        
+        Related(User, Score, card.one_many)
+        Related(User, UserAnswer, card.one_many)
+        
+        Related(ScoringDimension, Score, card.one_many)
+        Related(ScoringDimension, PossibleAnswer, card.one_many)
+        
+    def test_simple(self):
+        t = Test.new()
+        t.title = "First Test"
+        
+        qt = QuestionType.new()
+        qt.Text = "multiple_choice"
+        
+        q = Question.new()
+        q.QuestionType = qt
+        q.prompt = "What is your favorite color?"
+        
+        sd = ScoringDimension.new()
+        sd.Text = "heat"
+        
+        for color,score in [('red', 2), ('blue', 0), ('yellow', 1)]:
+            pa = PossibleAnswer.new()
+            pa.ScoringDimension = sd
+            pa.data = color
+            pa.delta_score = score
+            q.PossibleAnswer.add(pa)
+            
+        u = User.new()
+        u.name = "Fred"
+        
+        ua = UserAnswer.new()
+        ua.User = u
+        ua.Question = q
+        ua.data = "blue"
+        ua.Date = "12/25/09"
+        
+        s = Score.new()
+        s.Test = t
+        s.User = u
+        
+        raw_score = 0
+        for uaT in u.UserAnswer:
+            for pa in a.Question.PossibleAnswer:
+                if pa.data == uaT.data:
+                    raw_score += pa.delta_score
+
+        s.amplitude = raw_score
 
 if __name__ == '__main__':
     unittest.main()
