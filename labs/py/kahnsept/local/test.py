@@ -31,18 +31,14 @@ class TestBasics(unittest.TestCase):
     def test_property(self):
         e = Entity('Test')
         p = Property(e)
-        self.assertEqual(p.card, card.multiple)
+        self.assertEqual(p.card, card.one)
         
-        p = Property(e, 'fred')
+        p = e.add_prop(e, 'fred')
         self.assertEqual(p.tag, 'fred')
-        
-        e.add_prop(p)
         self.assertNotEqual(e.get_prop('fred'), None)
         
     def test_instance(self):
         e = Entity('Test')
-        p = Property(e)
-        e.add_prop(p)
         i = e.new()
         
         self.assertEqual(i._entity, e)
@@ -50,10 +46,10 @@ class TestBasics(unittest.TestCase):
 class TestBuiltins(unittest.TestCase):
     def test_builtin(self):
         e = Entity('Test')
-        e.add_prop(Property(Number))
-        e.add_prop(Property(Text))
-        e.add_prop(Property(Boolean))
-        e.add_prop(Property(Date))
+        e.add_prop(Number)
+        e.add_prop(Text)
+        e.add_prop(Boolean)
+        e.add_prop(Date)
         
         e.Number = 1
         self.assertEqual(e.Number, 1)
@@ -70,11 +66,11 @@ class TestBuiltins(unittest.TestCase):
 class TestCoercion(unittest.TestCase):
     def test_pass(self):
         e = Entity('Test')
-        e.add_prop(Property(Number))
-        e.add_prop(Property(Text))
-        e.add_prop(Property(Boolean))
-        e.add_prop(Property(Date))
-        e.add_prop(Property(e, 'parent'))
+        e.add_prop(Number)
+        e.add_prop(Text)
+        e.add_prop(Boolean)
+        e.add_prop(Date)
+        e.add_prop(e, 'parent')
         
         i = e.new()
         i2 = e.new()
@@ -121,21 +117,21 @@ class TestSample(unittest.TestCase):
         PossibleAnswer.add_prop(Text, 'data')
         PossibleAnswer.add_prop(Number, 'delta_score')
         
-        Related(Test, Question, card.many_many)
-        Related(Test, Score, card.one_many)
+        Relation(Test, Question, card.many_many)
+        Relation(Test, Score, card.one_many)
         
-        Related(Question, PossibleAnswer, card.one_many)
-        Related(Question, UserAnswer, card.one_many)
+        Relation(Question, PossibleAnswer, card.one_many)
+        Relation(Question, UserAnswer, card.one_many)
         
-        Related(QuestionType, Question, card.one_many)
+        Relation(QuestionType, Question, card.one_many)
 
-        Related(PossibleAnswer, UserAnswer, card.one_many)
+        Relation(PossibleAnswer, UserAnswer, card.one_many)
         
-        Related(User, Score, card.one_many)
-        Related(User, UserAnswer, card.one_many)
+        Relation(User, Score, card.one_many)
+        Relation(User, UserAnswer, card.one_many)
         
-        Related(ScoringDimension, Score, card.one_many)
-        Related(ScoringDimension, PossibleAnswer, card.one_many)
+        Relation(ScoringDimension, Score, card.one_many)
+        Relation(ScoringDimension, PossibleAnswer, card.one_many)
         
     def test_simple(self):
         t = Test.new()

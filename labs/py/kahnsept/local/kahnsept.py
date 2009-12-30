@@ -17,6 +17,21 @@ local_cache = "kahnsept.bin"
 
 TRACE = True
 
+"""
+The allowed cardinalities of a property or relation
+"""             
+card = enum('one',
+            'many',
+            'one_one',   # 1:1 - matched (e.g. spouse)
+            'one_many',  # 1:* - partition (e.g., children)
+            'many_one',  # *:1 - reference (e.g., father)
+            'many_many', # *:* - multi-set (e.g., siblings)
+            many_one=0,  # synonym for 'one'
+            many_many=1 # synonym for 'many'
+            )
+
+card_inverse = (card.one_many, card.many_many, card.one_one, card.many_one)
+
 class Entity(object):
     """
     Entities are the definitions of all Instances in Kahnsept.
@@ -43,18 +58,45 @@ class Entity(object):
     def all_entities(cls):
         return cls._mEntities
         
-    def add_prop(self, prop):
+    def add_prop(self, entity, tag=None, cd=None, default=None):
         """
-        Add a new property to the Entity.  We require that all properties be uniquely identifiable:
+        Add a new property or Relation to the Entity.  We require that all properties be uniquely identifiable:
         if two properties of the same type exist, they must BOTH be tagged.
         """
-        name = prop.entity.name
-        if prop.tag is not None:
-            name = prop.tag
+        if isinstance(entity, BuiltIn):
+            if cd is None:
+                cd = card.one
+            prop = Property(entity, tag, cd, default)
+            self._add_prop(prop)
+        
+        # Define a Relation with another Entity
+        if cd is None:
+            cd = card.many_many
+        rel = Relation(self, entity, cd, tag)
+
+        # Add both (or neither) properties to each entity - atomically
+        (propL, propR) = rel.get_props()
+        pL = None
+        try:
+            pL = self._add_prop(propL)
+            entity._add_prop(propR)
+        except Exception, e:
+            if pL is not None:
+                self.del_prop(pL)
+            raise e
+        
+    def _add_prop(self, prop):
+        name = prop.name()
         if self.get_prop(name):
             raise Exception("Duplicate property name: %s" % prop.name)
         self._mProps[name] = prop
-            
+        return prop
+        
+    def del_prop(self, prop):
+        name = prop.name
+        if name in self._mProps:
+            del self.mProps[name]
+
     def get_prop(self, name):
         if name is None:
             return None
@@ -118,15 +160,6 @@ class BuiltIn(Entity):
         raise Exception("Can't add properties to builtin types")
 
 
-"""
-The allowed cardinalities of a property relationship
-"""             
-card = enum('one_one', # 1:1 - matched (e.g. spouse)
-             'one_many', # 1:* - partition (e.g., children)
-             'many_one', # *:1 - reference (e.g., father)
-             'many_many' # *:* - multi-set (e.g., siblings)
-             )
-        
 class Property(object):
     """
     Properties definitions contain:
@@ -135,11 +168,36 @@ class Property(object):
     - tag (name) - optional
     - cardinality (min and max values allowed)
     """
-    def __init__(self, entity, tag=None, card=card.many_one, default=None):
+    def __init__(self, entity, tag=None, cd=card.many_one, default=None):
         self.entity = entity
         self.tag = tag
-        self.card = card
+        self.card = cd
         self.default = default
+        
+    def name(self):
+        return self.tag or self.entity.name
+    
+class Relation(object):
+    """
+    A description of a (bi-directional) relationship between two Entities
+    """
+    def __init__(self, entityL, entityR, cd=card.many_many, tagL=None, tagR=None):
+        self.entityL = entityL
+        self.entityR = entityR
+        self.card = cd
+        self.tagL = tagL
+        self.tagR = tagR
+        
+    def name_from(self, entity):
+        if entity is self.entityL:
+            return self.tagL or self.entityR.name
+        if entity is self.entityR:
+            return self.tagR or self.entityR.name
+        raise "%s is not a member of the %s-%s Relation" % (entity.name, self.entityL.name, self.entityR.name)
+    
+    def get_props(self):
+        return (Property(self.entityR, self.tagL, self.card),
+                Property(self.entityL, self.tagR, card_inverse[self.card]))
         
 class Instance(object):
     """
