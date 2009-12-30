@@ -11,7 +11,7 @@ import shelve
 import datetime
 
 from enum import *
-from dyn_dict import *
+import parse_date
 
 local_cache = "kahnsept.bin"
 
@@ -95,6 +95,10 @@ class BuiltIn(Entity):
         """
         coerce the given value to be storable in the current type
         """
+        if self.builtin_type == self.builtin_types.Date and type(value) == str:
+            dt = parse_date.parse_date(value)
+            return dt
+            
         for target in self.py_types[self.builtin_type]:
             convert = None
             try:
@@ -143,13 +147,9 @@ class Instance(object):
     
     instance.x - get the value of the property defined to an x type (or tagged x)
     """
-    idNext = 0
-
     def __init__(self, entity):
         self.__dict__['_entity'] = entity
         self.__dict__['_mValues'] = {}
-        self.__dict__['_id'] = Instance.idNext
-        Instance.idNext += 1
         
     def __getattr__(self, prop_name):
         if prop_name not in self._mValues:
@@ -158,15 +158,23 @@ class Instance(object):
     
     def __setattr__(self, prop_name, value):
         if value is None:
-            del self._mValues[prop_name]
+            if prop_name in self._mValues:
+                del self._mValues[prop_name]
             return
         
         prop = self._entity.get_prop(prop_name)
+        if prop is None:
+            raise Exception("No such property: %s" % prop_name)
         
-        self._mValues[prop_name] = value
+        target_entity = prop.entity
+        save_value = target_entity.coerce_value(value)
+        if save_value is None:
+            raise Exception("Can't save a value of type %s into a property of type %s" % (type(value), target_entity.name))
+        
+        self._mValues[prop_name] = save_value
         
     def JSON(self):
-        json = {'id': self._id,
+        json = {'id': id(self),
                 'type': self._entity}
         json.update(self._mValues)
         return json
