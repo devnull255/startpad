@@ -20,7 +20,7 @@ class TestBasics(unittest.TestCase):
         self.assertEqual(p.tag, 'fred')
         
         e.add_prop(p)
-        self.assertEqual(len(e._props), 1)
+        self.assertNotEqual(e.get_prop('fred'), None)
         
     def test_instance(self):
         e = kahnsept.Entity('Test')

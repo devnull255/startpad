@@ -36,7 +36,6 @@ class Entity(object):
 
     def __init__(self, name):
         self.name = name
-        self._props = []
         self._mProps = {}
     
     @classmethod    
@@ -48,22 +47,17 @@ class Entity(object):
         Add a new property to the Entity.  We require that all properties be uniquely identifiable:
         if two properties of the same type exist, they must BOTH be tagged.
         """
-        for own_prop in self._props:
-            if own_prop.entity == prop.entity and (prop.tag is None or own_prop.tag is None):
-                raise Exception("Cannot have two properties of the same type w/o a tag name")
-        if prop not in self._props:
-            self._props.append(prop)
-            self._mProps
+        name = prop.entity.name
+        if prop.tag is not None:
+            name = prop.tag
+        if self.get_prop(name):
+            raise Exception("Duplicate property name: %s" % prop.name)
+        self._mProps[name] = prop
             
-    def get_props(self, name):
-        """
-        Return all applicable properties by name.  Return all tagged props as well as type name matches.
-        """
-        props = []
-        for prop in self._props:
-            if prop.tag == name or prop.entity.name == name:
-                props.append(prop)
-        return props 
+    def get_prop(self, name):
+        if name is None:
+            return None
+        return self._mProps.get(name, None)
             
     def new(self):
         """
@@ -72,8 +66,12 @@ class Entity(object):
         return Instance(self)
     
     def is_instance(self, inst):
-        return isinstance(inst, self)
+        return isinstance(inst._entity, self)
     
+    def coerce_value(self, value):
+        if self.is_instance(value):
+            return value
+        return None
 
 class BuiltIn(Entity):
     builtin_types = enum('Number', 'Text', 'Date', 'Boolean')
@@ -91,7 +89,21 @@ class BuiltIn(Entity):
         
     def is_instance(self, inst):
         return isinstance(inst, self.py_types[self.builtin_type])
-        
+    
+    def coerce_value(self, value):
+        """
+        coerce the given value to be storable in the current type
+        """
+        for target in self.py_types[self.builtin_type]:
+            convert = None
+            try:
+                convert = target(value)
+            except:
+                pass
+            if convert is not None:
+                return convert
+        return None
+
     @staticmethod
     def init_all():
         for bi in BuiltIn.builtin_types:
