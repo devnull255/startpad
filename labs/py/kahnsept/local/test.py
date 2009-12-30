@@ -32,10 +32,10 @@ class TestBasics(unittest.TestCase):
         
 class TestBuiltins(unittest.TestCase):
     def test_builtin(self):
-        num = kahnsept.Entity('number')
-        text = kahnsept.Entity('text')
-        bool = kahnsept.Entity('boolean')
-        date = kahnsept.Entity('date')
+        num = kahnsept.Number
+        text = kahnsept.Text
+        bool = kahnsept.Boolean
+        date = kahnsept.Date
         
         e = kahnsept.Entity('Test')
         e.add_prop(num)

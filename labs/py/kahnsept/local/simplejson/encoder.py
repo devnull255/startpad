@@ -419,6 +419,8 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr, _key_separ
             yield str(o)
         elif isinstance(o, float):
             yield _floatstr(o)
+        elif isinstance(o, Atomic):
+                yield str(o)
         elif isinstance(o, (list, tuple)):
             for chunk in _iterencode_list(o, _current_indent_level):
                 yield chunk
@@ -438,3 +440,6 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr, _key_separ
                 del markers[markerid]
 
     return _iterencode
+
+class Atomic():
+    pass

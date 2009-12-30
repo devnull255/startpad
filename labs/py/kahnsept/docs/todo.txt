@@ -24,6 +24,11 @@ Classes:
 ? Do we have type heirarchies (sub-classes of Entities?)
 - default values
 - type check property assignments
+- add_prop use inline form w/o Property object
+- simplejson of Instance
+- default values
+- type check value
+- builtin types
 
 ==== version 1 ===
 - Initialization

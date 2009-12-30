@@ -8,6 +8,7 @@ import code
 import sys
 import re
 import shelve
+import datetime
 
 from enum import *
 
@@ -47,6 +48,37 @@ class Entity(object):
         Return an instance of this Entity type
         """
         return Instance(self)
+    
+    def is_instance(self, inst):
+        return isinstance(inst, self)
+    
+
+class BuiltIn(Entity):
+    builtin_types = enum('Number', 'Text', 'Date', 'Boolean')
+    py_types = [[int, long, float],
+                [str, unicode],
+                [datetime.datetime, datetime.date],
+                [bool]]
+    type_defaults = [0, '', datetime.datetime.now(), False]
+
+    def __init__(self, builtin_type):
+        self.builtin_type = builtin_type
+        name = self.builtin_types(builtin_type)
+        super(BuiltIn, self).__init__(name)
+        self._value = self.type_defaults[builtin_type]
+        globals()[name] = self
+        
+    def is_instance(self, inst):
+        return isinstance(inst, self.py_types[self.builtin_type])
+        
+    @staticmethod
+    def init_all():
+        for bi in BuiltIn.builtin_types.values():
+            BuiltIn(bi)
+        
+    def add_prop(self, name):
+        raise Exception("Can't add properties to builtin types")
+
 
 """
 The allowed cardinalities of a property
@@ -65,10 +97,11 @@ class Property(object):
     - tag (name) - optional
     - cardinality (min and max values allowed)
     """
-    def __init__(self, entity, tag=None, card=card.single):
+    def __init__(self, entity, tag=None, card=card.single, default=None):
         self.entity = entity
         self.tag = tag
         self.card = card
+        self.default = default
         
 class Instance(object):
     """
@@ -85,6 +118,8 @@ class Instance(object):
         Instance.idNext += 1
         
     def __getattr__(self, prop_name):
+        if prop_name not in self._mValues:
+            return None
         return self._mValues[prop_name]
     
     def __setattr__(self, prop_name, value):
@@ -94,61 +129,42 @@ class Instance(object):
         
         self._mValues[prop_name] = value
         
-    def __repr__(self):
-        return simplejson.dumps(self._mValues, indent=4)
-        
-        
-class MapWrapper(object):
-    """
-    Wrap a mapping object, and return an object where the keys
-    of the object can be accessed via attribute notation (much as in
-    javascript: d.prop rather than d['prop'].
+    def JSON(self):
+        json = {'id': self._id,
+                'type': self._entity}
+        json.update(self._mValues)
+        return json
     
-    We also make the json format be the repr for these objects.
-    """
-    _m = None
-    _m_wrappers = {}
+class KahnseptEncoder(simplejson.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Entity):
+            return JSONString("Entity('%s')" % obj.name)
+        if isinstance(obj, Instance):
+            return JSONString("%s<%d>" % (obj._entity.name, obj._id))
+        return super(KahnseptEcoder, self).default(self, obj)
     
-    def __new__(cls, m):
-        """
-        Share instances of MapWrapper for a given identify of map
-        """
-        if id(m) in cls._m_wrappers:
-            return cls._m_wrappers[id(m)]
-        mp = super(MapWrapper, cls).__new__(cls)
-        cls._m_wrappers[id(m)] = mp
-        mp._m = m
-        return mp
-
-    def __getattr__(self, name):
-        value = self._m[name]
-        if type(value) == dict:
-            value = MapWrapper(value)
-        return value
+class JSONString(simplejson.encoder.Atomic):
+    def __init__(self, s):
+        self.s = s
+        
+    def __str__(self):
+        return self.s
     
-    def __setattr__(self, name, value):
-        # We must initialize ._m as our first act!
-        if self._m is None:
-            super(MapWrapper, self).__setattr__(name, value)
-            return
-        
-        if value is None:
-            del self._m[name]
-            return
-
-        self._m[name] = value
-        
-    def __repr__(self):
-        return simplejson.dumps(self._m, indent=4)
+"""
+Initialize the builtin types once
+"""
+BuiltIn.init_all()
     
 def interactive():
     sys_display = sys.displayhook
     
     def json_display(value):
         try:
-            s = simplejson.dumps(value, indent=4)
+            if isinstance(value, Instance):
+                value = value.JSON()
+            s = simplejson.dumps(value, cls=KahnseptEncoder, indent=4)
             print s
-        except:
+        except Exception, e:
             sys_display(value)
             
     sys.displayhook = json_display
