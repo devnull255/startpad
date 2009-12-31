@@ -275,7 +275,7 @@ class Value(object):
         self.value = None
         
     def __len__(self):
-        if self.is_multi():
+        if self.prop.is_multi():
             return len(self.values)
         return 0 if self.value is None else 1
     
@@ -283,7 +283,7 @@ class Value(object):
         return self.values[index]
     
     def __contains__(self, value):
-        if self.is_multi():
+        if self.prop.is_multi():
             return value in self.values
         return value == self.value
         
