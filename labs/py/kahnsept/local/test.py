@@ -90,16 +90,26 @@ class TestRelations(unittest.TestCase):
             
         self.assertRaises(Exception, should_throw)
         
+    def test_contants(self):
+        self.assertEqual(Card.one, Card.many_one)
+        self.assertEqual(Card.many, Card.many_many)
+        
     def test_one_one(self):
         e1 = Entity("One1")
         e2 = Entity("One2")
         Relation(e1,e2,card=Card.one_one)
         i1 = e1.new()
         i2 = e2.new()
+        i3 = e1.new()
         i1.One2 = i2
         
         self.assertEqual(i1.One2, i2)
         self.assertEqual(i2.One1, i1)
+        
+        # Steal connection from i1-i2
+        i3.One2 = i2
+        self.assertEqual(i1.One2, None)
+        self.assertEqual(i3.One2, i2)
         
     def test_one_many(self):
         e1 = Entity('OM1')
@@ -111,14 +121,55 @@ class TestRelations(unittest.TestCase):
         i21 = e2.new()
         i22 = e2.new()
         
+        # Single connection
         i11.OM2 = i21
         self.assertEqual(i11.OM2[0], i21)
         self.assertEqual(i21.OM1, i11)
         
+        # One parent, two children
         i11.OM2 = i22
         self.assertEqual(len(i11.OM2), 2)
         self.assert_(i21 in i11.OM2 and i22 in i11.OM2)
         self.assertEqual(i22.OM1, i11)
+        
+        # "Steal" child into second parent
+        i12.OM2 = i22
+        self.assertEqual(len(i11.OM2), 1)
+        self.assertEqual(len(i12.OM2), 1)
+        self.assertEqual(i11.OM2[0], i21)
+        self.assertEqual(i12.OM2[0], i22)
+        
+    def test_many_one(self):
+        e1 = Entity('MO1')
+        e2 = Entity('MO2')
+        Relation(e1, e2, card=Card.many_one)
+        
+        i11 = e1.new()
+        i12 = e1.new()
+        i21 = e2.new()
+        i22 = e2.new()
+        
+        # Single connection
+        i11.MO2 = i21
+        self.assertEqual(i11.MO2, i21)
+        self.assertEqual(i21.MO1[0], i11)
+        
+        # Replace parent
+        i11.MO2 = i22
+        self.assertEqual(i11.MO2, i22)
+        self.assertEqual(len(i21.MO1), 0)
+        
+        # One parent, two children
+        i12.MO2 = i22
+        self.assertEqual(len(i22.MO1), 2)
+        self.assert_(i11 in i22.MO1 and i12 in i22.MO1)
+        self.assertEqual(i12.MO2, i22)
+        
+    def test_many_many(self):
+        e1 = Entity('MM1')
+        e2 = Entity('MM2')
+        r = Relation(e1, e2)
+        self.assertEqual(r.cards, [Card.many_many, Card.many_many])
         
         
         
