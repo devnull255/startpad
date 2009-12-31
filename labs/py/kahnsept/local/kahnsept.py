@@ -20,7 +20,7 @@ TRACE = True
 """
 The allowed cardinalities of a property or relation
 """             
-card = enum('one',
+Card = enum('one',
             'many',
             'one_one',   # 1:1 - matched (e.g. spouse)
             'one_many',  # 1:* - partition (e.g., children)
@@ -30,7 +30,13 @@ card = enum('one',
             many_many=1 # synonym for 'many'
             )
 
-card_inverse = (card.one_many, card.many_many, card.one_one, card.many_one)
+card_inverse = (Card.one_many, Card.many_many, Card.one_one, Card.many_one)
+
+def key_summary(map, max=5):
+    sum = map.keys()[0:max]
+    if len(map) > max:
+        sum.append("and %d others." % max - len(map))
+    return ", ".join(sum)
 
 class Entity(object):
     """
@@ -53,27 +59,30 @@ class Entity(object):
     def __init__(self, name):
         self.name = name
         self._mProps = {}
+        
+    def __repr__(self):
+        return "Entity('%s') - Props: %s" % (self.name, key_summary(self._mProps))
     
     @classmethod    
     def all_entities(cls):
         return cls._mEntities
         
-    def add_prop(self, entity, tag=None, cd=None, default=None):
+    def add_prop(self, entity, tag=None, card=None, default=None):
         """
         Add a new property or Relation to the Entity.  We require that all properties be uniquely identifiable:
         if two properties of the same type exist, they must BOTH be tagged.
         """
         if isinstance(entity, BuiltIn):
-            if cd is None:
-                cd = card.one
-            prop = Property(entity, tag, cd, default)
+            if card is None:
+                card = Card.one
+            prop = Property(entity, tag, card, default)
             self._add_prop(prop)
             return prop
         
         # Define a Relation with another Entity
-        if cd is None:
-            cd = card.many_many
-        rel = Relation(self, entity, cd, tag)
+        if card is None:
+            card = Card.many_many
+        rel = Relation(self, entity, cardL=card, tagL=tag)
 
         return rel
         
@@ -162,47 +171,56 @@ class Property(object):
     - tag (name) - optional
     - cardinality (min and max values allowed)
     """
-    def __init__(self, entity, tag=None, cd=card.many_one, default=None):
+    def __init__(self, entity, tag=None, card=Card.many_one, default=None, relation=None, side=None):
         self.entity = entity
         self.tag = tag
-        self.card = cd
+        self.card = card
         self.default = default
+        self.relation = relation
+        self.side = side
+        
+    def __repr__(self):
+        return "Property('%s')->%s (%s)" % (self.name(), self.entity.name, "many" if self.is_multi() else "1")
         
     def name(self):
         return self.tag or self.entity.name
     
+    def is_multi(self):
+        return self.card in (Card.one_many, Card.many_many)
+    
+    def related_value(self, instance):
+        if self.relation is None or not isinstance(instance, Instance):
+            return None
+        return instance._get_value(self.relation.names[1-self.side])
+
 class Relation(object):
     """
     A description of a (bi-directional) relationship between two Entities
     """
-    def __init__(self, entityL, entityR, cd=card.many_many, tagL=None, tagR=None):
-        self.entityL = entityL
-        self.entityR = entityR
-        self.card = cd
-        self.tagL = tagL
-        self.tagR = tagR
+    def __init__(self, entityL, entityR, cardL=Card.many_many, tagL=None, tagR=None):
+        self.entities = (entityL, entityR)
+        self.tags = (tagL, tagR)
+        
+        self.names = [self.tags[side] or self.entities[1-side].name for side in range(2)]
+        self.cards = [cardL, card_inverse[cardL]]
+        self.props = [Property(self.entities[side], self.names[side], self.cards[side], relation=self, side=side) \
+                      for side in range(2)]
+        
+        if entityL == entityR and self.names[0] == self.names[1]:
+            raise Exception("Self-Relations MUST have distinct tag names (%s != %s)" % self.names)
         
         # Add both (or neither) properties to each entity - atomically
-        (propL, propR) = self.get_props()
         pL = None
         try:
-            pL = entityL._add_prop(propL)
-            entityR._add_prop(propR)
+            pL = entityL._add_prop(self.props[0])
+            entityR._add_prop(self.props[1])
         except Exception, e:
             if pL is not None:
                 entityL.del_prop(pL)
             raise e
         
-    def name_from(self, entity):
-        if entity is self.entityL:
-            return self.tagL or self.entityR.name
-        if entity is self.entityR:
-            return self.tagR or self.entityR.name
-        raise "%s is not a member of the %s-%s Relation" % (entity.name, self.entityL.name, self.entityR.name)
-    
-    def get_props(self):
-        return (Property(self.entityR, self.tagL, self.card),
-                Property(self.entityL, self.tagR, card_inverse[self.card]))
+    def __repr__(self):
+        return "Relation: %r ~ %r" % (self.props[0], self.props[1])
         
 class Instance(object):
     """
@@ -214,40 +232,115 @@ class Instance(object):
         self.__dict__['_entity'] = entity
         self.__dict__['_mValues'] = {}
         
+    def __repr__(self):
+        return "%s<%X>: Values: %s" % (self._entity.name, id(self), key_summary(self._mValues))
+        
+    def _get_value(self, prop_name):
+        return self._ensure_value(prop_name)
+        
     def __getattr__(self, prop_name):
-        if prop_name not in self._mValues:
-            return None
-        return self._mValues[prop_name]
+        return self._ensure_value(prop_name).get()
     
     def __setattr__(self, prop_name, value):
+        self._ensure_value(prop_name).set(value)
+        
+    def _ensure_value(self, prop_name):
+        value = self._mValues.get(prop_name, None)
         if value is None:
-            if prop_name in self._mValues:
-                del self._mValues[prop_name]
-            return
-        
-        prop = self._entity.get_prop(prop_name)
-        if prop is None:
-            raise Exception("No such property: %s" % prop_name)
-        
-        target_entity = prop.entity
-        save_value = target_entity.coerce_value(value)
-        if save_value is None:
-            raise Exception("Can't save a value of type %s into a property of type %s" % (type(value), target_entity.name))
-        
-        self._mValues[prop_name] = save_value
-        
+            prop = self._entity.get_prop(prop_name)
+            if prop is None:
+                raise Exception("No property '%s' in %s" % (prop_name, self._entity.name))
+            value = Value(prop, self)
+            self._mValues[prop_name] = value
+        return value
+
     def JSON(self):
         json = {'id': id(self),
                 'type': self._entity}
         json.update(self._mValues)
         return json
     
+class Value(object):
+    """
+    A value can hold 1 or more values for an instance property.  It's behavior is driven
+    by it's corresponding Property definition.
+    
+    TODO: Pretty storage inefficient to store instance pointers in every value!
+    """
+    def __init__(self, prop, instance):
+        self.prop = prop
+        self.instance = instance
+        
+        assert(prop is not None and instance is not None)
+
+        self.values = set()
+        self.value = None
+        
+    def set(self, value):
+        save_value = self.prop.entity.coerce_value(value)
+
+        if save_value is None and value is not None:
+            if isinstance(value, Instance):
+                type_name = value._entity.name
+            else:
+                type_name = str(type(value))
+            raise Exception("Can't save a value of type %s into a property of type %s" % (type_name, self.prop.entity.name))
+        
+        # If value is already here, there is nothing to do
+        if self._has_value(save_value):
+            return save_value
+        
+        # May need to set our own as well as the other side of the relation's value
+        valueOther = self.prop.related_value(save_value)
+        if valueOther is not None:
+            valueOther._set(self.instance)
+        self._set(save_value)
+        return save_value
+    
+    def add(self, value):
+        return self.set(value)
+    
+    def get(self):
+        if self.prop.is_multi():
+            return self
+        else:
+            return self.value
+    
+    def remove(self, value):
+        if not self._has_value(value):
+            return
+        
+        valueOther = self.prop.related_value(value)
+        if valueOther is not None:
+            valueOther._remove(self.instance)
+        self._remove(value)
+        
+    def _set(self, value):
+        if self.prop.is_multi(): 
+            self.values.add(value)
+        else:
+            self.remove(self.value)
+            self.value = value
+               
+    def _remove(self, value):
+        if self.prop.is_multi():
+            self.values.discard(value)
+        else:
+            self.value = None
+        
+    def _has_value(self, value):
+        if value is None:
+            return True
+
+        if self.prop.is_multi():
+            return value in self.values
+        
+        return value == self.value
+    
 class KahnseptEncoder(simplejson.JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, Entity):
-            return JSONString("Entity('%s')" % obj.name)
-        if isinstance(obj, Instance):
-            return JSONString("%s<%d>" % (obj._entity.name, obj._id))
+        if isinstance(obj, Entity, Property, Relation, Instance):
+            return JSONString(repr(obj))
         return super(KahnseptEcoder, self).default(self, obj)
     
 class JSONString(simplejson.encoder.Atomic):

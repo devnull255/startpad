@@ -41,11 +41,22 @@ class TestBasics(unittest.TestCase):
         self.assertEqual(i._entity, e)
         
     def test_relation(self):
-        e = Entity('Test')
+        e1 = Entity('Test')
         e2 = Entity('Test2')
-        Relation(e, e2)
-        self.assertNotEqual(e.get_prop('Test2'), None)
+        r = Relation(e1, e2)
+        
+        self.assertEqual(r.names, ['Test2', 'Test'])
+        self.assertEqual(r.cards, [Card.many_many, Card.many_many])
+        
+        self.assertNotEqual(e1.get_prop('Test2'), None)
         self.assertNotEqual(e2.get_prop('Test'), None)
+        
+        i1 = e1.new()
+        i2 = e2.new()
+        i1.Test2 = i2
+        
+        self.assertEqual(i1.Test2, i2)
+        self.assertEqual(i2.Test, i1)
         
 class TestBuiltins(unittest.TestCase):
     def test_builtin(self):
@@ -121,21 +132,21 @@ class TestSample(unittest.TestCase):
         PossibleAnswer.add_prop(Text, 'data')
         PossibleAnswer.add_prop(Number, 'delta_score')
         
-        Relation(Test, Question, card.many_many)
-        Relation(Test, Score, card.one_many)
+        Relation(Test, Question, Card.many_many)
+        Relation(Test, Score, Card.one_many)
         
-        Relation(Question, PossibleAnswer, card.one_many)
-        Relation(Question, UserAnswer, card.one_many)
+        Relation(Question, PossibleAnswer, Card.one_many)
+        Relation(Question, UserAnswer, Card.one_many)
         
-        Relation(QuestionType, Question, card.one_many)
+        Relation(QuestionType, Question, Card.one_many)
 
-        Relation(PossibleAnswer, UserAnswer, card.one_many)
+        Relation(PossibleAnswer, UserAnswer, Card.one_many)
         
-        Relation(User, Score, card.one_many)
-        Relation(User, UserAnswer, card.one_many)
+        Relation(User, Score, Card.one_many)
+        Relation(User, UserAnswer, Card.one_many)
         
-        Relation(ScoringDimension, Score, card.one_many)
-        Relation(ScoringDimension, PossibleAnswer, card.one_many)
+        Relation(ScoringDimension, Score, Card.one_many)
+        Relation(ScoringDimension, PossibleAnswer, Card.one_many)
         
         t = Test.new()
         t.title = "First Test"
@@ -177,6 +188,8 @@ class TestSample(unittest.TestCase):
                     raw_score += pa.delta_score
 
         s.amplitude = raw_score
+        
+        self.assertEqual(s.amplitude, 0)
 
 if __name__ == '__main__':
     unittest.main()

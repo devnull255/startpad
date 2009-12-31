@@ -29,6 +29,7 @@ Classes:
 - default values
 - type check value
 - builtin types
+- tagged values (e.g. home, work, etc for phone numbers)
 
 ==== version 1 ===
 - Initialization
