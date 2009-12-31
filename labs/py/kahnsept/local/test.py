@@ -4,6 +4,9 @@ from parse_date import *
 import unittest
 import datetime
 
+# Get the built-in types added to globals for these test cases
+World(globals())
+
 class TestDateParse(unittest.TestCase):
     def test_dates(self):
         for test in ['01/01/09', '1/1/09', '1/1/2009', 'Jan 1, 09', 'Jan 1, 2009', 'January 1, 2009',
