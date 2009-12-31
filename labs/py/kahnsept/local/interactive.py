@@ -1,6 +1,7 @@
 import simplejson
 import code2
 import sys
+import shelve
     
 def interactive(globals=None, locals=None):
     sys_display = sys.displayhook

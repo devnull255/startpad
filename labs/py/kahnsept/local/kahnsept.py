@@ -4,7 +4,6 @@ Kahnsept - Entity/Relationship system
 """
 
 import re
-import shelve
 import datetime
 
 from enum import *
@@ -36,35 +35,53 @@ def key_summary(map, max=5):
         sum.append("and %d others." % max - len(map))
     return ", ".join(sum)
 
+class World(object):
+    """
+    All Kahnsept objects are stored relative to a give World.
+    """
+    current_world = None
+    
+    def __init__(self, entities=None):
+        if entities is None:
+            entities = {}
+        self.entities = entities
+        World.current_world = self 
+
+        BuiltIn.init_all()
+
 class Entity(object):
     """
     Entities are the definitions of all Instances in Kahnsept.
     
     They are collections of Properties.
     """
-    _mEntities = {}
-    
-    def __new__(cls, name):
+    def __new__(cls, name, world=None):
+        if world is None:
+            world = World.current_world
+
         """
         Share instances of Entity for a given name
         """
-        if name in cls._mEntities:
-            return cls._mEntities[name]
+        assert(type(name) == str)
+        if name in world.entities:
+            return world.entities[name]
         e = super(Entity, cls).__new__(cls)
-        cls._mEntities[name] = e
+        world.entities[name] = e
         return e
 
-    def __init__(self, name):
+    def __init__(self, name, world=None):
+        if world is None:
+            world = World.current_world
+            
+        assert(type(name) == str)
+
         self.name = name
+        self.world = world
         self._mProps = {}
         
     def __repr__(self):
         return "Entity('%s') - Props: %s" % (self.name, key_summary(self._mProps))
     
-    @classmethod    
-    def all_entities(cls):
-        return cls._mEntities
-        
     def add_prop(self, entity, tag=None, card=None, default=None):
         """
         Add a new property or Relation to the Entity.  We require that all properties be uniquely identifiable:
@@ -123,11 +140,10 @@ class BuiltIn(Entity):
                 [bool]]
     type_defaults = [0, '', datetime.datetime.now(), False]
 
-    def __init__(self, builtin_type):
-        self.builtin_type = builtin_type
-        name = self.builtin_types(builtin_type)
+    def __init__(self, name):
+        self.builtin_type = self.builtin_types(name)
         super(BuiltIn, self).__init__(name)
-        self._value = self.type_defaults[builtin_type]
+        self._value = self.type_defaults[self.builtin_type]
         
     def is_instance(self, inst):
         return isinstance(inst, self.py_types[self.builtin_type])
@@ -153,7 +169,7 @@ class BuiltIn(Entity):
     @staticmethod
     def init_all():
         for bi in BuiltIn.builtin_types:
-            globals()[bi] = BuiltIn(BuiltIn.builtin_types(bi))
+            BuiltIn(bi)
         
     def add_prop(self, name):
         raise Exception("Can't add properties to builtin types")
@@ -345,10 +361,8 @@ class Value(object):
         
         return value == self.value
     
-"""
-Initialize the builtin types once
-"""
-BuiltIn.init_all()
-    
+# Initialize a Kahnsept world
+world = World()
+
 if __name__ == '__main__':
-    interactive.interactive(globals=globals(), locals=Entity.all_entities())
+    interactive.interactive(globals=globals(), locals=world.entities)
