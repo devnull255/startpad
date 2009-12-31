@@ -112,7 +112,7 @@ class TestCoercion(unittest.TestCase):
         self.assertRaises(Exception, throws)
         
 class TestSample(unittest.TestCase):
-    def x_test_sample(self):
+    def test_sample(self):
         Test = Entity('Test')
         Question = Entity('Question')
         QuestionType = Entity('QuestionType')
@@ -184,7 +184,7 @@ class TestSample(unittest.TestCase):
         
         raw_score = 0
         for uaT in u.UserAnswer:
-            for pa in a.Question.PossibleAnswer:
+            for pa in uaT.Question.PossibleAnswer:
                 if pa.data == uaT.data:
                     raw_score += pa.delta_score
 
