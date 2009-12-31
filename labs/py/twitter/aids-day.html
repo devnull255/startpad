@@ -1,0 +1,339 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<title>Aids Day Re-Tweet Counter</title>
+<script src="namespace.js"></script>
+<script src="base.js"></script>
+<script src="dom.js"></script>
+<script src="formatutil.js"></script>
+<script src="json2.js"></script>
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script>
+google.load('visualization', '1', {packages:['annotatedtimeline']});
+</script>
+<style>
+body {
+font-family: Verdana, Arial;
+font-size: 20px;
+color:white;
+background-color: #a00;
+text-align: center;
+}
+table {
+border-collapse:collapse;
+}
+
+p {
+margin: 10px 0;
+}
+
+td, th {
+padding: 2px 5px 2px 5px;
+text-align: center;
+}
+
+td.number {
+text-align: right;
+}
+
+a {
+color: white;
+}
+
+a:visited {
+color: white;
+}
+
+div.followers {
+font-size: 14px;
+margin-top: 5px;
+}
+
+span.time {
+font-size: 12px;
+position: relative;
+top: -2px;
+font-weight: bold;
+};
+
+</style>
+<script>
+AIDS = global_namespace.Define('startpad.aids-day', function(NS) {
+	var DOM = NS.Import('startpad.DOM');
+	var Format = NS.Import('startpad.format-util');
+	var Base = NS.Import('startpad.base');
+
+NS.Extend(NS, {
+    mUsers: {},
+    aUsers: [],
+    cUsers: 0,
+    dateBase: new Date("Tue, 01 Dec 2009 20:58:04 +0000"),
+    iNext: 0,
+    divChart: undefined,
+    tblData: undefined,
+
+Loaded: function()
+	{
+	NS.divChart = DOM.$('#chart');
+	NS.tblData = DOM.$('#tblData');
+
+	for (var name in NS.mUsers)
+		{
+		var user = NS.mUsers[name];
+		user.dateCreated = new Date(NS.dateBase.getTime() + user.tweet_secs * 1000);
+		NS.cUsers++;
+		NS.aUsers.push(user)
+		}
+		
+	NS.aUsers.sort(function(x,y) {return x.tweet_secs - y.tweet_secs;});
+	
+	var spanCount = DOM.$('#Total');
+	spanCount.innerHTML = "$" + Format.FormatNumber(10000) +
+		" (" + Format.FormatNumber(NS.cUsers) + " tweets)";	
+	
+	DrawChart();
+	
+	DisplayBatch();
+	},
+	
+ImpactGraph: function(obj)
+	{
+    NS.mUsers = obj;
+	}
+
+});
+
+function DisplayBatch()
+{	
+	if (NS.iNext >= NS.cUsers)
+		return;
+		
+	var cClump = 100;
+	
+	// IE does NOT do well building a large dynamic table - slow down the rate
+	// to keep browser responsiveness.
+	if (Base.Browser.fIE)
+		cClump = 20;
+
+	var iLast = Math.min(NS.cUsers, NS.iNext+cClump);
+		
+	var cMax = NS.cUsers;
+	for (var i = NS.iNext; i < iLast; i++)
+		{
+		AppendToTable(NS.aUsers[NS.aUsers.length - 1 - i], NS.aUsers.length - i);
+		}
+	
+	NS.iNext = iLast;	
+	setTimeout(DisplayBatch, 1000);
+}
+	
+function DrawChart()
+{
+	var data = new google.visualization.DataTable();
+	data.addColumn('date', 'Date');
+	data.addColumn('number', 'Rate per Hour');
+	data.addColumn('number', 'Tweets');
+	data.addColumn('string', 'User');
+
+	var sum = 0;
+	// Report rate limit with a 15 minute half-life
+	var rate = new NS.RateLimit(0, 60*10);
+	for (var i = 0; i < NS.aUsers.length; i++)
+		{
+		sum += 1;
+		var user = NS.aUsers[i];
+		sUser = undefined;
+		if (user.total_tweets > 700)
+			sUser = user.name + " $" + Format.FormatNumber(user.total_tweets*5);
+
+		rate.current_value(user.tweet_secs, 1);
+		var tph = rate.rate_per_period(60*60);
+		var row = [user.dateCreated, tph, sum, sUser];
+		data.addRow(row);
+		}
+		
+	var chart = new google.visualization.AnnotatedTimeLine(NS.divChart);
+	chart.draw(data, {
+		displayAnnotations: true, scaleType: 'allmaximized', scaleColumns:[0, 1, 3],
+		thickness: 3, displayZoomButtons: false
+		});
+}
+
+function AppendToTable(user, c)
+{
+	var tr = document.createElement('tr');
+	
+	AppendTD(tr, '<span class="counts">' + Format.FormatNumber(c) + '</span>');
+	AppendTD(tr, Format.ReplaceKeys(
+		'<a target="_blank" href="http://twitter.com/{name}">{name}</a>',
+		user));
+
+	var sTweet = '';
+
+    sTweet += SLeaders(user.path, user.name);
+
+    if (user.name != 'mckoss')
+        {
+        sTweet += '<div class="followers">'; 
+        chSep = 'Followers: ';
+        for (var i in user.children)
+                {
+                sTweet += chSep + user.children[i];
+                chSep = ', ';
+                }
+        sTweet += '</div>';
+        }
+    else
+        user.total_tweets = 2000;
+    sTweet += "<br/>Impact: $" + Format.FormatNumber(5*user.total_tweets);
+    
+	AppendTD(tr, '<div style="width:500px;">' + sTweet + '</div>');
+	AppendTD(tr, user.dateCreated.toLocaleTimeString());
+	
+	NS.tblData.appendChild(tr);
+}
+
+function AppendTD(tr, stHTML, fNumber)
+{
+	var td = document.createElement('td');
+	if (fNumber)
+		td.className = "number";
+	td.innerHTML = stHTML;
+	tr.appendChild(td);
+}
+
+function SLeaders(aPath, name)
+{
+    if (!aPath)
+        return "";
+        
+    aPath.push(name);
+    
+    var s = "";
+    
+    var secsLast = NS.mUsers[aPath[0]].tweet_secs;
+    s += aPath[0];
+    for (var i = 1; i < aPath.length; i++)
+    	{
+    	var user = NS.mUsers[aPath[i]];
+    	var secs = user.tweet_secs;
+    	s += ' -<span class="time">' + Age(secs - secsLast) + "</span>-> ";
+    	s += user.name;
+    	secsLast = secs;
+    	}
+    return s;
+}
+    
+function Age(secs)
+{
+    hrs = Math.floor(secs/60/60);
+    min = Math.floor((secs - hrs*60*60)/60);
+    if (hrs > 0)
+	    return hrs + "h " + min + "m"
+	if (min > 0)
+    	return min + "m";
+    return secs + "s";
+}
+
+/*
+    RateLimit - An exponential decay counter, with rate limiting.
+  
+    At any time, we can query the "current value" of a rate of values, and test if it has exceeded
+    a specified threshold.  In the absence of updated values, the value of the level will
+    drop by half each secs_half seconds.
+
+    Ported from timescore.calc.py
+ */
+NS.RateLimit = function(threshold, secs_half)
+	{
+	if (secs_half == undefined)
+		secs_half = 60;
+	this.value = 0;
+	this.threshold = threshold;
+	this.secs_half = secs_half;
+	this.k = Math.pow(0.5, 1/secs_half);
+	this.secs_last = 0;
+	}
+	
+NS.Extend(NS.RateLimit.prototype, {
+	ln2: Math.log(2),
+
+is_exceeded: function(secs, value)
+	{
+	if (value == undefined)
+		value = 1;
+		
+	if (isNaN(sec) || secs < this.secs_last)
+		return true;
+		
+	var _is_exceeded = this.current_value(secs) + value > this.threshold;
+	
+	if (!_is_exceeded)
+		self.value += value;
+		
+	return _is_exceeded;
+	},
+	
+current_value: function(secs, value)
+	{
+	if (value == undefined)
+		value = 0;
+		
+	if (isNaN(secs) || secs < this.secs_last)
+		return this.value;
+		
+	this.value *= Math.pow(this.k, secs - this.secs_last);
+	
+	// Deal with underflow
+	if (isNaN(this.value))
+		this.value = 0;
+
+	this.secs_last = secs;
+	this.value += value;
+
+	return this.value; 
+	},
+
+/* Return value as an estimate of the rate per time period
+ * Note that rate is approx ln(2) of calculated score
+ * for the given half-life.
+ */
+rate_per_period: function(secs)
+	{
+	if (secs == undefined)
+		secs = this.secs_half;
+	return this.current_value() * secs/this.secs_half * this.ln2;
+	},
+});
+
+}); // startpad.aids-day
+</script>
+
+</head>
+
+<body>
+<h1>World Aids Day Re-Tweet Counter</h1>
+<p>At 1pm on World Aids Day, I sent this message:</p>
+<blockquote style="margin:auto;width:800px;border:5px solid white;">
+<pre>
+For each re-tweet, I'll donate $5 to fight AIDS! <a href="http://twitter.com/mckoss">@mckoss</a>
+- <a target="_blank" href="http://www.quip-art.com/225">http://www.quip-art.com/225</a>
+</pre>
+</blockquote>
+
+<h1>Total raised: <span id="Total"></span></h1>
+
+<div style="margin:20px auto; width:900px; height: 600px;" id="chart"></div>
+
+<table style="margin:auto;" border="1">
+<thead>
+	<tr><th>Count</th><th>Person</th><th>Impact</th><th>Time</th></tr>
+</thead>
+<tbody id="tblData"></tbody>
+</table>
+
+<script src="impact.js"></script>
+<script>AIDS.Loaded()</script>
+</body>
+</html>

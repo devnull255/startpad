@@ -1,0 +1,48 @@
+Local Python Command-Line entity relationship version
+
+Classes:
+1 Entity
+  Methods:
+  	add_prop(prop)
+4 Instance
+  instance.prop = value (set value)
+  instance.prop (read value)
+  instance.prop.append(value)
+  instance.prop.remove(value)
+  del instance.prop (remove value) or instance.prop = None
+  instance._id
+  Instance.get(_id) (<_id> syntax would be nice)
+2 Prop
+  - Entity(type)
+  - [tag_name]
+  - cardinality
+3 Built-in Entities:
+	- number
+	- text
+	- date
+	
+? Do we have type heirarchies (sub-classes of Entities?)
+- default values
+- type check property assignments
+- add_prop use inline form w/o Property object
+- simplejson of Instance
+- default values
+- type check value
+- builtin types
+- tagged values (e.g. home, work, etc for phone numbers)
+
+==== version 1 ===
+- Initialization
+  - Create Attribute (descriptor)
+    - name:
+    - defaults:
+    - allowed_types:
+  - Create _attributes in types for Base, Type, Attribute
+- Kahnsept Methods
+  - Set Attribute
+    - Asign _anti_<attrbiute> is value is a Kahsept
+    - Don't allow duplicate values
+  - Remove Attribute
+  - GetAntiAttribute
+- Kahnsept Display Form
+

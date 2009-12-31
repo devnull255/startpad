@@ -1,0 +1,32 @@
+<html>
+<head>
+<script src="namespace.js"></script>
+<script src="kahnsept.js"></script>
+<script>
+var K = global_namespace.Import("kahnsept");
+K.Init();
+</script>
+</head>
+<body>
+<h1>This is a sample Kahnsept World</h1>
+<p>
+<script>
+var typeFood = new K.Type({_name:"food"});
+var typePlant = new K.Type({_name:"plant"});
+var typeFruit = new K.Type({_name:"fruit", _typeParent:[typeFood, typePlant]});
+var typeVeggie = new K.Type({_name:"veggie", _typeParent:[typeFood, typePlant]});
+var typeColor = new K.Type({_name:"color"});
+typeColor.AddAttribute("visual", "boolean", true);
+
+new K.Kahnsept(K.typeColor, {_name:"red"});
+new K.Kahnsept(K.typeColor, {_name:"green"});
+
+document.write("The World has " + K.idMax + " Kahnsepts in it");
+for (var i = 0; i < K.idMax; i++)
+	{
+	var k = K.Get(i);
+	document.write("<br/>" + k.Dump());
+	}
+</script>
+</p>
+</body>

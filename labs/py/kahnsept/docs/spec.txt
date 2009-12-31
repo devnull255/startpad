@@ -1,0 +1,65 @@
+Kahnsept Spec
+by Chris and Mike Koss
+July 2009
+version 0.1
+
+Kahnsept is a prototype-based object representation and editing system.  It has several advanced concepts beyond
+native JavaScript-style prototypes:
+
+- Objects (called "Kahnsepts") can derive from multiple parents
+- The "type" of a Kahnsept is simply the (collection of) parents of that Kahnsept.
+- Properties of Kahnsepts and inherently multi-valued
+- Kahnsepts are multi-faceted based on a rule system.  For example, the Film Kahnsept with genre=='horror' can
+  form a distinct prototype - the act of setting a Film-derived Kahnsept to have the 'horror' value will
+  automatically make it a child of the Film->Horror Film Kahnsept.
+- Properties in Kahnsept can hold numbers, strings, booleans, dates, and other Kahnsepts
+- Kahnsept can reference "converse properties" just as they can native properties (e.g., access all the
+  other Kahnsepts (of type X), which have THIS Kahnsept as an attribute.
+- FUTURE: properties referenced by some combination of Type and Tag (instead of static attribute name)
+- FUTURE: support for multiple namespaces for attribute names
+
+Definitions
+============================================================================
+
+Kahnsept(k) - base object type.  Everything in the system is a Kahnsept.
+Konexion(x) - ("property/attribute") one or more related Kahnsepts, with a given name and (multiple) values
+  Konexions have "inheritance rules" for children which is one of:
+  - prototype_value (default) - same as parent UNTIL changed
+  - readonly_value - always same as parent - can't be changed
+  - allow_children - restrict possible values to be children of the parent value (default empty)
+  - dont_inherit - child does NOT inherit any value for this Konexion
+  - extend - child can ADD TO this Konexion, not remove from
+
+JavaScript Classes
+============================================================================
+Globals:
+Kahnsept - the root Kahnsept on which all others derive
+Builtin-Kahnsept types: kNumber, kString, kBoolean, kDate, kRule
+
+Functions:
+Get(id) - return Kahnsept with a given identifier
+X(sName, kSource, kDest) - make a Konexion between two Kahnsepts
+DisX(sName, kSource, kDest) - remove a Konexion
+
+Properties beginning with '_' are system internals.
+
+Kahnsept
+========
+Properties:
+
+_id - globally unique id for object persistence
+_parents: [array of types for this Kahnsept]
+_children:[array of Kahnsepts which have this as a (direct) parent]
+_rules: [...]
+name: the default display name of this Kahnsept
+{dictionary of other Kahnsepts for each Konexion}
+
+Methods:
+
+New(opt) - create a child of this Kahnsept
+IsA(kParent) - true iff kParent is a parent of this
+GetX(sName) - get (the array) of Konexion values
+GetXIs(sName) - get the converse of Konexion values
+
+
+
