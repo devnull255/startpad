@@ -171,7 +171,23 @@ class TestRelations(unittest.TestCase):
         r = Relation(e1, e2)
         self.assertEqual(r.cards, [Card.many_many, Card.many_many])
         
+        i11 = e1.new()
+        i12 = e1.new()
+        i21 = e2.new()
+        i22 = e2.new()
         
+        i11.MM2.add(i21)
+        i11.MM2.add(i22)
+        self.assertEqual(len(i11.MM2), 2)
+        self.assertEqual(len(i21.MM1), 1)
+        self.assertEqual(len(i22.MM1), 1)
+        
+        i12.MM2.add(i21)
+        i12.MM2.add(i22)
+        self.assertEqual(len(i11.MM2), 2)
+        self.assertEqual(len(i12.MM2), 2)
+        self.assertEqual(len(i21.MM1), 2)
+        self.assertEqual(len(i22.MM1), 2)
         
 class TestBuiltins(unittest.TestCase):
     def test_builtin(self):
