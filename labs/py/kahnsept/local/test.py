@@ -162,7 +162,7 @@ class TestSample(unittest.TestCase):
         sd = ScoringDimension.new()
         sd.Text = "heat"
         
-        for color,score in [('red', 2), ('blue', 0), ('yellow', 1)]:
+        for color,score in [('red', 2), ('blue', -1), ('yellow', 1)]:
             pa = PossibleAnswer.new()
             pa.ScoringDimension = sd
             pa.data = color
@@ -190,7 +190,7 @@ class TestSample(unittest.TestCase):
 
         s.amplitude = raw_score
         
-        self.assertEqual(s.amplitude, 0)
+        self.assertEqual(s.amplitude, -1)
 
 if __name__ == '__main__':
     unittest.main()

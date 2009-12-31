@@ -91,8 +91,6 @@ class Entity(object):
         if self.get_prop(name):
             raise Exception("Duplicate property name: %s" % prop.name)
         self._mProps[name] = prop
-        if TRACE:
-            print "Adding prop %s to %s." % (name, self.name)
         return prop
         
     def del_prop(self, prop):
