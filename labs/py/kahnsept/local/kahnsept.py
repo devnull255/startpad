@@ -68,6 +68,7 @@ class Entity(object):
                 cd = card.one
             prop = Property(entity, tag, cd, default)
             self._add_prop(prop)
+            return prop
         
         # Define a Relation with another Entity
         if cd is None:
@@ -85,11 +86,15 @@ class Entity(object):
                 self.del_prop(pL)
             raise e
         
+        return rel
+        
     def _add_prop(self, prop):
         name = prop.name()
         if self.get_prop(name):
             raise Exception("Duplicate property name: %s" % prop.name)
         self._mProps[name] = prop
+        if TRACE:
+            print "Adding prop %s to %s." % (name, self.name)
         return prop
         
     def del_prop(self, prop):
