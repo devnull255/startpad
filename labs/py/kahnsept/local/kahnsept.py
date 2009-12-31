@@ -3,15 +3,13 @@ Kahnsept - Entity/Relationship system
 
 """
 
-import simplejson
-import code2
-import sys
 import re
 import shelve
 import datetime
 
 from enum import *
 import parse_date
+import interactive
 
 local_cache = "kahnsept.bin"
 
@@ -347,39 +345,10 @@ class Value(object):
         
         return value == self.value
     
-class KahnseptEncoder(simplejson.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, Entity, Property, Relation, Instance):
-            return JSONString(repr(obj))
-        return super(KahnseptEcoder, self).default(self, obj)
-    
-class JSONString(simplejson.encoder.Atomic):
-    def __init__(self, s):
-        self.s = s
-        
-    def __str__(self):
-        return self.s
-    
 """
 Initialize the builtin types once
 """
 BuiltIn.init_all()
     
-def interactive():
-    sys_display = sys.displayhook
-    
-    def json_display(value):
-        try:
-            if isinstance(value, Instance):
-                value = value.JSON()
-            s = simplejson.dumps(value, cls=KahnseptEncoder, indent=4)
-            print s
-        except Exception, e:
-            sys_display(value)
-            
-    sys.displayhook = json_display
-    
-    code2.interact("", globals=globals(), local=Entity.all_entities())
-    
 if __name__ == '__main__':
-    interactive()
+    interactive.interactive(globals=globals(), locals=Entity.all_entities())
