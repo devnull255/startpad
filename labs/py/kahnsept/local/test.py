@@ -34,12 +34,28 @@ class TestBasics(unittest.TestCase):
         p = e.add_prop(e, 'fred')
         self.assertNotEqual(e.get_prop('fred'), None)
         
+    def test_single(self):
+        e = Entity("Single")
+        e.add_prop(Text)
+        i = e.new()
+        i.Text = "fred"
+        self.assertEqual(len(i.Text), 4)
+        
     def test_many(self):
-        m = Entity('Multi')
+        m = Entity('Many')
         m.add_prop(Text, card=Card.many)
         
         i = m.new()
         self.assertEqual(len(i.Text), 0)
+        
+        i.Text = "first"
+        self.assertEqual(len(i.Text), 1)
+        self.assertEqual(i.Text[0], "first")
+        
+        i.Text = "second"
+        self.assertEqual(len(i.Text), 2)
+        self.assert_("first" in i.Text)
+        self.assert_("second" in i.Text)
         
     def test_instance(self):
         e = Entity('Test')

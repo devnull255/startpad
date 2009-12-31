@@ -275,17 +275,16 @@ class Value(object):
         self.value = None
         
     def __len__(self):
-        if self.prop.is_multi():
-            return len(self.values)
-        return 0 if self.value is None else 1
+        assert(self.prop.is_multi());
+        return len(self.values)
     
     def __getitem__(self, index):
+        assert(self.prop.is_multi());
         return self.values[index]
     
     def __contains__(self, value):
-        if self.prop.is_multi():
-            return value in self.values
-        return value == self.value
+        assert(self.prop.is_multi());
+        return value in self.values
         
     def set(self, value):
         save_value = self.prop.entity.coerce_value(value)

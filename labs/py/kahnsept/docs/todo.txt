@@ -30,6 +30,7 @@ Classes:
 - type check value
 - builtin types
 - tagged values (e.g. home, work, etc for phone numbers)
+- ordered multi-values?
 
 ==== version 1 ===
 - Initialization
