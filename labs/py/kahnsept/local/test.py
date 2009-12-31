@@ -40,6 +40,13 @@ class TestBasics(unittest.TestCase):
         
         self.assertEqual(i._entity, e)
         
+    def test_relation(self):
+        e = Entity('Test')
+        e2 = Entity('Test2')
+        Relation(e, e2)
+        self.assertNotEqual(e.get_prop('Test2'), None)
+        self.assertNotEqual(e2.get_prop('Test'), None)
+        
 class TestBuiltins(unittest.TestCase):
     def test_builtin(self):
         e = Entity('Test')

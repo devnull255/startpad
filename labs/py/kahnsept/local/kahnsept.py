@@ -75,17 +75,6 @@ class Entity(object):
             cd = card.many_many
         rel = Relation(self, entity, cd, tag)
 
-        # Add both (or neither) properties to each entity - atomically
-        (propL, propR) = rel.get_props()
-        pL = None
-        try:
-            pL = self._add_prop(propL)
-            entity._add_prop(propR)
-        except Exception, e:
-            if pL is not None:
-                self.del_prop(pL)
-            raise e
-        
         return rel
         
     def _add_prop(self, prop):
@@ -192,6 +181,17 @@ class Relation(object):
         self.card = cd
         self.tagL = tagL
         self.tagR = tagR
+        
+        # Add both (or neither) properties to each entity - atomically
+        (propL, propR) = self.get_props()
+        pL = None
+        try:
+            pL = entityL._add_prop(propL)
+            entityR._add_prop(propR)
+        except Exception, e:
+            if pL is not None:
+                entityL.del_prop(pL)
+            raise e
         
     def name_from(self, entity):
         if entity is self.entityL:
