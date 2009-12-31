@@ -82,7 +82,7 @@ class Entity(object):
         # Define a Relation with another Entity
         if card is None:
             card = Card.many_many
-        rel = Relation(self, entity, cardL=card, tagL=tag)
+        rel = Relation(self, entity, card=card, tagL=tag)
 
         return rel
         
@@ -195,17 +195,17 @@ class Relation(object):
     """
     A description of a (bi-directional) relationship between two Entities
     """
-    def __init__(self, entityL, entityR, cardL=Card.many_many, tagL=None, tagR=None):
+    def __init__(self, entityL, entityR, card=Card.many_many, tagL=None, tagR=None):
         self.entities = (entityL, entityR)
         self.tags = (tagL, tagR)
         
         self.names = [self.tags[side] or self.entities[1-side].name for side in range(2)]
-        self.cards = [cardL, card_inverse[cardL]]
+        self.cards = [card, card_inverse[card]]
         self.props = [Property(self.entities[1-side], self.names[side], self.cards[side], relation=self, side=side) \
                       for side in range(2)]
         
         if entityL == entityR and self.names[0] == self.names[1]:
-            raise Exception("Self-Relations MUST have distinct tag names (%s != %s)" % self.names)
+            raise Exception("Self-Relations MUST have distinct tag names (%s != %s)" % tuple(self.names))
         
         # Add both (or neither) properties to each entity - atomically
         pL = None
