@@ -203,7 +203,7 @@ class Relation(object):
         
         self.names = [self.tags[side] or self.entities[1-side].name for side in range(2)]
         self.cards = [cardL, card_inverse[cardL]]
-        self.props = [Property(self.entities[side], self.names[side], self.cards[side], relation=self, side=side) \
+        self.props = [Property(self.entities[1-side], self.names[side], self.cards[side], relation=self, side=side) \
                       for side in range(2)]
         
         if entityL == entityR and self.names[0] == self.names[1]:
@@ -273,8 +273,21 @@ class Value(object):
         
         assert(prop is not None and instance is not None)
 
-        self.values = set()
+        self.values = []
         self.value = None
+        
+    def __len__(self):
+        if self.is_multi():
+            return len(self.values)
+        return 0 if self.value is None else 1
+    
+    def __getitem__(self, index):
+        return self.values[index]
+    
+    def __contains__(self, value):
+        if self.is_multi():
+            return value in self.values
+        return value == self.value
         
     def set(self, value):
         save_value = self.prop.entity.coerce_value(value)
@@ -317,14 +330,14 @@ class Value(object):
         
     def _set(self, value):
         if self.prop.is_multi(): 
-            self.values.add(value)
+            self.values.append(value)
         else:
             self.remove(self.value)
             self.value = value
                
     def _remove(self, value):
         if self.prop.is_multi():
-            self.values.discard(value)
+            self.values.remove(value)
         else:
             self.value = None
         

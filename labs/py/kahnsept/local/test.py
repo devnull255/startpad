@@ -53,10 +53,11 @@ class TestBasics(unittest.TestCase):
         
         i1 = e1.new()
         i2 = e2.new()
+        
         i1.Test2 = i2
         
-        self.assertEqual(i1.Test2, i2)
-        self.assertEqual(i2.Test, i1)
+        self.assertEqual(i1.Test2[0], i2)
+        self.assertEqual(i2.Test[0], i1)
         
 class TestBuiltins(unittest.TestCase):
     def test_builtin(self):
@@ -98,7 +99,7 @@ class TestCoercion(unittest.TestCase):
         self.assertEqual(i.Text, "1")
         self.assertEqual(i.Boolean, True)
         self.assertEqual(i.Date.date(), datetime.date(2009,1,1))
-        self.assertEqual(i.parent, i2)
+        self.assertEqual(i.parent[0], i2)
         
     def test_fail(self):
         e = Entity('Test')
