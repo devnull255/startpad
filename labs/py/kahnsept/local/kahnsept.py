@@ -45,7 +45,7 @@ class World(object):
         if entities is None:
             entities = {}
         self.entities = entities
-        self.instances = {}
+        self.instances = []
         World.current_world = self 
 
         BuiltIn.init_all()
@@ -97,9 +97,12 @@ class Entity(object):
     def __repr__(self):
         return "Entity('%s') - Props: %s" % (self.name, key_summary(self._mProps))
     
-    def JSON(self):
+    def JSON(self, json_context):
         """ return a JSON serializable structure """
-        return JSONFunction('Entity', self.name, self._mProps)
+        if json_context.first_visit(self):
+            return JSONFunction('Entity', self.name, self._mProps)
+        else:
+            return JSONFunction('Entity', self.name)            
     
     def add_prop(self, entity, tag=None, card=None, default=None):
         """
@@ -211,6 +214,9 @@ class Property(object):
         
     def __repr__(self):
         return "Property('%s')->%s (%s)" % (self.name(), self.entity.name, "many" if self.is_multi() else "1")
+    
+    def JSON(self, json_context):
+        return JSONFunction('Property', dict_nonnull(self.__dict__))
         
     def name(self):
         return self.tag or self.entity.name
@@ -383,9 +389,23 @@ class Value(object):
 world = World()
 
 class JSONEncoder(simplejson.JSONEncoder):
+    class JSONContext():
+        def __init__(self):
+            self.visited = set()
+            
+        def first_visit(self, obj):
+            key = id(obj)
+            f = key not in self.visited
+            self.visited.add(key)
+            return f
+    
+    def __init__(self, **kw):
+        self.context = self.JSONContext()
+        super(JSONEncoder, self).__init__(**kw)
+
     def default(self, obj):
         if hasattr(obj, 'JSON'):
-            return obj.JSON()
+            return obj.JSON(self.context)
         return super(JSONEncoder, self).default(obj)
     
 class JSONFunction(simplejson.encoder.Atomic):
@@ -402,6 +422,9 @@ class InteractiveEncoder(simplejson.JSONEncoder):
         if isinstance(obj, (Entity, Property, Relation, Instance)):
             return interactive.JSONString(repr(obj))
         return super(InteractiveEncoder, self).default(obj)
+    
+def dict_nonnull(d):
+    return dict([(key,value) for (key,value) in d.items() if value is not None])
 
 if __name__ == '__main__':
     world = World({})
