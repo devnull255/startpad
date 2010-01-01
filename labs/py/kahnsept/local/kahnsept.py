@@ -3,8 +3,9 @@ Kahnsept - Entity/Relationship system
 
 """
 
-import re
 import datetime
+import shelve
+import simplejson
 
 from enum import *
 import parse_date
@@ -364,5 +365,13 @@ class Value(object):
 # Initialize a Kahnsept world
 world = World()
 
+class KahnseptEncoder(simplejson.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, (Entity, Property, Relation, Instance)):
+            return interactive.JSONString(repr(obj))
+        return super(KahnseptEcoder, self).default(self, obj)
+
 if __name__ == '__main__':
-    interactive.interactive(globals=globals(), locals=world.entities)
+    shelf = shelve.open('kahnsept.bin')
+    world = World()
+    interactive.interactive(ext_map=globals(), locals=world.entities, encoder=KahnseptEncoder)
