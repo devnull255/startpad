@@ -4,7 +4,6 @@ Kahnsept - Entity/Relationship system
 """
 
 import datetime
-import shelve
 import simplejson
 
 from enum import *
@@ -46,9 +45,18 @@ class World(object):
         if entities is None:
             entities = {}
         self.entities = entities
+        self.instances = {}
         World.current_world = self 
 
         BuiltIn.init_all()
+        
+    def save(self, file_name="kahnsept"):
+        file = open("%s.json" % file_name, 'w')
+        file.write(simplejson.dumps(self.JSON(), cls=JSONEncoder, indent=4))
+        file.close()
+        
+    def JSON(self):
+        return JSONFunction('Kahnsept', {'entities':self.entities, 'instances':self.instances})
 
 class Entity(object):
     """
@@ -88,6 +96,10 @@ class Entity(object):
         
     def __repr__(self):
         return "Entity('%s') - Props: %s" % (self.name, key_summary(self._mProps))
+    
+    def JSON(self):
+        """ return a JSON serializable structure """
+        return JSONFunction('Entity', self.name, self._mProps)
     
     def add_prop(self, entity, tag=None, card=None, default=None):
         """
@@ -370,12 +382,27 @@ class Value(object):
 # Initialize a Kahnsept world
 world = World()
 
-class KahnseptEncoder(simplejson.JSONEncoder):
+class JSONEncoder(simplejson.JSONEncoder):
+    def default(self, obj):
+        if hasattr(obj, 'JSON'):
+            return obj.JSON()
+        return super(JSONEncoder, self).default(obj)
+    
+class JSONFunction(simplejson.encoder.Atomic):
+    def __init__(self, func_name, *args):
+        self.func_name = func_name
+        self.args = args
+        
+    def __str__(self):
+        json_args = [simplejson.dumps(arg, cls=JSONEncoder, indent=4) for arg in self.args]
+        return "%s(%s)" % (self.func_name, ", ".join(json_args))
+
+class InteractiveEncoder(simplejson.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, (Entity, Property, Relation, Instance)):
             return interactive.JSONString(repr(obj))
-        return super(KahnseptEncoder, self).default(obj)
+        return super(InteractiveEncoder, self).default(obj)
 
 if __name__ == '__main__':
     world = World({})
-    interactive.interactive(ext_map=globals(), locals=world.entities, encoder=KahnseptEncoder)
+    interactive.interactive(ext_map=globals(), locals=world.entities, encoder=InteractiveEncoder)
