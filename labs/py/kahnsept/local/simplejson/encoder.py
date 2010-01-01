@@ -31,8 +31,6 @@ for i in range(0x20):
 INFINITY = float('1e66666')
 FLOAT_REPR = repr
 
-TRACE = True
-
 def encode_basestring(s):
     """Return a JSON representation of a Python string
 
@@ -281,16 +279,12 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr, _key_separ
     def _marker_enter(obj):
         if markers is not None:
             markerid = id(obj)
-            if TRACE:
-                print "enter - %s (%s)" % (markerid, type(obj))
             if markerid in markers:
                 raise ValueError("Circular reference detected")
             markers[markerid] = obj
             
     def _marker_leave(obj):
         if markers is not None:
-            if TRACE:
-                print "leave - %s" % id(obj)
             del markers[id(obj)]
     
     def _iterencode_list(lst, _current_indent_level):
@@ -423,7 +417,6 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr, _key_separ
             _current_indent_level += 1
             newline_indent = '\n' + (' ' * (_indent * _current_indent_level))
             separator = _item_separator + newline_indent
-            buf += newline_indent
         else:
             newline_indent = None
             separator = _item_separator
