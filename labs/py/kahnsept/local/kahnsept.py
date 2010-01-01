@@ -65,9 +65,13 @@ class Entity(object):
         """
         assert(type(name) == str)
         if name in world.entities:
+            if TRACE:
+                print "%s already defined." % name
             return world.entities[name]
         e = super(Entity, cls).__new__(cls)
-        world.entities[name] = e
+        
+        if TRACE:
+            print "Defining %s" % name
         return e
 
     def __init__(self, name, world=None):
@@ -79,6 +83,8 @@ class Entity(object):
         self.name = name
         self.world = world
         self._mProps = {}
+        print "Ent: %s" % self.name
+        world.entities[name] = self
         
     def __repr__(self):
         return "Entity('%s') - Props: %s" % (self.name, key_summary(self._mProps))
@@ -141,11 +147,10 @@ class BuiltIn(Entity):
                 [bool]]
     type_defaults = [0, '', datetime.datetime.now(), False]
 
-    def __init__(self, name):
+    def __init__(self, name, world=None):
         self.builtin_type = self.builtin_types(name)
-        super(BuiltIn, self).__init__(name)
-        self._value = self.type_defaults[self.builtin_type]
-        
+        super(BuiltIn, self).__init__(name, world)        
+
     def is_instance(self, inst):
         return isinstance(inst, self.py_types[self.builtin_type])
     
@@ -369,9 +374,9 @@ class KahnseptEncoder(simplejson.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, (Entity, Property, Relation, Instance)):
             return interactive.JSONString(repr(obj))
-        return super(KahnseptEcoder, self).default(self, obj)
+        return super(KahnseptEncoder, self).default(obj)
 
 if __name__ == '__main__':
     shelf = shelve.open('kahnsept.bin')
-    world = World()
+    world = World(shelf)
     interactive.interactive(ext_map=globals(), locals=world.entities, encoder=KahnseptEncoder)
