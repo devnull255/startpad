@@ -214,7 +214,7 @@ class TestBuiltins(unittest.TestCase):
         
 class TestCoercion(unittest.TestCase):
     def test_pass(self):
-        e = Entity('Test')
+        e = Entity('Test3')
         e.add_prop(Number)
         e.add_prop(Text)
         e.add_prop(Boolean)
@@ -235,7 +235,7 @@ class TestCoercion(unittest.TestCase):
         self.assertEqual(i.parent[0], i2)
         
     def test_fail(self):
-        e = Entity('Test')
+        e = Entity('Test2')
         e.add_prop(Number)
         i = e.new()
         
