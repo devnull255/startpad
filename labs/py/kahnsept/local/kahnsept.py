@@ -377,6 +377,5 @@ class KahnseptEncoder(simplejson.JSONEncoder):
         return super(KahnseptEncoder, self).default(obj)
 
 if __name__ == '__main__':
-    shelf = shelve.open('kahnsept.bin')
-    world = World(shelf)
+    world = World({})
     interactive.interactive(ext_map=globals(), locals=world.entities, encoder=KahnseptEncoder)
