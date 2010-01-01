@@ -9,6 +9,7 @@ import simplejson as json
 from enum import *
 import parse_date
 import interactive
+import pickle
 
 local_cache = "kahnsept.bin"
 
@@ -41,22 +42,30 @@ class World(object):
     """
     current_world = None
     
-    def __init__(self, entities=None):
-        if entities is None:
-            entities = {}
-        self.entities = entities
+    def __init__(self, entity_map=None):
+        if entity_map is None:
+            entity_map = {}
+        self.entities = entity_map
         self.instances = []
         World.current_world = self 
 
         BuiltIn.init_all()
         
-    def save(self, file_name="kahnsept"):
+    def save_json(self, file_name="kahnsept"):
         file = open("%s.json" % file_name, 'w')
         try:
             json.dump(json.JSONFunction('Kahnsept', {'entities':self.entities, 'instances':self.instances}),
                        file, cls=JSONEncoder, indent=4)
         finally:
             file.close()
+            
+    def save(self, file_name="kahnsept"):
+        file = open("%s.bin" % file_name, 'w')
+        pickle.dump(self, file, 2)
+        file.close()
+        
+    def load(self):
+        pass
 
 class Entity(object):
     """
@@ -383,9 +392,6 @@ class Value(object):
         
         return value == self.value
     
-# Initialize a Kahnsept world
-world = World()
-
 class JSONEncoder(json.JSONEncoder):
     """
     Handle networks of object via depth-first pre-order traversal.
@@ -420,12 +426,12 @@ class JSONEncoder(json.JSONEncoder):
 class InteractiveEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, (Entity, Property, Relation, Instance)):
-            return interactive.JSONString(repr(obj))
+            return json.JSONString(repr(obj))
         return super(InteractiveEncoder, self).default(obj)
     
 def dict_nonnull(d):
     return dict([(key,value) for (key,value) in d.items() if value is not None])
 
 if __name__ == '__main__':
-    world = World({})
+    world = World()
     interactive.interactive(ext_map=globals(), locals=world.entities, encoder=InteractiveEncoder)

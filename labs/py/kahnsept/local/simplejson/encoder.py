@@ -477,7 +477,7 @@ class JSONString(JSONRaw):
         self.s = s
         
     def __str__(self):
-        return s
+        return self.s
 
 class JSONFunction(object):
     """
