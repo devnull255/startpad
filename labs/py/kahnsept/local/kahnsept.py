@@ -75,12 +75,12 @@ class World(object):
         pickle.dump(self, file)
         file.close()
     
-    @staticmethod    
-    def load(file_name="kahnsept"):
+    @classmethod    
+    def load(cls, file_name="kahnsept"):
         file = open("%s.kah" % file_name)
         world = pickle.load(file)
         file.close
-        self.make_current(world)
+        cls.make_current(world)
         return world
 
 class Entity(object):
@@ -107,6 +107,9 @@ class Entity(object):
         return (self.name, self.world)
 
     def __init__(self, name, world=None):
+        if hasattr(self, 'inited'):
+            return
+
         if world is None:
             world = World.current
             
@@ -116,6 +119,7 @@ class Entity(object):
         self.world = world
         self._mProps = {}
         world.entities[name] = self
+        self.inited = True
         
     def __repr__(self):
         return "Entity('%s') - Props: %s" % (self.name, key_summary(self._mProps))
@@ -453,4 +457,4 @@ def dict_nonnull(d):
 
 if __name__ == '__main__':
     world = World()
-    interactive.interactive(ext_map=globals(), locals=world.entities, encoder=InteractiveEncoder)
+    interactive.interactive(ext_map=globals(), locals=world.scope, encoder=InteractiveEncoder)
