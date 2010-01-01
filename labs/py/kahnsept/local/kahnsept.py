@@ -11,6 +11,8 @@ import parse_date
 import interactive
 import pickle
 
+import dyn_dict
+
 local_cache = "kahnsept.bin"
 
 TRACE = True
@@ -40,16 +42,25 @@ class World(object):
     """
     All Kahnsept objects are stored relative to a give World.
     """
-    current_world = None
+    current = None
+    scope = dyn_dict.DynDict()
     
     def __init__(self, entity_map=None):
         if entity_map is None:
             entity_map = {}
         self.entities = entity_map
         self.instances = []
-        World.current_world = self 
-
+        self.make_current(self)
         BuiltIn.init_all()
+    
+    @classmethod    
+    def make_current(cls, world):
+        if cls.current == world:
+            return
+        if cls.current is not None:
+            cls.scope.remove_dict(cls.current.entities)
+        cls.current = world
+        cls.scope.add_dict(world.entities)
         
     def save_json(self, file_name="kahnsept"):
         file = open("%s.json" % file_name, 'w')
@@ -60,12 +71,17 @@ class World(object):
             file.close()
             
     def save(self, file_name="kahnsept"):
-        file = open("%s.bin" % file_name, 'w')
-        pickle.dump(self, file, 2)
+        file = open("%s.kah" % file_name, 'w')
+        pickle.dump(self, file)
         file.close()
-        
-    def load(self):
-        pass
+    
+    @staticmethod    
+    def load(file_name="kahnsept"):
+        file = open("%s.kah" % file_name)
+        world = pickle.load(file)
+        file.close
+        self.make_current(world)
+        return world
 
 class Entity(object):
     """
@@ -75,21 +91,24 @@ class Entity(object):
     """
     def __new__(cls, name, world=None):
         if world is None:
-            world = World.current_world
+            world = World.current
 
         """
         Share instances of Entity for a given name
         """
         assert(type(name) == str)
-        if name in world.entities:
+        if hasattr(world, 'entities') and name in world.entities:
             return world.entities[name]
         e = super(Entity, cls).__new__(cls)
         
         return e
+    
+    def __getnewargs__(self):
+        return (self.name, self.world)
 
     def __init__(self, name, world=None):
         if world is None:
-            world = World.current_world
+            world = World.current
             
         assert(type(name) == str)
 

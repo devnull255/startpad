@@ -11,7 +11,7 @@ class DynDict(UserDict.DictMixin):
     """
     
     def __init__(self, *args):
-        self.dicts = args
+        self.dicts = list(args)
         
     def __getitem__(self, key):
         for d in self.dicts:
@@ -32,5 +32,11 @@ class DynDict(UserDict.DictMixin):
         for d in self.dicts:
             s.update(d.keys())
         return list(s)
+    
+    def add_dict(self, d):
+        self.dicts.append(d)
+        
+    def remove_dict(self, d):
+        self.dicts.remove(d)
         
     
