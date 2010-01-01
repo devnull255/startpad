@@ -4,7 +4,7 @@ Kahnsept - Entity/Relationship system
 """
 
 import datetime
-import simplejson
+import simplejson as json
 
 from enum import *
 import parse_date
@@ -52,11 +52,11 @@ class World(object):
         
     def save(self, file_name="kahnsept"):
         file = open("%s.json" % file_name, 'w')
-        file.write(simplejson.dumps(self.JSON(), cls=JSONEncoder, indent=4))
-        file.close()
-        
-    def JSON(self):
-        return JSONFunction('Kahnsept', {'entities':self.entities, 'instances':self.instances})
+        try:
+            json.dump(json.JSONFunction('Kahnsept', {'entities':self.entities, 'instances':self.instances}),
+                       file, cls=JSONEncoder, indent=4)
+        finally:
+            file.close()
 
 class Entity(object):
     """
@@ -73,13 +73,9 @@ class Entity(object):
         """
         assert(type(name) == str)
         if name in world.entities:
-            if TRACE:
-                print "%s already defined." % name
             return world.entities[name]
         e = super(Entity, cls).__new__(cls)
         
-        if TRACE:
-            print "Defining %s" % name
         return e
 
     def __init__(self, name, world=None):
@@ -91,7 +87,6 @@ class Entity(object):
         self.name = name
         self.world = world
         self._mProps = {}
-        print "Ent: %s" % self.name
         world.entities[name] = self
         
     def __repr__(self):
@@ -100,9 +95,9 @@ class Entity(object):
     def JSON(self, json_context):
         """ return a JSON serializable structure """
         if json_context.first_visit(self):
-            return JSONFunction('Entity', self.name, self._mProps)
+            return json.JSONFunction('Entity', self.name, self._mProps)
         else:
-            return JSONFunction('Entity', self.name)            
+            return json.JSONFunction('Entity', self.name)            
     
     def add_prop(self, entity, tag=None, card=None, default=None):
         """
@@ -216,7 +211,7 @@ class Property(object):
         return "Property('%s')->%s (%s)" % (self.name(), self.entity.name, "many" if self.is_multi() else "1")
     
     def JSON(self, json_context):
-        return JSONFunction('Property', dict_nonnull(self.__dict__))
+        return json.JSONFunction('Property', dict_nonnull(self.__dict__))
         
     def name(self):
         return self.tag or self.entity.name
@@ -257,6 +252,9 @@ class Relation(object):
         
     def __repr__(self):
         return "Relation: %r ~ %r" % (self.props[0], self.props[1])
+    
+    def JSON(self, json_context):
+        return json_context.JSONFunctionObject('Relation', self.__dict__)
         
 class Instance(object):
     """
@@ -388,13 +386,24 @@ class Value(object):
 # Initialize a Kahnsept world
 world = World()
 
-class JSONEncoder(simplejson.JSONEncoder):
+class JSONEncoder(json.JSONEncoder):
+    """
+    Handle networks of object via depth-first pre-order traversal.
+    
+    Keep track of visited state and pass in context object to determine
+    when an object is first visited.  Later visits can dump out an
+    abbreviated object reference instead of the complete object. 
+    """
     class JSONContext():
         def __init__(self):
             self.visited = set()
             
+        @staticmethod
+        def uid(obj):
+            return id(obj)
+            
         def first_visit(self, obj):
-            key = id(obj)
+            key = self.uid(obj)
             f = key not in self.visited
             self.visited.add(key)
             return f
@@ -408,16 +417,7 @@ class JSONEncoder(simplejson.JSONEncoder):
             return obj.JSON(self.context)
         return super(JSONEncoder, self).default(obj)
     
-class JSONFunction(simplejson.encoder.Atomic):
-    def __init__(self, func_name, *args):
-        self.func_name = func_name
-        self.args = args
-        
-    def __str__(self):
-        json_args = [simplejson.dumps(arg, cls=JSONEncoder, indent=4) for arg in self.args]
-        return "%s(%s)" % (self.func_name, ", ".join(json_args))
-
-class InteractiveEncoder(simplejson.JSONEncoder):
+class InteractiveEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, (Entity, Property, Relation, Instance)):
             return interactive.JSONString(repr(obj))

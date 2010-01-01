@@ -63,10 +63,3 @@ class Help(Command):
             Command.all_commands[cmd].help()
 
 Help()
-    
-class JSONString(simplejson.encoder.Atomic):
-    def __init__(self, s):
-        self.s = s
-        
-    def __str__(self):
-        return self.s

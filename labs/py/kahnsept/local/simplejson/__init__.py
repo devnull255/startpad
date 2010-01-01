@@ -101,12 +101,13 @@ __version__ = '2.0.9'
 __all__ = [
     'dump', 'dumps', 'load', 'loads',
     'JSONDecoder', 'JSONEncoder',
+    'JSONRaw', 'JSONString', 'JSONFunction'
 ]
 
 __author__ = 'Bob Ippolito <bob@redivi.com>'
 
 from decoder import JSONDecoder
-from encoder import JSONEncoder
+from encoder import JSONEncoder, JSONRaw, JSONString, JSONFunction
 
 _default_encoder = JSONEncoder(
     skipkeys=False,
