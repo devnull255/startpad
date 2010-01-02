@@ -430,6 +430,7 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr, _key_separ
             yield '\n' + (' ' * (_indent * _current_indent_level))
         yield ')'
         _marker_leave(json_func)
+        json_func.leave()
             
     def _iterencode(o, _current_indent_level):
         if isinstance(o, basestring):
@@ -491,5 +492,14 @@ class JSONFunction(object):
     def __init__(self, func_name, *args):
         self.func_name = func_name
         self.args = args
+        self.callback = None
+        
+    def set_callback(self, callback):
+        self.callback = callback
+        return self
+        
+    def leave(self):
+        if self.callback is not None:
+            self.callback()
+        
 
-    

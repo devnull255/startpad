@@ -169,7 +169,7 @@ class Entity(object):
     
     def JSON(self, json_context):
         """ return a JSON serializable structure """
-        if json_context.first_visit(self) and len(self._mProps) != 0:
+        if json_context.full_json(self) and len(self._mProps) != 0:
             js = {}
             props = {}
             for (name, prop) in self._mProps.items():
@@ -406,10 +406,12 @@ class Instance(object):
         return value
 
     def JSON(self, json_context):
-        if json_context.first_visit(self):
-            js = {'type': self._entity.name}
-            js.update(self._mValues)
-            return json.JSONFunction(self._entity.name, self._id, js)
+        if json_context.full_json(self):
+            def free_instances():
+                json_context.full_instances = True
+            json_context.full_instances = False
+                
+            return json.JSONFunction(self._entity.name, self._id, self._mValues).set_callback(free_instances)
         else:
             return json.JSONFunction(self._entity.name, self._id)
     
@@ -519,12 +521,16 @@ class JSONEncoder(json.JSONEncoder):
     class JSONContext():
         def __init__(self):
             self.visited = set()
+            self.full_instances = True
             
         @staticmethod
         def uid(obj):
             return id(obj)
             
-        def first_visit(self, obj):
+        def full_json(self, obj):
+            if isinstance(obj, Instance) and not self.full_instances:
+                return False
+            
             key = self.uid(obj)
             f = key not in self.visited
             self.visited.add(key)
@@ -538,7 +544,7 @@ class JSONEncoder(json.JSONEncoder):
         if hasattr(obj, 'JSON'):
             return obj.JSON(self.context)
         return super(JSONEncoder, self).default(obj)
-    
+
 class InteractiveEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, (World, Entity, Property, Relation, Instance)):
