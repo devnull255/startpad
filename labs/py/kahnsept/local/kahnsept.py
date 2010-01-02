@@ -49,6 +49,7 @@ class World(object):
         # Keep a shadow copy of created Entities in the entity_map (e.g., globals())
         self.entity_map = entity_map
         self.entities = {}
+        self.relations = []
         self.make_current(self)
         BuiltIn.init_all()
         
@@ -70,10 +71,39 @@ class World(object):
         cls.scope.add_dict(world.entities)
         
     def save_json(self, file_name="kahnsept"):
+        """
+        Save Schema and Data in JSON format in this order:
+        
+        - Entities (names) - with non-relation properties
+        - Relationships
+        - Instances
+        """
         file = open("%s.json" % file_name, 'w')
         try:
-            json.dump(json.JSONFunction('Kahnsept', {'entities':self.entities}),
-                       file, cls=JSONEncoder, indent=4)
+            js = {}
+
+            ent_map = {}
+            for (name, ent) in self.entities.items():
+                if isinstance(ent, BuiltIn):
+                    continue
+                ent_map[name] = ent
+            if len(ent_map) > 0:
+                js['entities'] = ent_map
+
+            if len(self.relations) > 0:
+                js['relations'] = self.relations
+
+            inst = []
+            for ent in self.entities.values():
+                if isinstance(ent, BuiltIn):
+                    continue
+                if len(ent.all()) > 0:
+                    inst.extend(ent.all())
+            if len(inst) > 0:
+                js['instances'] = inst
+
+            json.dump(json.JSONFunction('Kahnsept', js),
+                       file, cls=JSONEncoder, indent=4, check_circular=False)
         finally:
             file.close()
             
@@ -139,10 +169,17 @@ class Entity(object):
     
     def JSON(self, json_context):
         """ return a JSON serializable structure """
-        if json_context.first_visit(self):
-            return json.JSONFunction('Entity', self.name, self._mProps)
+        if json_context.first_visit(self) and len(self._mProps) != 0:
+            js = {}
+            props = {}
+            for (name, prop) in self._mProps.items():
+                if prop.relation is None:
+                    props[name] = prop
+            if len(props) > 0:
+                js['properties'] = props
+            return js
         else:
-            return json.JSONFunction('Entity', self.name)            
+            return self.name            
     
     def add_prop(self, entity, tag=None, card=None, default=None):
         """
@@ -209,7 +246,10 @@ class BuiltIn(Entity):
 
     def __init__(self, name, world=None):
         self.builtin_type = self.builtin_types(name)
-        super(BuiltIn, self).__init__(name, world)        
+        super(BuiltIn, self).__init__(name, world)
+        
+        # Add BuiltIn Entities to the global (kahnsept) namespace
+        globals()[name] = self        
 
     def is_instance(self, inst):
         return isinstance(inst, self.py_types[self.builtin_type])
@@ -260,7 +300,12 @@ class Property(object):
         return "Property('%s')->%s (%s)" % (self.name(), self.entity.name, "many" if self.is_multi() else "1")
     
     def JSON(self, json_context):
-        return json.JSONFunction('Property', dict_nonnull(self.__dict__))
+        js = {'type':self.entity.name}
+        if self.is_multi():
+            js['multi'] = True
+        if self.default is not None:
+            js['default'] = self.default
+        return js
         
     def name(self):
         return self.tag or self.entity.name
@@ -277,7 +322,10 @@ class Relation(object):
     """
     A description of a (bi-directional) relationship between two Entities
     """
-    def __init__(self, entityL, entityR, card=Card.many_many, tagL=None, tagR=None):
+    def __init__(self, entityL, entityR, card=Card.many_many, tagL=None, tagR=None, world=None):
+        if world is None:
+            world = World.current
+
         self.entities = (entityL, entityR)
         self.tags = (tagL, tagR)
         
@@ -299,11 +347,23 @@ class Relation(object):
                 entityL.del_prop(pL)
             raise e
         
+        world.relations.append(self)
+        
     def __repr__(self):
         return "Relation: %r <=> %r" % (self.props[0], self.props[1])
     
     def JSON(self, json_context):
-        return json_context.JSONFunctionObject('Relation', self.__dict__)
+        """ Relation({"left":{"entity":<name>, "name":<name>},
+                      "right":{"entity":<name>},
+                      "card":<type>)
+        """
+        js = {'left':{'entity':self.entities[0].name},
+              'right':{'entity':self.entities[1].name},
+              'card': Card(self.cards[0])}
+        for side in range(2):
+            if self.names[side] != self.entities[1-side].name:
+                js['right' if side else 'left']['name'] = self.names[side]
+        return json.JSONFunction('Relation', js)
         
 class Instance(object):
     """
@@ -346,10 +406,12 @@ class Instance(object):
         return value
 
     def JSON(self, json_context):
-        json = {'id': id(self),
-                'type': self._entity}
-        json.update(self._mValues)
-        return json
+        if json_context.first_visit(self):
+            js = {'type': self._entity.name}
+            js.update(self._mValues)
+            return json.JSONFunction(self._entity.name, self._id, js)
+        else:
+            return json.JSONFunction(self._entity.name, self._id)
     
 class Value(object):
     """
@@ -378,6 +440,12 @@ class Value(object):
     def __contains__(self, value):
         assert(self.prop.is_multi());
         return value in self.values
+    
+    def JSON(self, json_context):
+        if self.prop.is_multi():
+            return self.values
+        else:
+            return self.value
         
     def set(self, value):
         save_value = self.prop.entity.coerce_value(value)
@@ -480,6 +548,21 @@ class InteractiveEncoder(json.JSONEncoder):
 def dict_nonnull(d):
     return dict([(key,value) for (key,value) in d.items() if value is not None])
 
+def quick_test():
+    t = Entity('Test')
+    t.add_prop(Text, 'title')
+    q = Entity("Question")
+    q.add_prop(Text, 'prompt')
+    Relation(t, q, Card.one_many)
+
+    x = t.new()
+    x.title = "My title"
+    y = q.new()
+    y.prompt = "What is your favorite color?"
+    y.Test = x
+    
+    world.save_json()
+    
 if __name__ == '__main__':
     world = World()
     interactive.interactive(ext_map=globals(), locals=world.scope, encoder=InteractiveEncoder)

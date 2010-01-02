@@ -280,7 +280,7 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr, _key_separ
         if markers is not None:
             markerid = id(obj)
             if markerid in markers:
-                raise ValueError("Circular reference detected")
+                raise ValueError("Circular reference detected for %s" % type(obj))
             markers[markerid] = obj
             
     def _marker_leave(obj):
@@ -425,7 +425,7 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr, _key_separ
             for chunk in _iterencode(arg, _current_indent_level):
                 yield chunk
             buf = separator
-        if newline_indent is not None:
+        if len(json_func.args) > 1 and newline_indent is not None:
             _current_indent_level -= 1
             yield '\n' + (' ' * (_indent * _current_indent_level))
         yield ')'
