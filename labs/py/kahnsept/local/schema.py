@@ -124,6 +124,28 @@ TODO:
         
   but we have ambiguity of the naming of converse relations.  What is Class.Person(s)?  Does it exist independent
   of Class.Teacher and Class.Student(s)?
+  
+  compare to a container model for sharing schema:
+  
+      Entities:
+      ---------
+      Class
+          name
+          Teacher!
+          Student(s)
+        
+      Person
+          name
+          Address(own)
+      
+      Student
+          Person(own)
+          
+      Teacher
+          Person(own)
+          
+  we then reference Teacher.Person.name and Student.Person.name, and never Class.Person.
+        
 
 - Given a model we want to auto-generate:
 
@@ -207,7 +229,7 @@ An example with relationship names:
     Person
         name
         parent<Person(s)>/child(s)
-        spouse<Person>
+        spouse<Person>/spouse
         born_in<Location>/birthplace_of
         
     Location
