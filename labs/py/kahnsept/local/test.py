@@ -345,7 +345,7 @@ class TestPickling(unittest.TestCase):
         t.title = "This is my title"
         w.save('test')
         w = World.load('test')
-        self.assertEqual(w.entities['Test'].instances()[0].title, "This is my title")
+        self.assertEqual(w.entities['Test'].all()[0].title, "This is my title")
         
 
 if __name__ == '__main__':

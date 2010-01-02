@@ -49,7 +49,6 @@ class World(object):
         if entity_map is None:
             entity_map = {}
         self.entities = entity_map
-        self.instances = []
         self.make_current(self)
         BuiltIn.init_all()
     
@@ -65,7 +64,7 @@ class World(object):
     def save_json(self, file_name="kahnsept"):
         file = open("%s.json" % file_name, 'w')
         try:
-            json.dump(json.JSONFunction('Kahnsept', {'entities':self.entities, 'instances':self.instances}),
+            json.dump(json.JSONFunction('Kahnsept', {'entities':self.entities}),
                        file, cls=JSONEncoder, indent=4)
         finally:
             file.close()
@@ -182,7 +181,7 @@ class Entity(object):
         self.instance_map[self.idMax] = i
         return i
     
-    def instances(self):
+    def all(self):
         return self.instance_map.values()
     
     def is_instance(self, inst):
