@@ -167,7 +167,7 @@ class Entity(object):
         
     def del_prop(self, name):
         if name in self._mProps:
-            del self.mProps[name]
+            del self._mProps[name]
 
     def get_prop(self, name):
         if name is None:
