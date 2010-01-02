@@ -32,10 +32,10 @@ Card = enum('one',
 
 card_inverse = (Card.one_many, Card.many_many, Card.one_one, Card.many_one)
 
-def key_summary(map, max=5):
-    sum = map.keys()[0:max]
-    if len(map) > max:
-        sum.append("and %d others." % max - len(map))
+def key_summary(map, limit=7):
+    sum = map.keys()[0:limit]
+    if len(map) > limit:
+        sum.append("and %d others." % (len(map) - limit))
     return ", ".join(sum)
 
 class World(object):
@@ -46,14 +46,19 @@ class World(object):
     scope = dyn_dict.DynDict()
     
     def __init__(self, entity_map=None):
-        if entity_map is None:
-            entity_map = {}
-        self.entities = entity_map
+        # Keep a shadow copy of created Entities in the entity_map (e.g., globals())
+        self.entity_map = entity_map
+        self.entities = {}
         self.make_current(self)
         BuiltIn.init_all()
         
     def __repr__(self):
-        return "World - Entities: %s" % key_summary(self.entities)
+        return "World - Entities: %s" % key_summary(self.entities, 15)
+    
+    def _register_entity(self, entity):
+        self.entities[entity.name] = entity
+        if self.entity_map is not None:
+            self.entity_map[entity.name] = entity
     
     @classmethod    
     def make_current(cls, world):
@@ -127,7 +132,7 @@ class Entity(object):
         self.idMax = 0
         self.instance_map = {}
 
-        world.entities[name] = self
+        world._register_entity(self)
         
     def __repr__(self):
         return "Entity('%s') - Props: %s" % (self.name, key_summary(self._mProps))
