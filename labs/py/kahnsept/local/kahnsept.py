@@ -51,6 +51,9 @@ class World(object):
         self.entities = entity_map
         self.make_current(self)
         BuiltIn.init_all()
+        
+    def __repr__(self):
+        return "World - Entities: %s" % key_summary(self.entities)
     
     @classmethod    
     def make_current(cls, world):
@@ -162,8 +165,7 @@ class Entity(object):
         self._mProps[name] = prop
         return prop
         
-    def del_prop(self, prop):
-        name = prop.name
+    def del_prop(self, name):
         if name in self._mProps:
             del self.mProps[name]
 
@@ -233,7 +235,6 @@ class BuiltIn(Entity):
     def add_prop(self, name):
         raise Exception("Can't add properties to builtin types")
 
-
 class Property(object):
     """
     Properties definitions contain:
@@ -294,7 +295,7 @@ class Relation(object):
             raise e
         
     def __repr__(self):
-        return "Relation: %r ~ %r" % (self.props[0], self.props[1])
+        return "Relation: %r <=> %r" % (self.props[0], self.props[1])
     
     def JSON(self, json_context):
         return json_context.JSONFunctionObject('Relation', self.__dict__)
