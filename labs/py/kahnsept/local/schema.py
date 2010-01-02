@@ -40,23 +40,12 @@ TODO:
       Test
           Questions(s)
           
-  seems stronly to imply ownership (and converse one).  When not the case we override in our model either
+      Class
+          Student(s)
+          
+  The first seems strongly to imply ownership (and converse singularity) but the second case implies
+  a reference (and converse multiplicity).  For the former, when not the case we override in our model either
   with
-  
-- Given a model we want to auto-generate:
-
-    - HTML Forms
-        - Instance views (display, new, edit)
-        - Appropriate field entry (and customizations?)
-    - HTML Views
-        - Object navigation
-    - Python classes
-    - AppEngine models
-    - Django models
-    - Load/Save Schema/Data formats:
-        - JSON
-        - XML
-        - CSV
   
       Test
           Questions(s)/(s)
@@ -74,6 +63,85 @@ TODO:
       Relations:
       ----------
       Test(s)/Questions(s)
+      
+  For the later, we could clarify with:
+  
+      Class
+          Student(s)
+      Student
+          Class(s)
+          
+- No enumeration type specified.  Could just use strings, or an Entity with text, but it would be nice
+  to have a typed solution.  Note, XML-Schema has this (uses "xs:restriction").
+  
+- Any need for namespaces?
+
+- Way to specify that a property is UNIQUE across all instances (like and id or choice collection)
+  (* is sometimes used):
+  
+      Entities:
+      ---------
+      Person
+          *username
+          name
+          phone
+          Address(own)
+          
+- Specify optional or required elements (allowing zero cardinality).  Default to zero, and indicate
+  required with !
+  
+      Entities:
+      ---------
+      Class
+          *id
+          name!
+          Teacher!
+          Student(s)
+          
+        Teacher
+            name
+            
+        Student
+            name
+            
+- What about type heirarchies?  Really just a shortcut mechanism, no?   How about:
+
+    Entities:
+    ---------
+    Class
+        name
+        Teacher!
+        Student(s)
+        
+    Person
+        name
+        Address
+        
+    Student(Person)
+        
+    Teacher(Person)
+        Class(s)
+        
+  but we have ambiguity of the naming of converse relations.  What is Class.Person(s)?  Does it exist independent
+  of Class.Teacher and Class.Student(s)?
+
+- Given a model we want to auto-generate:
+
+    - HTML Forms
+        - Instance views (display, new, edit)
+        - Appropriate field entry (and customizations?)
+    - HTML Views
+        - Object navigation
+    - Python classes
+    - AppEngine models
+    - Django models
+    - Load/Save Schema/Data formats:
+        - JSON
+        - XML
+        - CSV
+        - UML
+        - XML Schema
+        - Other E/R data formats
 
     Chris's Testing Framework Example:
     
@@ -140,7 +208,7 @@ An example with relationship names:
         name
         parent<Person(s)>/child(s)
         spouse<Person>
-        birthplace<Location>
+        born_in<Location>/birthplace_of
         
     Location
         City
@@ -156,11 +224,11 @@ An example with relationship names:
     Country
         Text
         
-        
     Relations:
     ----------
     parent<Person(s)>/child<Person(s)>
     spouse<Person>/spouse<Person>      // Can I have symmetrical names like this - non-directional relations with both names the same!
+    born_in<Location>/birthplace_of<Person(s)>
     
 Another example:
 
@@ -198,4 +266,30 @@ And more:
     Employee
         name
         supervisor<Employee>/report(s)
+        
+Orders and items (see http://www.w3.org/TR/xmlschema-0/#po.xsd)
+
+    Entities:
+    ---------
+    PurchaseOrder
+        shipTo<Address>(own)/shipping   // w/o specifying converse relation names - we have name conflict on Address.PurchaseOrder
+        billTo<Address>(own)/billing    
+        comment
+        Item(s)(own)
+        orderDate<Date>
+        
+    Address
+        name
+        street
+        city
+        state
+        zip
+        country
+        
+    Item
+        productName
+        quantity<Number>
+        price<Number>
+        comment
+        shipDate<Date>
 """
