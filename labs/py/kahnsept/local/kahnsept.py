@@ -71,13 +71,13 @@ class World(object):
             file.close()
             
     def save(self, file_name="kahnsept"):
-        file = open("%s.kah" % file_name, 'w')
+        file = open("%s.kpt" % file_name, 'w')
         pickle.dump(self, file)
         file.close()
     
     @classmethod    
     def load(cls, file_name="kahnsept"):
-        file = open("%s.kah" % file_name)
+        file = open("%s.kpt" % file_name)
         world = pickle.load(file)
         file.close
         cls.make_current(world)
@@ -97,6 +97,8 @@ class Entity(object):
         Share instances of Entity for a given name
         """
         assert(type(name) == str)
+        
+        # world.entities is not initialized on un-pickling
         if hasattr(world, 'entities') and name in world.entities:
             return world.entities[name]
         e = super(Entity, cls).__new__(cls)
@@ -104,11 +106,13 @@ class Entity(object):
         return e
     
     def __getnewargs__(self):
+        """ for pickling """
         return (self.name, self.world)
 
     def __init__(self, name, world=None):
         if hasattr(self, 'inited'):
             return
+        self.inited = True
 
         if world is None:
             world = World.current
@@ -118,8 +122,10 @@ class Entity(object):
         self.name = name
         self.world = world
         self._mProps = {}
+        self.idMax = 0
+        self.instance_map = {}
+
         world.entities[name] = self
-        self.inited = True
         
     def __repr__(self):
         return "Entity('%s') - Props: %s" % (self.name, key_summary(self._mProps))
@@ -171,7 +177,13 @@ class Entity(object):
         """
         Return an instance of this Entity type
         """
-        return Instance(self)
+        self.idMax += 1
+        i = Instance(self, self.idMax)
+        self.instance_map[self.idMax] = i
+        return i
+    
+    def instances(self):
+        return self.instance_map.values()
     
     def is_instance(self, inst):
         return isinstance(inst, Instance) and inst._entity is self
@@ -294,12 +306,20 @@ class Instance(object):
     
     instance.x - get the value of the property defined to an x type (or tagged x)
     """
-    def __init__(self, entity):
+    def __init__(self, entity, id):
         self.__dict__['_entity'] = entity
+        self.__dict__['_id'] = id
         self.__dict__['_mValues'] = {}
         
+    def __getstate__(self):
+        return self.__dict__;
+    
+    def __setstate__(self, d):
+        for (key,value) in d.items():
+            self.__dict__[key] = value
+        
     def __repr__(self):
-        return "%s<%X>: Values: %s" % (self._entity.name, id(self), key_summary(self._mValues))
+        return "%s<%X>: Values: %s" % (self._entity.name, self._id, key_summary(self._mValues))
         
     def _get_value(self, prop_name):
         return self._ensure_value(prop_name)
@@ -315,12 +335,12 @@ class Instance(object):
         if value is None:
             prop = self._entity.get_prop(prop_name)
             if prop is None:
-                raise Exception("No property '%s' in %s" % (prop_name, self._entity.name))
+                raise AttributeError
             value = Value(prop, self)
             self._mValues[prop_name] = value
         return value
 
-    def JSON(self):
+    def JSON(self, json_context):
         json = {'id': id(self),
                 'type': self._entity}
         json.update(self._mValues)
@@ -448,7 +468,7 @@ class JSONEncoder(json.JSONEncoder):
     
 class InteractiveEncoder(json.JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, (Entity, Property, Relation, Instance)):
+        if isinstance(obj, (World, Entity, Property, Relation, Instance)):
             return json.JSONString(repr(obj))
         return super(InteractiveEncoder, self).default(obj)
     
