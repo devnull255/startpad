@@ -1,11 +1,8 @@
-from kahnsept import World, Entity, Relation, Card
+from kahnsept import *
 
-import kahnsept
 import interactive
 
 if __name__ == '__main__':
-    world = World(globals())
-    
     Entity('Test').add_prop(Text, 'title')
 
     Entity('Question').add_prop(Text, 'prompt')
