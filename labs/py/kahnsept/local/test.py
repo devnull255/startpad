@@ -4,9 +4,6 @@ from parse_date import *
 import unittest
 import datetime
 
-# Get the built-in types added to globals for these test cases
-World(globals())
-
 class TestDateParse(unittest.TestCase):
     def test_dates(self):
         for test in ['01/01/09', '1/1/09', '1/1/2009', 'Jan 1, 09', 'Jan 1, 2009', 'January 1, 2009',
@@ -24,6 +21,9 @@ class TestDateParse(unittest.TestCase):
                 self.assertEqual(dt, datetime.datetime(2009,1,1,13,17))
 
 class TestBasics(unittest.TestCase):
+    def setUp(self):
+        World()
+
     def test_entity(self):
         e = Entity('Test')
         self.assertEqual(e.name, 'Test')
@@ -39,14 +39,14 @@ class TestBasics(unittest.TestCase):
         
     def test_single(self):
         e = Entity("Single")
-        e.add_prop(Text)
+        e.add_prop(World.scope['Text'])
         i = e.new()
         i.Text = "fred"
         self.assertEqual(len(i.Text), 4)
         
     def test_many(self):
         m = Entity('Many')
-        m.add_prop(Text, card=Card.many)
+        m.add_prop(World.scope['Text'], card=Card.many)
         
         i = m.new()
         self.assertEqual(len(i.Text), 0)
@@ -194,11 +194,12 @@ class TestRelations(unittest.TestCase):
         
 class TestBuiltins(unittest.TestCase):
     def test_builtin(self):
+        World()
         e = Entity('Test')
-        e.add_prop(Number)
-        e.add_prop(Text)
-        e.add_prop(Boolean)
-        e.add_prop(Date)
+        e.add_prop(World.scope['Number'])
+        e.add_prop(World.scope['Text'])
+        e.add_prop(World.scope['Boolean'])
+        e.add_prop(World.scope['Date'])
         
         e.Number = 1
         self.assertEqual(e.Number, 1)
@@ -214,11 +215,12 @@ class TestBuiltins(unittest.TestCase):
         
 class TestCoercion(unittest.TestCase):
     def test_pass(self):
-        e = Entity('Test3')
-        e.add_prop(Number)
-        e.add_prop(Text)
-        e.add_prop(Boolean)
-        e.add_prop(Date)
+        World()
+        e = Entity('Test')
+        e.add_prop(World.scope['Number'])
+        e.add_prop(World.scope['Text'])
+        e.add_prop(World.scope['Boolean'])
+        e.add_prop(World.scope['Date'])
         e.add_prop(e, 'parent')
         
         i = e.new()
@@ -235,8 +237,9 @@ class TestCoercion(unittest.TestCase):
         self.assertEqual(i.parent[0], i2)
         
     def test_fail(self):
-        e = Entity('Test2')
-        e.add_prop(Number)
+        World()
+        e = Entity('Test')
+        e.add_prop(World.scope['Number'])
         i = e.new()
         
         def throws():
@@ -246,6 +249,7 @@ class TestCoercion(unittest.TestCase):
         
 class TestSample(unittest.TestCase):
     def test_sample(self):
+        World(globals())
         Test = Entity('Test')
         Question = Entity('Question')
         QuestionType = Entity('QuestionType')
@@ -324,6 +328,25 @@ class TestSample(unittest.TestCase):
         s.amplitude = raw_score
         
         self.assertEqual(s.amplitude, -1)
+ 
+class TestPickling(unittest.TestCase):        
+    def test_save(self):
+        w = World()
+        w.save('test')
+        w = World.load('test')
+        
+        self.assert_(isinstance(w.entities['Text'], BuiltIn))
+        
+    def test_data(self):
+        w = World()
+        e = Entity('Test')
+        e.add_prop(World.scope['Text'], 'title')
+        t = e.new()
+        t.title = "This is my title"
+        w.save('test')
+        w = World.load('test')
+        self.assertEqual(w.entities['Test'].instances()[0].title, "This is my title")
+        
 
 if __name__ == '__main__':
     unittest.main()
