@@ -25,6 +25,12 @@ margin: auto;
 width: 700px;
 }
 </style>
+<script>
+function Loaded()
+{
+    document.getElementById('command').focus();
+}
+</script>
 <title>Kahnsept - Knowledge Management System</title>
 </head>
 <body>
@@ -36,6 +42,7 @@ width: 700px;
 <form action="/command" method="post">
 <label for="command">Command: </label><input id="command" name="command"/> <input type="submit" value="Go"/>
 </form>
+<script>Loaded()</script>
 </html>
 """
 
