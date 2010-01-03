@@ -9,6 +9,8 @@ import simplejson as json
 from enum import *
 import parse_date
 import pickle
+import traceback
+import sys
 
 import dyn_dict
 
@@ -44,7 +46,9 @@ class World(object):
     All Kahnsept objects are stored relative to a give World.
     """
     current = None
-    scope = dyn_dict.DynDict()
+    # Insert a dictionary at the head - in case where scope holds "global" variable settings
+    # from an exec call.
+    scope = dyn_dict.DynDict({})
     
     def __init__(self):
         # Keep a shadow copy of created Entities in the entity_map (e.g., globals())
@@ -110,7 +114,8 @@ class World(object):
             json.dump(json.JSONFunction('Kahnsept', js),
                        file, cls=JSONEncoder, indent=4, check_circular=False)
         except Exception, e:
-            file.write("Terminated with error: %r" % e)
+            sTrace = ''.join(traceback.format_list(traceback.extract_tb(sys.exc_info()[2])))
+            file.write("Terminated with error: %r [%s]" % (e, sTrace))
             
     def save(self, file_name="kahnsept"):
         file = open("%s.kpt" % file_name, 'w')
