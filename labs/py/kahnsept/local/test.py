@@ -249,7 +249,7 @@ class TestCoercion(unittest.TestCase):
         
 class TestSample(unittest.TestCase):
     def test_sample(self):
-        World(globals())
+        w = World()
         Test = Entity('Test')
         Question = Entity('Question')
         QuestionType = Entity('QuestionType')
@@ -259,16 +259,16 @@ class TestSample(unittest.TestCase):
         ScoringDimension = Entity('ScoringDimension')
         PossibleAnswer = Entity('PossibleAnswer')
         
-        Test.add_prop(Text, 'title')
-        User.add_prop(Text, 'name')
-        Question.add_prop(Text, 'prompt')
-        QuestionType.add_prop(Text)
-        Score.add_prop(Number, 'amplitude')
-        ScoringDimension.add_prop(Text)
-        UserAnswer.add_prop(Text, 'data')
-        UserAnswer.add_prop(Date)
-        PossibleAnswer.add_prop(Text, 'data')
-        PossibleAnswer.add_prop(Number, 'delta_score')
+        Test.add_prop(w.Text, 'title')
+        User.add_prop(w.Text, 'name')
+        Question.add_prop(w.Text, 'prompt')
+        QuestionType.add_prop(w.Text)
+        Score.add_prop(w.Number, 'amplitude')
+        ScoringDimension.add_prop(w.Text)
+        UserAnswer.add_prop(w.Text, 'data')
+        UserAnswer.add_prop(w.Date)
+        PossibleAnswer.add_prop(w.Text, 'data')
+        PossibleAnswer.add_prop(w.Number, 'delta_score')
         
         Relation(Test, Question, Card.many_many)
         Relation(Test, Score, Card.one_many)

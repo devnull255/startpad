@@ -16,7 +16,7 @@ local_cache = "kahnsept.bin"
 
 TRACE = True
 
-__all__ = ['Card', 'World', 'Entity', 'Property', 'Relation', 'Instance']
+__all__ = ['Card', 'World', 'Entity', 'BuiltIn', 'Property', 'Relation', 'Instance']
 
 """
 The allowed cardinalities of a property or relation
