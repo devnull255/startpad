@@ -8,7 +8,6 @@ import simplejson as json
 
 from enum import *
 import parse_date
-import interactive
 import pickle
 
 import dyn_dict
@@ -16,6 +15,8 @@ import dyn_dict
 local_cache = "kahnsept.bin"
 
 TRACE = True
+
+__all__ = ['Card', 'World', 'Entity', 'Property', 'Relation', 'Instance']
 
 """
 The allowed cardinalities of a property or relation
@@ -45,9 +46,8 @@ class World(object):
     current = None
     scope = dyn_dict.DynDict()
     
-    def __init__(self, entity_map=None):
+    def __init__(self):
         # Keep a shadow copy of created Entities in the entity_map (e.g., globals())
-        self.entity_map = entity_map
         self.entities = {}
         self.relations = []
         self.make_current(self)
@@ -58,8 +58,9 @@ class World(object):
     
     def _register_entity(self, entity):
         self.entities[entity.name] = entity
-        if self.entity_map is not None:
-            self.entity_map[entity.name] = entity
+        
+        # Make entities available as attributes of the World object
+        setattr(self, entity.name, entity)
     
     @classmethod    
     def make_current(cls, world):
@@ -247,9 +248,6 @@ class BuiltIn(Entity):
     def __init__(self, name, world=None):
         self.builtin_type = self.builtin_types(name)
         super(BuiltIn, self).__init__(name, world)
-        
-        # Add BuiltIn Entities to the global (kahnsept) namespace
-        globals()[name] = self        
 
     def is_instance(self, inst):
         return isinstance(inst, self.py_types[self.builtin_type])
@@ -545,30 +543,5 @@ class JSONEncoder(json.JSONEncoder):
             return obj.JSON(self.context)
         return super(JSONEncoder, self).default(obj)
 
-class InteractiveEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, (World, Entity, Property, Relation, Instance)):
-            return json.JSONString(repr(obj))
-        return super(InteractiveEncoder, self).default(obj)
-    
 def dict_nonnull(d):
     return dict([(key,value) for (key,value) in d.items() if value is not None])
-
-def quick_test():
-    t = Entity('Test')
-    t.add_prop(Text, 'title')
-    q = Entity("Question")
-    q.add_prop(Text, 'prompt')
-    Relation(t, q, Card.one_many)
-
-    x = t.new()
-    x.title = "My title"
-    y = q.new()
-    y.prompt = "What is your favorite color?"
-    y.Test = x
-    
-    world.save_json()
-    
-if __name__ == '__main__':
-    world = World()
-    interactive.interactive(ext_map=globals(), locals=world.scope, encoder=InteractiveEncoder)

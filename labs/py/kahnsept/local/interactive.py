@@ -2,10 +2,12 @@
 Interactive console - displays results using JSON format
 """
 
-import simplejson
+import simplejson as json
 import code2
 import sys
 import re
+
+from kahnsept import *
 
 import dyn_dict
     
@@ -18,7 +20,7 @@ def interactive(ext_map=None, locals=None, encoder=None):
                 value.go()
                 return
             
-            s = simplejson.dumps(value, cls=encoder, indent=4)
+            s = json.dumps(value, cls=encoder, indent=4)
             print s
         except Exception, e:
             print "Exception %r" % e
@@ -61,5 +63,28 @@ class Help(Command):
         print Command.trim_prefix(s)
         for cmd in Command.all_commands:
             Command.all_commands[cmd].help()
+            
+class InteractiveEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, (World, Entity, Property, Relation, Instance)):
+            return json.JSONString(repr(obj))
+        return super(InteractiveEncoder, self).default(obj)
+    
+def quick_test():
+    t = Entity('Test')
+    t.add_prop(world.Text, 'title')
+    q = Entity("Question")
+    q.add_prop(world.Text, 'prompt')
+    Relation(t, q, Card.one_many)
 
-Help()
+    x = t.new()
+    x.title = "My title"
+    y = q.new()
+    y.prompt = "What is your favorite color?"
+    y.Test = x
+    
+    world.save_json()
+
+if __name__ == '__main__':
+    world = World()
+    interactive(ext_map=globals(), locals=World.scope, encoder=InteractiveEncoder)
