@@ -72,6 +72,11 @@ class World(object):
         cls.scope.add_dict(world.entities)
         
     def save_json(self, file_name="kahnsept"):
+        file = open("%s.json" % file_name, 'w')
+        self.write_json(file)
+        file.close()
+
+    def write_json(self, file):
         """
         Save Schema and Data in JSON format in this order:
         
@@ -79,7 +84,6 @@ class World(object):
         - Relationships
         - Instances
         """
-        file = open("%s.json" % file_name, 'w')
         try:
             js = {}
 
@@ -105,8 +109,8 @@ class World(object):
 
             json.dump(json.JSONFunction('Kahnsept', js),
                        file, cls=JSONEncoder, indent=4, check_circular=False)
-        finally:
-            file.close()
+        except Exception, e:
+            file.write("Terminated with error: %r" % e)
             
     def save(self, file_name="kahnsept"):
         file = open("%s.kpt" % file_name, 'w')
@@ -170,7 +174,7 @@ class Entity(object):
     
     def JSON(self, json_context):
         """ return a JSON serializable structure """
-        if json_context.full_json(self) and len(self._mProps) != 0:
+        if json_context.full_json(self):
             js = {}
             props = {}
             for (name, prop) in self._mProps.items():
