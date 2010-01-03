@@ -1,35 +1,78 @@
 <html>
 <head>
 <style>
-#command {
-width: 700px;
+body {
+width: 900px;
+margin: auto;
+font-family: Verdana, Arial, sans serif;
+font-size: 14px;
 }
+
+h1 {
+text-align: center;
+border-bottom: 1px solid black;
+padding: 10px 0;
+}
+
 div {
 margin: 0;
 padding: 0;
 }
+
+label {
+font-weight: bold;
+}
+
+#command {
+width: 750px;
+}
+
 .error {
 color: red;
 margin: auto;
 width: 700px;
 }
+
+.code {
+font-family: Courier, fixed;
+font-size: 12px;
+border: 1px solid gray;
+padding: 5px;
+}
 </style>
+
 <script>
 function Loaded()
 {
     document.getElementById('command').focus();
 }
 </script>
+
 <title>Kahnsept - Knowledge Management System</title>
+
 </head>
+
 <body>
 <h1><script>document.write(document.title)</script></h1>
-<pre>
+
+<h2>Current Database:</h2>
+<pre class="code">
 {{body}}
 </pre>
+
 <div class="error">{{error}}</div>
+
 <form action="/command" method="post">
-<label for="command">Command: </label><input id="command" name="command"/> <input type="submit" value="Go"/>
+	<label for="command">Command:</label>
+	<input id="command" name="command"/> <input type="submit" value="Go"/>
 </form>
+
+<h2>History:</h2>
+<div class="code">
+{% for command in history %}
+	<pre>{{command.counter}}. {{command.command}} -> {{command.result}}</pre>
+{% endfor %}
+</div>
+
 <script>Loaded()</script>
 </html>

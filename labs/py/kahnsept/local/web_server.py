@@ -24,33 +24,42 @@ settings.configure(TEMPLATE_DIRS=(os.path.join(cur_dir, 'templates').replace('\\
 world = World()
 error = ""
 keep_running = True
+history = []
+count = 0
 
 class KHandler(object):
     """ Handle web requests for Kahnsept commands """
 
     @expose
     def index(self):
-        global world, error
+        global world, error, history
         
         string_file = StringIO()
         world.write_json(string_file)
-        return render_to_string('home.html', {'body':string_file.getvalue(), 'error':error})
+        return render_to_string('home.html', {'body':string_file.getvalue(), 'error':error, 'history':history})
         
     @expose
     def command(self, command=None):
-        global world, error
+        global world, error, history, count
+
+        result = None
+        error = ""
+        
+        count += 1
 
         try:
-            error = ""
-            exec command in globals(), World.scope
+            try:
+                result = eval(command, globals(), World.scope)
+            except SyntaxError:
+                result = "(Command completed)"
+                exec command in globals(), World.scope
         except Exception, e:
+            result = None
             error = "Eval error: %r" % e
+        else:
+            history.insert(0, {'counter': count, 'command':command, 'result':result})
 
         raise cherrypy.HTTPRedirect('/')
-    
-    @expose
-    def stop(self):
-        raise SystemExit
     
 def render_to_string(template_name, d):
     """ django template helper function - like render_to_response """
