@@ -1,48 +1,23 @@
+# Tested with CherryPy 3.1.2
 import cherrypy
 expose = cherrypy.expose
+
+# Tested with Django 1.1
+from django.conf import settings
+from django.template import loader, Context
 
 import os.path
 from StringIO import StringIO
 
 from kahnsept import *
 
-html = """\
-<html>
-<head>
-<style>
-#command {
-width: 700px;
-}
-div {
-margin: 0;
-padding: 0;
-}
-.error {
-color: red;
-margin: auto;
-width: 700px;
-}
-</style>
-<script>
-function Loaded()
-{
-    document.getElementById('command').focus();
-}
-</script>
-<title>Kahnsept - Knowledge Management System</title>
-</head>
-<body>
-<h1><script>document.write(document.title)</script></h1>
-<pre>
-%(body)s
-</pre>
-<div class="error">%(error)s</div>
-<form action="/command" method="post">
-<label for="command">Command: </label><input id="command" name="command"/> <input type="submit" value="Go"/>
-</form>
-<script>Loaded()</script>
-</html>
-"""
+""" Configure server and django templates """
+cur_dir = os.path.dirname(__file__)
+config_file = os.path.join(cur_dir, 'web_server.conf')
+print "Templates: %s" % os.path.join(cur_dir, 'templates')
+settings.configure(TEMPLATE_DIRS=(os.path.join(cur_dir, 'templates').replace('\\', '/'),),
+                   TEMPLATE_LOADERS = ('django.template.loaders.filesystem.load_template_source',)
+                   )
 
 # We want a persisent global Kahnsept world for all web requests - this only works if
 # all requests share the same process space (single thread?)
@@ -59,7 +34,7 @@ class KHandler(object):
         
         string_file = StringIO()
         world.write_json(string_file)
-        return html % {'body':string_file.getvalue(), 'error':error}
+        return render_to_string('home.html', {'body':string_file.getvalue(), 'error':error})
         
     @expose
     def command(self, command=None):
@@ -76,7 +51,12 @@ class KHandler(object):
     @expose
     def stop(self):
         raise SystemExit
+    
+def render_to_string(template_name, d):
+    """ django template helper function - like render_to_response """
+    t = loader.get_template(template_name)
+    c = Context(d)
+    return t.render(c)
                 
 if __name__ == '__main__':
-    conf = os.path.join(os.path.dirname(__file__), 'web_server.conf')
-    cherrypy.quickstart(KHandler(), config=conf)
+    cherrypy.quickstart(KHandler(), config=config_file)

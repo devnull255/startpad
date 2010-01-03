@@ -1,0 +1,35 @@
+<html>
+<head>
+<style>
+#command {
+width: 700px;
+}
+div {
+margin: 0;
+padding: 0;
+}
+.error {
+color: red;
+margin: auto;
+width: 700px;
+}
+</style>
+<script>
+function Loaded()
+{
+    document.getElementById('command').focus();
+}
+</script>
+<title>Kahnsept - Knowledge Management System</title>
+</head>
+<body>
+<h1><script>document.write(document.title)</script></h1>
+<pre>
+{{body}}
+</pre>
+<div class="error">{{error}}</div>
+<form action="/command" method="post">
+<label for="command">Command: </label><input id="command" name="command"/> <input type="submit" value="Go"/>
+</form>
+<script>Loaded()</script>
+</html>
