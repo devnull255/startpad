@@ -2,6 +2,7 @@ import cProfile
 import pstats
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from StringIO import StringIO
+import cgi
 
 from kahnsept import *
 
@@ -52,13 +53,25 @@ class KHandler(BaseHTTPRequestHandler):
             self.not_found()
             return
 
-        self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.end_headers()
-        
+
+        self.open_content()
         string_file = StringIO()
         world.write_json(string_file)
-        self.wfile.write(html % {'body':string_file.getvalue()})
+        self.write(html % {'body':string_file.getvalue()})
+        self.close_content()
+        
+    def open_content(self, code=200, mime_type="text/html"):
+        self.send_response(code)
+        self.send_header("Content-type", mime_type)
+        self.buffer = StringIO()
+        
+    def write(self, s):
+        self.buffer.write(s)
+        
+    def close_content(self):
+        self.send_header("Content-Length", len(self.buffer.getvalue()))
+        self.end_headers()
+        self.wfile.write(self.buffer.getvalue())
         
     def do_POST(self):
         global count, world
@@ -66,22 +79,27 @@ class KHandler(BaseHTTPRequestHandler):
         if self.path != "/command":
             self.not_found()
             return
-
-        count += 1
-        Entity("New%d" % count, world)
         
+        form = cgi.FieldStorage(fp=self.rfile, headers=self.headers,
+                                 environ={'REQUEST_METHOD':'POST',
+                                          'CONTENT_TYPE':self.headers['Content-Type']})
+        
+        command = form['command'].value
+        self.log_message("Command: %s" % command)
+        
+        exec command
+
         self.redirect("/")
         
     def not_found(self):
-        self.send_response(404)
-        self.send_header("Content-type", "text/plain")
-        self.end_headers()
-        self.wfile.write("Nobody, home")
+        self.open_content(404, "text/plain")
+        self.write("Nobody, home")
+        self.close_content()
         
     def redirect(self, url):
-        self.send_response(302)
+        self.open_content(302)
         self.send_header("Location", url)
-        self.end_headers()
+        self.close_content()
 
 if __name__ == '__main__':
     server = HTTPServer(("", 8010), KHandler);
