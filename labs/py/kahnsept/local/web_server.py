@@ -15,6 +15,15 @@ html = """\
 #command {
 width: 700px;
 }
+div {
+margin: 0;
+padding: 0;
+}
+.error {
+color: red;
+margin: auto;
+width: 700px;
+}
 </style>
 <title>Kahnsept - Knowledge Management System</title>
 </head>
@@ -23,6 +32,7 @@ width: 700px;
 <pre>
 %(body)s
 </pre>
+<div class="error">%(error)s</div>
 <form action="/command" method="post">
 <label for="command">Command: </label><input id="command" name="command"/> <input type="submit" value="Go"/>
 </form>
@@ -32,6 +42,7 @@ width: 700px;
 # We want a persisent global Kahnsept world for all web requests!
 world = World()
 count = 0
+error = ""
 
 #handler = SimpleHTTPServer.SimpleHTTPRequestHandler;
 class KHandler(BaseHTTPRequestHandler):
@@ -44,20 +55,20 @@ class KHandler(BaseHTTPRequestHandler):
         self.end_headers()
         
     def do_GET(self):
-        global keep_running, world
+        global keep_running, world, error
 
         if self.path == "/stop":
             keep_running = False
 
         if self.path is not "/":
-            self.not_found()
+            self.send_error(404)
             return
-
 
         self.open_content()
         string_file = StringIO()
         world.write_json(string_file)
-        self.write(html % {'body':string_file.getvalue()})
+        self.write(html % {'body':string_file.getvalue(),
+                           'error':error})
         self.close_content()
         
     def open_content(self, code=200, mime_type="text/html"):
@@ -74,10 +85,10 @@ class KHandler(BaseHTTPRequestHandler):
         self.wfile.write(self.buffer.getvalue())
         
     def do_POST(self):
-        global count, world
+        global count, world, error
 
         if self.path != "/command":
-            self.not_found()
+            self.send_error(404)
             return
         
         form = cgi.FieldStorage(fp=self.rfile, headers=self.headers,
@@ -87,14 +98,13 @@ class KHandler(BaseHTTPRequestHandler):
         command = form['command'].value
         self.log_message("Command: %s" % command)
         
-        exec command
+        try:
+            error = ""
+            exec command in globals(), World.scope
+        except Exception, e:
+            error = "Eval error: %r" % e
 
         self.redirect("/")
-        
-    def not_found(self):
-        self.open_content(404, "text/plain")
-        self.write("Nobody, home")
-        self.close_content()
         
     def redirect(self, url):
         self.open_content(302)
