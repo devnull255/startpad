@@ -1,5 +1,7 @@
 """
 Interactive console - displays results using JSON format
+
+TODO: Make this module generic - run interactive kahnsept from a "shell.py" using this module
 """
 
 import simplejson as json
