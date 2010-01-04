@@ -3,16 +3,22 @@ Kahnsept - Entity/Relationship system
 
 """
 
-import re
 import datetime
+import simplejson as json
 
 from enum import *
 import parse_date
-import interactive
+import pickle
+import traceback
+import sys
+
+import dyn_dict
 
 local_cache = "kahnsept.bin"
 
 TRACE = True
+
+__all__ = ['Card', 'World', 'Entity', 'BuiltIn', 'Property', 'Relation', 'Instance']
 
 """
 The allowed cardinalities of a property or relation
@@ -29,25 +35,100 @@ Card = enum('one',
 
 card_inverse = (Card.one_many, Card.many_many, Card.one_one, Card.many_one)
 
-def key_summary(map, max=5):
-    sum = map.keys()[0:max]
-    if len(map) > max:
-        sum.append("and %d others." % max - len(map))
+def key_summary(map, limit=7):
+    sum = map.keys()[0:limit]
+    if len(map) > limit:
+        sum.append("and %d others." % (len(map) - limit))
     return ", ".join(sum)
 
 class World(object):
     """
     All Kahnsept objects are stored relative to a give World.
     """
-    current_world = None
+    current = None
+    # Insert a dictionary at the head - in case where scope holds "global" variable settings
+    # from an exec call.
+    scope = dyn_dict.DynDict({})
     
-    def __init__(self, entities=None):
-        if entities is None:
-            entities = {}
-        self.entities = entities
-        World.current_world = self 
-
+    def __init__(self):
+        # Keep a shadow copy of created Entities in the entity_map (e.g., globals())
+        self.entities = {}
+        self.relations = []
+        self.make_current(self)
         BuiltIn.init_all()
+        
+    def __repr__(self):
+        return "World - Entities: %s" % key_summary(self.entities, 15)
+    
+    def _register_entity(self, entity):
+        self.entities[entity.name] = entity
+        
+        # Make entities available as attributes of the World object
+        setattr(self, entity.name, entity)
+    
+    @classmethod    
+    def make_current(cls, world):
+        if cls.current == world:
+            return
+        if cls.current is not None:
+            cls.scope.remove_dict(cls.current.entities)
+        cls.current = world
+        cls.scope.add_dict(world.entities)
+        
+    def save_json(self, file_name="kahnsept"):
+        file = open("%s.json" % file_name, 'w')
+        self.write_json(file)
+        file.close()
+
+    def write_json(self, file):
+        """
+        Save Schema and Data in JSON format in this order:
+        
+        - Entities (names) - with non-relation properties
+        - Relationships
+        - Instances
+        """
+        try:
+            js = {}
+
+            ent_map = {}
+            for (name, ent) in self.entities.items():
+                if isinstance(ent, BuiltIn):
+                    continue
+                ent_map[name] = ent
+            if len(ent_map) > 0:
+                js['entities'] = ent_map
+
+            if len(self.relations) > 0:
+                js['relations'] = self.relations
+
+            inst = []
+            for ent in self.entities.values():
+                if isinstance(ent, BuiltIn):
+                    continue
+                if len(ent.all()) > 0:
+                    inst.extend(ent.all())
+            if len(inst) > 0:
+                js['instances'] = inst
+
+            json.dump(json.JSONFunction('Kahnsept', js),
+                       file, cls=JSONEncoder, indent=4, check_circular=False)
+        except Exception, e:
+            sTrace = ''.join(traceback.format_list(traceback.extract_tb(sys.exc_info()[2])))
+            file.write("Terminated with error: %r [%s]" % (e, sTrace))
+            
+    def save(self, file_name="kahnsept"):
+        file = open("%s.kpt" % file_name, 'w')
+        pickle.dump(self, file)
+        file.close()
+    
+    @classmethod    
+    def load(cls, file_name="kahnsept"):
+        file = open("%s.kpt" % file_name)
+        world = pickle.load(file)
+        file.close
+        cls.make_current(world)
+        return world
 
 class Entity(object):
     """
@@ -57,30 +138,58 @@ class Entity(object):
     """
     def __new__(cls, name, world=None):
         if world is None:
-            world = World.current_world
+            world = World.current
 
         """
         Share instances of Entity for a given name
         """
         assert(type(name) == str)
-        if name in world.entities:
+        
+        # world.entities is not initialized on un-pickling
+        if hasattr(world, 'entities') and name in world.entities:
             return world.entities[name]
         e = super(Entity, cls).__new__(cls)
-        world.entities[name] = e
+        
         return e
+    
+    def __getnewargs__(self):
+        """ for pickling """
+        return (self.name, self.world)
 
     def __init__(self, name, world=None):
+        if hasattr(self, 'inited'):
+            return
+        self.inited = True
+
         if world is None:
-            world = World.current_world
+            world = World.current
             
         assert(type(name) == str)
 
         self.name = name
         self.world = world
         self._mProps = {}
+        self.idMax = 0
+        self.instance_map = {}
+
+        world._register_entity(self)
         
     def __repr__(self):
         return "Entity('%s') - Props: %s" % (self.name, key_summary(self._mProps))
+    
+    def JSON(self, json_context):
+        """ return a JSON serializable structure """
+        if json_context.full_json(self):
+            js = {}
+            props = {}
+            for (name, prop) in self._mProps.items():
+                if prop.relation is None:
+                    props[name] = prop
+            if len(props) > 0:
+                js['properties'] = props
+            return js
+        else:
+            return self.name            
     
     def add_prop(self, entity, tag=None, card=None, default=None):
         """
@@ -108,10 +217,9 @@ class Entity(object):
         self._mProps[name] = prop
         return prop
         
-    def del_prop(self, prop):
-        name = prop.name
+    def del_prop(self, name):
         if name in self._mProps:
-            del self.mProps[name]
+            del self._mProps[name]
 
     def get_prop(self, name):
         if name is None:
@@ -122,7 +230,13 @@ class Entity(object):
         """
         Return an instance of this Entity type
         """
-        return Instance(self)
+        self.idMax += 1
+        i = Instance(self, self.idMax)
+        self.instance_map[self.idMax] = i
+        return i
+    
+    def all(self):
+        return self.instance_map.values()
     
     def is_instance(self, inst):
         return isinstance(inst, Instance) and inst._entity is self
@@ -140,11 +254,10 @@ class BuiltIn(Entity):
                 [bool]]
     type_defaults = [0, '', datetime.datetime.now(), False]
 
-    def __init__(self, name):
+    def __init__(self, name, world=None):
         self.builtin_type = self.builtin_types(name)
-        super(BuiltIn, self).__init__(name)
-        self._value = self.type_defaults[self.builtin_type]
-        
+        super(BuiltIn, self).__init__(name, world)
+
     def is_instance(self, inst):
         return isinstance(inst, self.py_types[self.builtin_type])
     
@@ -174,7 +287,6 @@ class BuiltIn(Entity):
     def add_prop(self, name):
         raise Exception("Can't add properties to builtin types")
 
-
 class Property(object):
     """
     Properties definitions contain:
@@ -193,6 +305,14 @@ class Property(object):
         
     def __repr__(self):
         return "Property('%s')->%s (%s)" % (self.name(), self.entity.name, "many" if self.is_multi() else "1")
+    
+    def JSON(self, json_context):
+        js = {'type':self.entity.name}
+        if self.is_multi():
+            js['multi'] = True
+        if self.default is not None:
+            js['default'] = self.default
+        return js
         
     def name(self):
         return self.tag or self.entity.name
@@ -209,7 +329,10 @@ class Relation(object):
     """
     A description of a (bi-directional) relationship between two Entities
     """
-    def __init__(self, entityL, entityR, card=Card.many_many, tagL=None, tagR=None):
+    def __init__(self, entityL, entityR, card=Card.many_many, tagL=None, tagR=None, world=None):
+        if world is None:
+            world = World.current
+
         self.entities = (entityL, entityR)
         self.tags = (tagL, tagR)
         
@@ -231,8 +354,23 @@ class Relation(object):
                 entityL.del_prop(pL)
             raise e
         
+        world.relations.append(self)
+        
     def __repr__(self):
-        return "Relation: %r ~ %r" % (self.props[0], self.props[1])
+        return "Relation: %r <=> %r" % (self.props[0], self.props[1])
+    
+    def JSON(self, json_context):
+        """ Relation({"left":{"entity":<name>, "name":<name>},
+                      "right":{"entity":<name>},
+                      "card":<type>)
+        """
+        js = {'left':{'entity':self.entities[0].name},
+              'right':{'entity':self.entities[1].name},
+              'card': Card(self.cards[0])}
+        for side in range(2):
+            if self.names[side] != self.entities[1-side].name:
+                js['right' if side else 'left']['name'] = self.names[side]
+        return json.JSONFunction('Relation', js)
         
 class Instance(object):
     """
@@ -240,12 +378,20 @@ class Instance(object):
     
     instance.x - get the value of the property defined to an x type (or tagged x)
     """
-    def __init__(self, entity):
+    def __init__(self, entity, id):
         self.__dict__['_entity'] = entity
+        self.__dict__['_id'] = id
         self.__dict__['_mValues'] = {}
         
+    def __getstate__(self):
+        return self.__dict__;
+    
+    def __setstate__(self, d):
+        for (key,value) in d.items():
+            self.__dict__[key] = value
+        
     def __repr__(self):
-        return "%s<%X>: Values: %s" % (self._entity.name, id(self), key_summary(self._mValues))
+        return "%s<%X>: Values: %s" % (self._entity.name, self._id, key_summary(self._mValues))
         
     def _get_value(self, prop_name):
         return self._ensure_value(prop_name)
@@ -261,16 +407,20 @@ class Instance(object):
         if value is None:
             prop = self._entity.get_prop(prop_name)
             if prop is None:
-                raise Exception("No property '%s' in %s" % (prop_name, self._entity.name))
+                raise AttributeError
             value = Value(prop, self)
             self._mValues[prop_name] = value
         return value
 
-    def JSON(self):
-        json = {'id': id(self),
-                'type': self._entity}
-        json.update(self._mValues)
-        return json
+    def JSON(self, json_context):
+        if json_context.full_json(self):
+            def free_instances():
+                json_context.full_instances = True
+            json_context.full_instances = False
+                
+            return json.JSONFunction(self._entity.name, self._id, self._mValues).set_callback(free_instances)
+        else:
+            return json.JSONFunction(self._entity.name, self._id)
     
 class Value(object):
     """
@@ -299,6 +449,12 @@ class Value(object):
     def __contains__(self, value):
         assert(self.prop.is_multi());
         return value in self.values
+    
+    def JSON(self, json_context):
+        if self.prop.is_multi():
+            return self.values
+        else:
+            return self.value
         
     def set(self, value):
         save_value = self.prop.entity.coerce_value(value)
@@ -361,8 +517,40 @@ class Value(object):
         
         return value == self.value
     
-# Initialize a Kahnsept world
-world = World()
+class JSONEncoder(json.JSONEncoder):
+    """
+    Handle networks of object via depth-first pre-order traversal.
+    
+    Keep track of visited state and pass in context object to determine
+    when an object is first visited.  Later visits can dump out an
+    abbreviated object reference instead of the complete object. 
+    """
+    class JSONContext():
+        def __init__(self):
+            self.visited = set()
+            self.full_instances = True
+            
+        @staticmethod
+        def uid(obj):
+            return id(obj)
+            
+        def full_json(self, obj):
+            if isinstance(obj, Instance) and not self.full_instances:
+                return False
+            
+            key = self.uid(obj)
+            f = key not in self.visited
+            self.visited.add(key)
+            return f
+    
+    def __init__(self, **kw):
+        self.context = self.JSONContext()
+        super(JSONEncoder, self).__init__(**kw)
 
-if __name__ == '__main__':
-    interactive.interactive(globals=globals(), locals=world.entities)
+    def default(self, obj):
+        if hasattr(obj, 'JSON'):
+            return obj.JSON(self.context)
+        return super(JSONEncoder, self).default(obj)
+
+def dict_nonnull(d):
+    return dict([(key,value) for (key,value) in d.items() if value is not None])

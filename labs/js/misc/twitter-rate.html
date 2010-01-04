@@ -1,0 +1,209 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<title>Twitter Rate Calculator - Find the rate that any keyword is being Twittered.</title>
+<style>
+table {
+border-collapse:collapse;
+}
+
+p {
+margin: 0;
+}
+
+td, th {
+padding: 2px 5px 2px 5px;
+text-align: center;
+}
+
+td.number {
+text-align: right;
+}
+</style>
+<script>
+if (!window.console || !console.firebug)
+	{
+	(function ()
+		{
+    var names = ["log", "debug", "info", "warn", "error", "assert", "dir", "dirxml",
+    "group", "groupEnd", "time", "timeEnd", "count", "trace", "profile", "profileEnd"];
+
+    window.console = {};
+    for (var i = 0; i < names.length; ++i)
+    	{
+        window.console[names[i]] = function() {};
+        }
+		})();
+	}
+
+function CalcStats(obj)
+{
+	obj.users = {};
+	obj.cUsers = 0;
+	obj.users['_all_'] = new User('_all_');
+
+	for (var i = 0; i < obj.results.length; i++)
+		{
+		var res = obj.results[i];
+		var ms = new Date(res.created_at).getTime();
+		var sUser = res.from_user;
+		if (!obj.users[sUser])
+			{
+			obj.users[sUser] = new User(sUser);
+			obj.cUsers++;
+			}
+		obj.users[sUser].AddTweet(res);
+		obj.users['_all_'].AddTweet(res);
+		}
+}
+
+var aKeywords = [];
+
+function QueryMultiple()
+{
+	document.getElementById("tblData").innerHTML = "";
+	var txtKeywords = document.getElementById("keywords");
+	aKeywords = txtKeywords.value.Trim().split("\n").reverse();
+	QueryNext(aKeywords.pop());
+}
+
+function QueryNext(sKW)
+{
+	if (!sKW)
+		{
+		console.log("finished");
+		return;
+		}
+	var stQ = "http://search.twitter.com/search.json?callback=UpdateNext&rpp=500&q=" + encodeURIComponent(sKW);
+	console.log(stQ);
+	var script = document.createElement('script');
+	script.src = stQ;
+	document.body.appendChild(script);
+}
+
+function UpdateNext(obj)
+{
+	console.log(obj);
+	var tblData = document.getElementById("tblData");
+	var tr = document.createElement('tr');
+	
+	CalcStats(obj);
+	
+	var all = obj.users['_all_'];
+	AppendTD(tr, '<a target="_blank" href="http://search.twitter.com/search?q='+obj.query+'">'+obj.query+'</a>');
+	AppendTD(tr, FormatNumber(all.PerDay(), 1), true);
+	AppendTD(tr, obj.cUsers, true);
+	tblData.appendChild(tr);
+	QueryNext(aKeywords.pop());
+}
+
+function AppendTD(tr, stHTML, fNumber)
+{
+	var td = document.createElement('td');
+	if (fNumber)
+		td.className = "number";
+	td.innerHTML = stHTML;
+	tr.appendChild(td);
+}
+
+String.prototype.Trim = function()
+{
+	return (this || "").replace(/^\s+|\s+$/gm, "");
+};
+
+function User(sUser)
+{
+	this.sUser = sUser;
+	this.cTweet = 0;
+}
+
+User.prototype = {
+	constructor: User,
+
+AddTweet: function (res)
+	{
+	if (!this.urlImage)
+		this.urlImage = res.profile_image_url;
+	var ms = new Date(res.created_at).getTime();
+	if (!this.msMin || ms < this.msMin)
+		this.msMin = ms;
+	if (!this.msMax || ms > this.msMax)
+		this.msMax = ms;
+	this.cTweet++;
+	},
+
+PerDay: function()
+	{
+	if (this.cTweet < 2)
+		return 0;
+	return (this.cTweet-1)/(this.msMax - this.msMin) * 1000 * 60 * 60 * 24
+	}
+};
+
+function FormatNumber(val, digits)
+{
+	var nInt = Math.floor(val);
+	var sInt = nInt.toString();
+	var sLast = "";
+	while (sInt != sLast)
+		{
+		sLast = sInt;
+		sInt = sInt.replace(/(\d+)(\d{3})/, "$1,$2");
+		}
+	
+	if (digits && digits > 0)
+		{
+		var nFrac = val - nInt;
+		nFrac = Math.floor(nFrac * Math.pow(10,digits));
+		sFrac = "." + SDigits(nFrac, digits);
+		}
+	else
+		sFrac = "";
+	
+	return sInt + sFrac;
+}
+
+function SDigits(val, digits)
+{
+	var s = "";
+	
+	val = Math.floor(val);
+	
+	for (; digits > 0; digits--)
+		{
+		s = (val%10) + s;
+		val = Math.floor(val/10);
+		}
+
+	return s;
+}
+
+</script>
+
+</head>
+
+<body>
+<h1>Twitter Rate Calculator</h1>
+
+<div style="width:400px;float:left;padding-right: 10px;border-right: 1px solid black;">
+	<p>
+		You can use this page to find the rate at which any keyword, or set of keywords is being twittered.
+		Type one or more search terms into the text box (one per line), and then click Go.  The most recent tweets using
+		those keywords will be searched, and used to estimate a daily "Twitter-Rate".
+	</p>
+	<input type="button" value="Go" onclick="QueryMultiple();"/>
+	<br/>
+	<textarea style="width:300px;" rows="100" id="keywords"></textarea>
+</div>
+
+<table style="margin-left: 420px;" border="1">
+<thead>
+<tr><th>Keyword</th><th>Per Day</th><th>Sample Size (People)</th></tr>
+</thead>
+<tbody id="tblData">
+</tbody>
+</table>
+
+
+</body>
+</html>

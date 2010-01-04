@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<script>
+var aNames = ["foo", "foo-bar", "foo_bar"];
+
+function Loaded()
+{
+	for (var i = 0; i < aNames.length; i++)
+		{
+		var div = document.getElementById(aNames[i]);
+		if (div)
+			div.style.backgroundColor = "yellow";
+		}
+}
+
+function InjectElements()
+{
+	for (var i = 0; i < aNames.length; i++)
+		{
+		var s = '';
+		s += '<div id="' + aNames[i] + '" class="' + aNames[i] + '">';
+		s += 'This div has id="' + aNames[i] + '".';
+		s += '</div>';
+		document.write(s);
+		}
+}
+</script>
+</head>
+<body onload="Loaded();">
+<h1>DOM ID Test</h1>
+<p>Elements that are selectable should have a yellow background.</p>
+<script>
+InjectElements();
+</script>
+</body>
+</html>
