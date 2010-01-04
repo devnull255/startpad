@@ -275,16 +275,23 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr, _key_separ
         str=str,
         tuple=tuple,
     ):
-
+    
+    def _marker_enter(obj):
+        if markers is not None:
+            markerid = id(obj)
+            if markerid in markers:
+                raise ValueError("Circular reference detected for %s" % type(obj))
+            markers[markerid] = obj
+            
+    def _marker_leave(obj):
+        if markers is not None:
+            del markers[id(obj)]
+    
     def _iterencode_list(lst, _current_indent_level):
         if not lst:
             yield '[]'
             return
-        if markers is not None:
-            markerid = id(lst)
-            if markerid in markers:
-                raise ValueError("Circular reference detected")
-            markers[markerid] = lst
+        _marker_enter(lst)
         buf = '['
         if _indent is not None:
             _current_indent_level += 1
@@ -326,18 +333,13 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr, _key_separ
             _current_indent_level -= 1
             yield '\n' + (' ' * (_indent * _current_indent_level))
         yield ']'
-        if markers is not None:
-            del markers[markerid]
+        _marker_leave(lst)
 
     def _iterencode_dict(dct, _current_indent_level):
         if not dct:
             yield '{}'
             return
-        if markers is not None:
-            markerid = id(dct)
-            if markerid in markers:
-                raise ValueError("Circular reference detected")
-            markers[markerid] = dct
+        _marker_enter(dct)
         yield '{'
         if _indent is not None:
             _current_indent_level += 1
@@ -403,9 +405,33 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr, _key_separ
             _current_indent_level -= 1
             yield '\n' + (' ' * (_indent * _current_indent_level))
         yield '}'
-        if markers is not None:
-            del markers[markerid]
+        _marker_leave(dct)
 
+    def _iterencode_function(json_func, _current_indent_level):
+        if not json_func:
+            yield '(function(){})()'
+            return
+        _marker_enter(json_func)
+        buf = json_func.func_name + '('
+        if _indent is not None:
+            _current_indent_level += 1
+            newline_indent = '\n' + (' ' * (_indent * _current_indent_level))
+            separator = _item_separator + newline_indent
+        else:
+            newline_indent = None
+            separator = _item_separator
+        for arg in json_func.args:
+            yield buf
+            for chunk in _iterencode(arg, _current_indent_level):
+                yield chunk
+            buf = separator
+        if len(json_func.args) > 1 and newline_indent is not None:
+            _current_indent_level -= 1
+            yield '\n' + (' ' * (_indent * _current_indent_level))
+        yield ')'
+        _marker_leave(json_func)
+        json_func.leave()
+            
     def _iterencode(o, _current_indent_level):
         if isinstance(o, basestring):
             yield _encoder(o)
@@ -419,27 +445,61 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr, _key_separ
             yield str(o)
         elif isinstance(o, float):
             yield _floatstr(o)
-        elif isinstance(o, Atomic):
-                yield str(o)
         elif isinstance(o, (list, tuple)):
             for chunk in _iterencode_list(o, _current_indent_level):
                 yield chunk
         elif isinstance(o, dict):
             for chunk in _iterencode_dict(o, _current_indent_level):
                 yield chunk
-        else:
-            if markers is not None:
-                markerid = id(o)
-                if markerid in markers:
-                    raise ValueError("Circular reference detected")
-                markers[markerid] = o
-            o = _default(o)
-            for chunk in _iterencode(o, _current_indent_level):
+        elif isinstance(o, JSONRaw):
+                yield str(o)
+        elif isinstance(o, JSONFunction):
+            for chunk in _iterencode_function(o, _current_indent_level):
                 yield chunk
-            if markers is not None:
-                del markers[markerid]
+        else:
+            _marker_enter(o)
+            oT = _default(o)
+            for chunk in _iterencode(oT, _current_indent_level):
+                yield chunk
+            _marker_leave(o)
 
     return _iterencode
 
-class Atomic():
-    pass
+class JSONRaw(object):
+    """
+    Extension to allow for objects that encode as their string
+    representation.
+    """
+    def __str__(self):
+        return ""
+    
+class JSONString(JSONRaw):
+    def __init__(self, s):
+        self.s = s
+        
+    def __str__(self):
+        return self.s
+
+class JSONFunction(object):
+    """
+    A wrapper for object that encode as:
+    
+        Function(arg1, arg2, ...)
+        
+    This is NOT JSON compliant, but can be used in any environment that has
+    a full JavaScript interpreter and can evaluate functions.
+    """
+    def __init__(self, func_name, *args):
+        self.func_name = func_name
+        self.args = args
+        self.callback = None
+        
+    def set_callback(self, callback):
+        self.callback = callback
+        return self
+        
+    def leave(self):
+        if self.callback is not None:
+            self.callback()
+        
+
