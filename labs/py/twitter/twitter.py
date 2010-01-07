@@ -62,7 +62,7 @@ class Twitter(object):
 
     def rate_limit_status(self):
         json = self.api('account/rate_limit_status')
-        self.calls_remaining = json['remaining_hits']
+        self.calls_remaining = json.remaining_hits
         return json
     
     def update(self, sText):
