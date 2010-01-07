@@ -1,9 +1,10 @@
 import twitter
 import simplejson as json
 from datetime import datetime
+import time
 
 # One update per minute - to stay clear of twitter update limits (250/hour?)
-wait = 60
+wait = 90
 
 def make_namelist():
     file = open('all_tweeters.js')
@@ -46,7 +47,7 @@ def join_me(start_after=None):
             if hasattr(res, 'error'):
                 raise Exception(res.error)
             file_log.write("%s: %s\n" % (name, res.id))
-            sleep(wait)
+            time.sleep(wait)
         except Exception, e:
             print "%s: error (%r)\n" % (name, e)
             file_log.write("%s: error (%r)\n" % (name, e))
@@ -54,4 +55,4 @@ def join_me(start_after=None):
     file_log.close()
     
 if __name__ == '__main__':
-    join_me()
+    join_me('hlcherryholmes')
