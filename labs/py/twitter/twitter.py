@@ -40,7 +40,7 @@ from BaseHTTPServer import BaseHTTPRequestHandler
 sTwitter = "http://twitter.com/"
 local_cache = "twitter_cache.bin"
 
-TRACE = True
+TRACE = False
 
 class Twitter(object):
     calls_remaining = 150
@@ -126,6 +126,8 @@ class Twitter(object):
             sock.close()
             json = simplejson.loads(sJSON)
         except urllib2.HTTPError, e:
+            if TRACE:
+                print "HTTPError %r" % e
             t2 = BaseHTTPRequestHandler.responses.get(e.code, ("unknown", "unknown"))
             json = {'error': "HTTP Error: %s (%s)" % (e.code, t2[0])}
         except Exception, e:
