@@ -20,6 +20,7 @@ color:white;
 background-color: #a00;
 text-align: center;
 }
+
 table {
 border-collapse:collapse;
 }
@@ -42,7 +43,7 @@ color: white;
 }
 
 a:visited {
-color: white;
+color: #bbb;
 }
 
 div.followers {
@@ -55,7 +56,12 @@ font-size: 12px;
 position: relative;
 top: -2px;
 font-weight: bold;
-};
+}
+
+span.user-info {
+font-size: 12px;
+font-style: italic;
+}
 
 </style>
 <script>
@@ -166,7 +172,11 @@ function AppendToTable(user, c)
 	
 	AppendTD(tr, '<span class="counts">' + Format.FormatNumber(c) + '</span>');
 	AppendTD(tr, Format.ReplaceKeys(
-		'<a target="_blank" href="http://twitter.com/{name}">{name}</a>',
+		'<a target="_blank" href="http://twitter.com/{name}">{name}</a>' +
+		'<br/><span class="user-info">'+
+			'<a target="_blank" href="http://twitter.com/{name}/following">{friend_count} friends</a>' +
+			'<br/>(<a target="_blank" href="http://twitter.com/{name}/status/{tweet_id}">tweet</a>)' +
+		'</span>',
 		user));
 
 	var sTweet = '';
