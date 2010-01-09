@@ -1,0 +1,77 @@
+Alright, we are going to demo a project called Kahnsept.
+
+So I started up the web server, and you can see here that we have an empty Kahnsept file.
+
+So we can't start to see with this interface is basically giving me kind of a Python command line.
+
+So I can execute statements, etc. That actually didn't [display].
+
+You can either have expression or commands.
+
+So let's start to build a Kahnsept database.
+
+I'll make an Entity called a Person.
+
+And, you can see it show up there in the current database.
+
+Now, a Person, has a property which is a Text property called their 'name'.
+
+There we go, and that gets added to the schema.
+
+And let's say we also have a Person property which is a Number property and is the person's age.  OK?
+
+So, now notice below we have just a history the commands and what they returned.
+
+So now let's go ahead a build, let's say, a Person, 'deb' equals a Person - ('deb' is just a variable name).
+
+I'm going to create a new Person, and we'll set her name to be "Debbie".  There we go.
+
+Now maybe she won't like this example - we'll set her age to, we'll say, 29.  There we go.
+
+Now we'll create another Person, we'll say, mike.  And my name is "Mike".
+
+Now these are just Python statements, and we're just accessing the database directly.
+
+And Mike's age ... OK.
+
+So, notice how it just kind of built all those structures for me.
+
+And I can say something like mike.name, and you can see my name, or mike.age, or you can say "mike.age > deb.age" -> True!
+
+So now let's add a more complex relationship - we're going to add a Relation between two people.
+
+And this is a one-to-one, the cardinality of this relationship is a one-to-one relationship.
+
+On the one side we'll call it 'husband' and on the other side we'll call it 'wife'.
+
+So we created a Relation now, you can see that structure in the database.
+
+So let me now use that Relation and you'll see something pretty cool here.
+
+So we say "mike.wife = deb".
+
+Look here, a couple of things happened here in the "instances" you'll see where Person(2), Mike, his wife got set to the Person(1) but for Person(1) the husband, the reverse relationship automatically got set up.
+
+OK, now we'll show off one other kind of cool thing.
+
+Suppose I make a new Person, we're going to say "Fred".  That's a new Person.
+
+[there's a little problem with the scrolling]
+
+fred.name is "Fred".  And fred.age is "21".
+
+OK - so there is a new person in there.  Now what happens if Debbie happens to like Fred a little bit better [than Mike].
+
+We're going to say "fred.wife = deb".  Now notice what it did.
+
+So here's for Fred, the wife got set to Person(1), and just like before the husband got set to Person(3).
+
+So that changed both of those variables automatically.
+
+But also because we set up a one-to-one Relation, it knew that Mike could no longer have a "wife" field.
+
+So that is the basics behind Kahnsept.  It's just available as a client side install right now.
+
+But it should be pretty good to go.
+
+[Current source code at http://bit.ly/kahnsept-demo1]

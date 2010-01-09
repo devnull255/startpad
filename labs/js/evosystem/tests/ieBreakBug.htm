@@ -1,0 +1,18 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+<title>IE Break Bug Demo</title>
+<script>
+// This code will not compile in IE, because of the use the "break" as a property name.
+// It is being confused with the break keyword (used for loop termination).
+// Firefox's javascript parser does not have this problem, and will compile and
+// run this code just fine.
+alert(1);
+var con = {};
+con.break = 1;
+</script>
+</head>
+<body>
+
+</body>
+</html>

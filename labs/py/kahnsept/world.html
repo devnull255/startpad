@@ -1,0 +1,63 @@
+<html>
+<head>
+<title>Kahnsept Demo World</title>
+<script src="scripts/namespace.js"></script>
+<script src="scripts/base.js"></script>
+<script src="scripts/dom.js"></script>
+<script src="scripts/events.js"></script>
+<script src="scripts/kahnsept.js"></script>
+<script src="scripts/kbrowser.js"></script>
+<script>
+var WD = global_namespace.Define("kahnsept.world-demo", function(NS) {
+	var K = NS.Import("kahnsept");
+	var KB = NS.Import("kahnsept.browser");
+	var DOM = NS.Import("startpad.DOM");
+	
+NS.Extend(NS, {
+Loaded: function()
+{
+	K.Init();
+	NS.SampleWorld();
+	NS.parts = DOM.BindIDs();
+	var kb = new KB.Browser(NS.parts);
+	kb.Navigate(K.kRoot);
+},
+
+SampleWorld: function()
+{
+	var kBook = K.New();
+	kBook.X("Author", "");
+	kBook.X("name", "Book");
+	kBook.X("Published", new Date());
+
+	var k1 = K.New(kBook);
+	k1.X("Author", "Richard H. Thanler");
+	k1.X("Author", "Cass R. Sunstein");
+	k1.X("name", "Nudge");
+	k1.X("Published", new Date("1/1/2008"));
+	k1.X("Copies", 45);
+
+	var k2 = K.New(k1);
+}
+
+}); // NS
+
+}); // kahnsept.world-demo namespace
+
+</script>
+</head>
+<body>
+<h1><script>document.write(document.title);</script></h1>
+<div id="stage">
+<h2 id="name"></h2>
+<input id="toggle-mode" type="button"/>
+<input id="save" type="button" value="Save"/>
+<p>Parents: <span id="parents"></span></p>
+<h2>Konexions</h2>
+<div id="konexions"></div>
+<h2>Children</h2>
+<div id="children"></div>
+</div>
+
+<script>WD.Loaded();</script>
+</body>
