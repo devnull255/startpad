@@ -25,11 +25,15 @@ ts.AddTest("Entropy calculation", function(ut)
 		['a', 0],
 		['aaaa', 0],
 		['ab', 1],
-		['abcd', 2]
+		['abcd', 2],
+		['aA', 1]
 		];
 
 	for (var i = 0; i < aTests.length; i++)
-		ut.AssertEq(Crypto.Entropy(aTests[i][0]), aTests[i][1]);
+		{
+		var e = new Crypto.Entropy(aTests[i][0]);
+		ut.AssertEq(e.BitsPerChar(), aTests[i][1], 'String: ' + aTests[i][0]);
+		}
 });
 
 ts.Run();
