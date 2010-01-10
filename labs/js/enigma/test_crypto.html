@@ -1,0 +1,49 @@
+<html>
+<head>
+<title>Crypto Utilities Test Page</title>
+<script src="namespace.js"></script>
+<script src="base.js"></script>
+<script src="mersene_twister.js"></script>
+<script src="random.js"></script>
+<script src="crypto.js"></script>
+<script src="unit.js"></script>
+</head>
+<body>
+<h1><script>document.write(document.title);</script></h1>
+<SCRIPT>
+ts = new UT.TestSuite();
+ts.DWOutputDiv();
+</script>
+<script>
+var Crypto = global_namespace.Import('startpad.crypto');
+var Random = global_namespace.Import('startpad.random');
+
+ts.AddTest("Entropy calculation", function(ut)
+{
+	aTests = [
+		['', 0],
+		['a', 0],
+		['aaaa', 0],
+		['ab', 1],
+		['abcd', 2],
+		['aA', 1]
+		];
+
+	var e = new Crypto.Entropy();
+	for (var i = 0; i < aTests.length; i++)
+		{
+		e.Init().AddString(aTests[i][0]);
+		ut.AssertEq(e.BitsPerChar(), aTests[i][1], 'String: ' + aTests[i][0]);
+		}
+		
+	e = new Crypto.Entropy('', Crypto.Entropy.AlphaOnly);
+	e.AddString('aA');
+	ut.AssertEq(e.BitsPerChar(), 0);
+});
+
+ts.Run();
+ts.Report();
+
+</script>
+</body>
+</html>
