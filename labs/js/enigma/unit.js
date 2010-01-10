@@ -14,10 +14,10 @@
 // UnitTest - Each unit test calls a function which in turn calls
 // back Assert's on the unit test object.
 
-global_namespace.Define('startpad.unit', function (NS)
-	Timer = global_namespace('startpad.timer');
+global_namespace.Define('startpad.unit', function (UT) {
+	Timer = UT.Import('startpad.timer');
 
-NS.Extend(NS, {
+UT.Extend(UT, {
 DW: function(st)
 	{
 	document.write(st);
@@ -31,14 +31,15 @@ UT.UnitTest = function (stName, fn)
     this.rgres = [];
 };
 
-UT.UnitTest.states = {
+UT.Extend(UT.UnitTest, {
+states: {
     created: 0,
     running: 1,
     completed: 2
-};
+	}
+});
 
-UT.UnitTest.prototype = {
-constructor: UT.UnitTest,
+UT.Extend(UT.UnitTest.prototype, {
     state: UT.UnitTest.states.created,
     cErrors: 0,
     cErrorsExpected: 0,
@@ -63,7 +64,7 @@ Run: function(ts)
     console.log("=== Running test: " + this.stName + " ===");
 
     if (this.cAsync)
-        this.tm = new UT.Timer(this.Timeout.FnMethod(this), this.msTimeout).Active();
+        this.tm = new Timer(this.Timeout.FnMethod(this), this.msTimeout).Active();
 
     try
         {
@@ -488,7 +489,7 @@ FnWrap: function(fn)
 				}
 		});
 	}
-}; // UT.UnitTest
+}); // UnitTest
 
 // TestResult - a single result from the test
 
@@ -511,8 +512,7 @@ UT.TestSuite = function (stName)
 };
 
 
-UT.TestSuite.prototype = {
-constructor: UT.TestSuite,
+UT.Extend(UT.TestSuite.prototype, {
     cFailures: 0,
     iReport: -1,
     fStopFail: false,
@@ -549,7 +549,7 @@ SkipTo: function(iut)
 Run: function()
     {
     // BUG: should this be Active(false) - since we do first iteration immediately?
-    this.tmRun = new UT.Timer(this.RunNext.FnMethod(this), 100).Repeat().Active(true);
+    this.tmRun = new Timer.Timer(100, this.RunNext.FnMethod(this)).Repeat().Active(true);
 
     this.iCur = 0;
     // Don't wait for timer - start right away.
@@ -761,4 +761,7 @@ MasterTest: function(iUnit, cErrors, cTests)
     if (ut.cErrors == ut.cErrorsExpected)
         ut.win.close();
     }
-};
+    
+}); // TestSuite
+
+}); // startpad.unit
