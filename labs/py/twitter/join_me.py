@@ -3,7 +3,7 @@ import simplejson as json
 from datetime import datetime
 import time
 
-# One update per minute - to stay clear of twitter update limits (250/hour?)
+# One update per 90 seconds - to stay clear of twitter update limits (1000 per day)
 wait = 90
 
 def make_namelist():
