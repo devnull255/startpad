@@ -29,11 +29,16 @@ ts.AddTest("Entropy calculation", function(ut)
 		['aA', 1]
 		];
 
+	var e = new Crypto.Entropy();
 	for (var i = 0; i < aTests.length; i++)
 		{
-		var e = new Crypto.Entropy(aTests[i][0]);
+		e.Init().AddString(aTests[i][0]);
 		ut.AssertEq(e.BitsPerChar(), aTests[i][1], 'String: ' + aTests[i][0]);
 		}
+		
+	e = new Crypto.Entropy('', Crypto.Entropy.AlphaOnly);
+	e.AddString('aA');
+	ut.AssertEq(e.BitsPerChar(), 0);
 });
 
 ts.Run();

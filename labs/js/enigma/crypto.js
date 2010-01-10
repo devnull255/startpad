@@ -25,8 +25,7 @@ Entropy: function(s, fnFilter)
 	if (fnFilter == undefined)
 		fnFilter = NS.Entropy.AsciiOnly;
 	this.fnFilter = fnFilter;
-	this.cch = 0;
-	this.mHist = {};
+	this.Init();
 	this.AddString(s);
 	}
 });
@@ -50,6 +49,13 @@ AlphaOnly: function(ch)
 });
 
 NS.Extend(NS.Entropy.prototype, {
+Init: function()
+	{
+	this.cch = 0;
+	this.mHist = {};	
+	return this;
+	},
+	
 AddString: function(s)
 	{
 	if (s == undefined)
