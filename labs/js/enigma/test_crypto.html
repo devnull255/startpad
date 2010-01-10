@@ -6,6 +6,7 @@
 <script src="mersene_twister.js"></script>
 <script src="random.js"></script>
 <script src="crypto.js"></script>
+<script src="enigma.js"></script>
 <script src="unit.js"></script>
 </head>
 <body>
@@ -17,6 +18,7 @@ ts.DWOutputDiv();
 <script>
 var Crypto = global_namespace.Import('startpad.crypto');
 var Random = global_namespace.Import('startpad.random');
+var Enigma = global_namespace.Import('startpad.enigma');
 
 ts.AddTest("Entropy calculation", function(ut)
 {
@@ -39,6 +41,13 @@ ts.AddTest("Entropy calculation", function(ut)
 	e = new Crypto.Entropy('', Crypto.Entropy.AlphaOnly);
 	e.AddString('aA');
 	ut.AssertEq(e.BitsPerChar(), 0);
+});
+
+ts.AddTest("Enigma Entropy Test", function(ut)
+{
+	machine = new Enigma.Enigma();
+	posStart = machine.position.concat();
+	
 });
 
 ts.Run();
