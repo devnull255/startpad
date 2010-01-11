@@ -9,8 +9,6 @@
 <script src="events.js"></script>
 <script src="enigma.js"></script>
 <script src="enigma-solver.js"></script>
-<script src="mersene_twister.js"></script>
-<script src="random.js"></script>
 <link rel="stylesheet" type="text/css" href="enigma-sim.css"/>
 <script>
 var Solver = global_namespace.Import('startpad.enigma.solver');
@@ -42,8 +40,8 @@ var Solver = global_namespace.Import('startpad.enigma.solver');
 				<textarea id="plain">QMJIDO MZWZJFJR</textarea>
 			</li>
 			<li>
-				<label for="rotor_search"></label>
-				<input type="button" id="rotor_search" value="Find Rotors"/>
+				<label for="solve"></label>
+				<input type="button" id="solve" value="Solve It"/>
 			</li>
 		</ol>
 	</fieldset>

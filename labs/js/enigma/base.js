@@ -3,8 +3,8 @@ global_namespace.Define('startpad.base', function(NS) {
 NS.Extend(NS, {
 Browser:
 	{
-	version: parseInt(window.navigator.appVersion),
-	fIE: window.navigator.appName.indexOf("Microsoft") !== -1
+	version: parseInt(navigator.appVersion),
+	fIE: navigator.appName.indexOf("Microsoft") !== -1
 	},
 	
 ExtendMissing: function(oDest, var_args)

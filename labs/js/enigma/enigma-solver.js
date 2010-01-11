@@ -1,17 +1,24 @@
 global_namespace.Define('startpad.enigma.solver', function (NS)
 {
-	Enigma = NS.Import('startpad.enigma');
+	var Enigma = NS.Import('startpad.enigma');
+	var Event = NS.Import('startpad.events');
+	var DOM = NS.Import('startpad.DOM');
 	
 NS.Extend(NS, {
 Init: function()
 	{
+		NS.mParts = DOM.BindIDs();
+		
 		NS.worker = new Worker('enigma-solver-worker.js');
 		NS.worker.onmessage = NS.OnMessage;
 		NS.worker.onerror = NS.OnError;
+		
+		Event.AddEventFn(NS.mParts.solve, 'click', NS.Solve);
 	},
 
 Solve: function()
 	{
+	NS.worker.postMessage('start solving');
 	},
 	
 OnMessage: function(event)
