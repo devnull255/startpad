@@ -8,6 +8,7 @@ NS.Extend(NS, {
 Init: function()
 	{
 		NS.mParts = DOM.BindIDs();
+		NS.mParts.text_input.focus();
 		
 		NS.worker = new Worker('enigma-solver-worker.js');
 		NS.worker.onmessage = NS.OnMessage;
@@ -18,7 +19,7 @@ Init: function()
 
 Solve: function()
 	{
-	NS.worker.postMessage('start solving');
+	NS.worker.postMessage(NS.mParts.text_input.value);
 	},
 	
 OnMessage: function(event)

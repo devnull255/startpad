@@ -32,19 +32,19 @@ var Solver = global_namespace.Import('startpad.enigma.solver');
 <p style="color:gray;">by Mike Koss</p>
 <hr/>
 
-	<fieldset id="input_form">
-		<legend>Rotor Search</legend>
-		<ol>
-			<li>
-				<label class="input" for="plain">Enter Coded Message Here:</label>
-				<textarea id="plain">QMJIDO MZWZJFJR</textarea>
-			</li>
-			<li>
-				<label for="solve"></label>
-				<input type="button" id="solve" value="Solve It"/>
-			</li>
-		</ol>
-	</fieldset>
+<fieldset id="input_form">
+	<legend>Rotor Search</legend>
+	<ol>
+		<li>
+			<label class="box" for="cipher">Enter Coded Message Here:</label>
+			<textarea class="text-input" id="text_input">QMJIDO MZWZJFJR</textarea>
+		</li>
+		<li>
+			<label for="solve"></label>
+			<input type="button" id="solve" value="Solve It"/>
+		</li>
+	</ol>
+</fieldset>
 
 </div>
 <script>Solver.Init();</script>
