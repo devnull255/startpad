@@ -58,29 +58,40 @@
 
 // Define stubs for FireBug objects if not present
 // This is here because this will often be the very first javascript file loaded
-if (!window.console)
+try
 	{
-	(function ()
+	var console;
+
+	if (!console)
 		{
-    var names = ["log", "debug", "info", "warn", "error", "assert", "dir", "dirxml",
-    "group", "groupEnd", "time", "timeEnd", "count", "trace", "profile", "profileEnd"];
-
-    window.console = {};
-    for (var i = 0; i < names.length; ++i)
-    	{
-        window.console[names[i]] = function() {};
-        }
-		})();
+		(function ()
+			{
+		    var names = ["log", "debug", "info", "warn", "error", "assert", "dir", "dirxml",
+		    "group", "groupEnd", "time", "timeEnd", "count", "trace", "profile", "profileEnd"];
+		
+		    console = {};
+		    for (var i = 0; i < names.length; ++i)
+		    	{
+		        console[names[i]] = function() {};
+		        }
+			})();
+		}
 	}
-
-(function()
-{
-	var sGlobal = 'global_namespace';
-
-	// Don't run this function more than once.
-	if (window[sGlobal])
-		return;
+catch (e)
+	{
+	}
 	
+var global_namespace = (function()
+{
+	try
+		{
+		if (global_namespace != undefined)
+			return global_namespace;
+		}
+	catch (e)
+		{
+		}
+
 	/** @constructor **/
 	function Namespace(nsParent, sName)
 		{
@@ -119,7 +130,7 @@ if (!window.console)
 		return oDest;
 		};
 
-	var ns = window[sGlobal] = new Namespace(null);
+	var ns = new Namespace(null);
 
 	ns['Extend'](Namespace.prototype, {
 	'Define': function (sPath, fnCallback)
@@ -155,13 +166,15 @@ if (!window.console)
 	
 	'Import': function(sPath)
 		{
-		return window[sGlobal]['Define'](sPath);
+		return ns['Define'](sPath);
 		},
 		
 	'SGlobalName': function(sInNamespace)
 		{
 		sInNamespace = sInNamespace.replace(/-/g, '_');
-		return sGlobal + '.' + this._sPath + '.' + sInNamespace;
+		return 'global_namespace.' + this._sPath + '.' + sInNamespace;
 		}
 	});
+	
+	return ns;
 })();
