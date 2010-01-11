@@ -7,6 +7,7 @@
 <script src="random.js"></script>
 <script src="formatutil.js"></script>
 <script src="enigma.js"></script>
+<script src="vector.js"></script>
 <script src="timer.js"></script>
 <script src="unit.js"></script>
 </head>
@@ -20,6 +21,7 @@ ts.DWOutputDiv();
 <script>
 var Enigma = global_namespace.Import('startpad.enigma');
 var Random = global_namespace.Import('startpad.random');
+var Vector = global_namespace.Import('startpad.vector');
 Enigma.fnTrace = function(s) {console.log(s);}
 
 ts.AddTest("Basic Reciprocal Encoding", function(ut)
@@ -139,6 +141,23 @@ ts.AddTest("Settings from Passkey", function(ut)
 	ut.AssertEq(settings.rotors.length, 3);
 	ut.AssertEq(settings.position.length, 3);
 	ut.AssertEq(settings.rings.length, 3);
+});
+
+ts.AddTest("Cycle Length", function(ut)
+{
+	var machine = new Enigma.Enigma();
+	var posStart = machine.position.concat();
+	var i = 0;
+	
+	while (true)
+		{
+		i += 1;
+		machine.IncrementRotors();
+		if (Vector.Equal(posStart, machine.position))
+			break;
+		}
+		
+	ut.AssertEq(i, 26*26*25);
 });
 
 ts.Run();
