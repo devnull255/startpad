@@ -203,6 +203,8 @@ Init: function(settings)
 	
 	if (this.fnTrace)
 		this.fnTrace("Init: " + this.toString())
+		
+	return this;
 	},
 
 /* Return machine state	as a string

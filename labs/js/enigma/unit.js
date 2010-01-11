@@ -14,149 +14,15 @@
 // UnitTest - Each unit test calls a function which in turn calls
 // back Assert's on the unit test object.
 
-Function.prototype.FnMethod = function(obj)
-{
-	var _fn = this;
-	return function () { return _fn.apply(obj, arguments); };
-};
+global_namespace.Define('startpad.unit', function (UT) {
+	Timer = UT.Import('startpad.timer');
 
-Function.prototype.FnArgs = function()
-{
-	var _fn = this;
-	var _args = [];
-	for (var i = 0; i < arguments.length; i++)
-		_args.push(arguments[i]);
-
-	return function () {
-		var args = [];
-		// In case this is a method call, preserve the "this" variable
-		var self = this;
-
-		for (var i = 0; i < arguments.length; i++)
-			args.push(arguments[i]);
-		for (i = 0; i < _args.length; i++)
-			args.push(_args[i]);
-
-		return _fn.apply(self, args);
-	};	
-};
-
-var UT = {
-
-// Extend(dest, src1, src2, ... )
-// Shallow copy properties in turn into dest object
-Extend: function(dest)
+UT.Extend(UT, {
+DW: function(st)
 	{
-	for (var i = 1; i < arguments.length; i++)
-		{
-		var src = arguments[i];
-		for (var prop in src)
-			{
-			if (src.hasOwnProperty(prop))
-				dest[prop] = src[prop];
-			}
-		}
-	},
-
-DW: function(st) {document.write(st);},
-
-Browser:
-	{
-	version: parseInt(navigator.appVersion),
-	fIE: navigator.appName.indexOf("Microsoft") != -1
-	},
-	
-// Convert all top-level object properties into a URL query string.
-// {a:1, b:"hello, world"} -> "?a=1&b=hello%2C%20world"
-StParams: function(obj)
-	{
-	if (obj == undefined || obj == null)
-		return "";
-		
-	var stDelim = "?";
-	var stParams = "";
-	for (var prop in obj)
-		{
-		if (!obj.hasOwnProperty(prop) || prop == "_anchor")
-			continue;
-		stParams += stDelim;
-		stParams += encodeURIComponent(prop);
-		// BUG: This is a bit bogus to encode a query param in JSON
-		if (typeof obj[prop] == "object")
-			stParams += "=" + encodeURIComponent(PF.EncodeJSON(obj[prop], true));
-		else if (obj[prop] != null)
-			stParams += "=" + encodeURIComponent(obj[prop]);
-		stDelim = "&";
-		}
-	if (obj._anchor)
-		stParams += "#" + encodeURIComponent(obj._anchor);
-	return stParams;
+	document.write(st);
 	}
-};  // UT
-
-UT.Timer = function(fnCallback, ms)
-{
-	this.ms = ms;
-	this.fnCallback = fnCallback;
-	return this;
-};
-
-UT.Timer.prototype = {
-	constructor: UT.Timer,
-	fActive: false,
-	fRepeat: false,
-	fInCallback: false,
-	fReschedule: false,
-
-Repeat: function(f)
-{
-	if (f == undefined)
-		f = true;
-	this.fRepeat = f;
-	return this;
-},
-
-Ping: function()
-{
-	// In case of race condition - don't call function if deactivated
-	if (!this.fActive)
-		return;
-
-	// Eliminate re-entrancy - is this possible?
-	if (this.fInCallback)
-		{
-		this.fReschedule = true;
-		return;
-		}
-
-	this.fInCallback = true;
-	this.fnCallback();
-	this.fInCallback = false;
-
-	if (this.fActive && (this.fRepeat || this.fReschedule))
-		this.Active(true);
-},
-
-// Calling Active resets the timer so that next call to Ping will be in this.ms milliseconds from NOW
-Active: function(fActive)
-{
-	if (fActive == undefined)
-		fActive = true;
-	this.fActive = fActive;
-	this.fReschedule = false;
-
-	if (this.iTimer)
-		{
-		clearTimeout(this.iTimer);
-		this.iTimer = undefined;
-		}
-
-	if (fActive)
-		this.iTimer = setTimeout(this.Ping.FnMethod(this), this.ms);
-
-	return this;
-}
-}; // UT.Timer
+});
 
 UT.UnitTest = function (stName, fn)
 {
@@ -165,14 +31,15 @@ UT.UnitTest = function (stName, fn)
     this.rgres = [];
 };
 
-UT.UnitTest.states = {
+UT.Extend(UT.UnitTest, {
+states: {
     created: 0,
     running: 1,
     completed: 2
-};
+	}
+});
 
-UT.UnitTest.prototype = {
-constructor: UT.UnitTest,
+UT.Extend(UT.UnitTest.prototype, {
     state: UT.UnitTest.states.created,
     cErrors: 0,
     cErrorsExpected: 0,
@@ -197,7 +64,7 @@ Run: function(ts)
     console.log("=== Running test: " + this.stName + " ===");
 
     if (this.cAsync)
-        this.tm = new UT.Timer(this.Timeout.FnMethod(this), this.msTimeout).Active();
+        this.tm = new Timer(this.Timeout.FnMethod(this), this.msTimeout).Active();
 
     try
         {
@@ -622,7 +489,7 @@ FnWrap: function(fn)
 				}
 		});
 	}
-}; // UT.UnitTest
+}); // UnitTest
 
 // TestResult - a single result from the test
 
@@ -645,8 +512,7 @@ UT.TestSuite = function (stName)
 };
 
 
-UT.TestSuite.prototype = {
-constructor: UT.TestSuite,
+UT.Extend(UT.TestSuite.prototype, {
     cFailures: 0,
     iReport: -1,
     fStopFail: false,
@@ -683,7 +549,7 @@ SkipTo: function(iut)
 Run: function()
     {
     // BUG: should this be Active(false) - since we do first iteration immediately?
-    this.tmRun = new UT.Timer(this.RunNext.FnMethod(this), 100).Repeat().Active(true);
+    this.tmRun = new Timer.Timer(100, this.RunNext.FnMethod(this)).Repeat().Active(true);
 
     this.iCur = 0;
     // Don't wait for timer - start right away.
@@ -895,4 +761,7 @@ MasterTest: function(iUnit, cErrors, cTests)
     if (ut.cErrors == ut.cErrorsExpected)
         ut.win.close();
     }
-};
+    
+}); // TestSuite
+
+}); // startpad.unit

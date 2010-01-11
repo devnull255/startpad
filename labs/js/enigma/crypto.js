@@ -71,6 +71,7 @@ AddString: function(s)
 		this.mHist[ch] += 1;
 		this.cch += 1;
 		}
+	return this;
 	},
 	
 BitsPerChar: function()
