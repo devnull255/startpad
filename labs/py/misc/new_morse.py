@@ -11,7 +11,6 @@ aMorse = ['.-', '-...', '-.-.', '-..', '.',             # A-E
           '..-', '...-', '.--', '-..-', '-.--', '--..'  # U-Z
           ]
 
-
 # Approx letter frequency from http://en.wikipedia.org/wiki/Letter_frequency
 aFreq = [
     8.167, 1.492, 2.782, 4.253, 12.702,     # A-E
@@ -24,12 +23,12 @@ aFreq = [
 sum_freq = reduce(operator.add, aFreq)
 aFreq = [aFreq[i]/sum_freq for i in range(len(aFreq))]
 
-def print_by_length():
+def print_by_length(aMorse):
     n = len(aMorse)
     aStats = [(chr(65+i), aMorse[i], code_length(aMorse[i])) for i in range(n)]
     aStats.sort(lambda x,y: x[2]-y[2])
     for c in aStats:
-        print c
+        print "%s %s : %d" % c
         
     avg = reduce(operator.add, [aStats[i][2]*aFreq[i] for i in range(n)])
     
@@ -38,9 +37,45 @@ def print_by_length():
 def code_length(sMorse):
     return sMorse.count('.') + 3 * sMorse.count('-') + len(sMorse) - 1
 
+def enum_morse():
+    """ Enumerate morse-like patterns in order of length """
+    size = 1
+    while True:
+        for pattern in enum_morse_size(size):
+            yield pattern
+        size += 2
+            
+def enum_morse_size(size):
+    for dots in range((size+1)/2, -1, -1):
+        sizeT = size - dots * 2
+        for dashes in range((sizeT+1)/4, -1, -1):
+            if dots*2 + dashes*4 - 1 != size:
+                continue 
+            for pattern in enum_dots_dashes(dots, dashes):
+                yield pattern
+                
+def enum_dots_dashes(dots, dashes):
+    if dots == 0 and dashes == 0:
+        yield ''
+        return
+    if dots == 0:
+        yield '-' * dashes
+        return
+    if dashes == 0:
+        yield '.' * dots
+        return
+
+    if dots >= 1:
+        for pattern in enum_dots_dashes(dots-1, dashes):
+            yield '.' + pattern
+    if dashes >= 1:
+        for pattern in enum_dots_dashes(dots, dashes-1):
+            yield '-' + pattern
+
+
 if __name__ == '__main__':
     import code
     
-    print_by_length()
+    print_by_length(aMorse)
     
     code.interact(local=globals())
