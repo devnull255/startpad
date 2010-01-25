@@ -21,7 +21,11 @@ aFreq = [
     ]
 
 sum_freq = reduce(operator.add, aFreq)
-aFreq = [aFreq[i]/sum_freq for i in range(len(aFreq))]
+aFreq = [aFreq[i]/sum_freq for i in range(26)]
+
+ordered_alpha = [(chr(65+i), aFreq[i]) for i in range(26)]
+ordered_alpha.sort(lambda x,y: cmp(y[1],x[1]))
+ordered_alpha = [ordered_alpha[i][0] for i in range(26)]
 
 def print_by_length(aMorse):
     n = len(aMorse)
@@ -63,5 +67,11 @@ if __name__ == '__main__':
     import code
     
     print_by_length(aMorse)
+    
+    new_morse = zip(ordered_alpha, enum_morse())
+    new_morse.sort(lambda x,y: cmp(x[0], y[0]))
+    new_morse = [new_morse[i][1] for i in range(26)]
+    
+    print_by_length(new_morse)
     
     code.interact(local=globals())
