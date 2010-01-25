@@ -8,9 +8,6 @@
 """
 
 import heapq
-import pprint
-
-pp = pprint.PrettyPrinter()
 
 def same_weight_chars(sSyms):
     return zip(list(sSyms), (1,) * len(sSyms))
@@ -45,21 +42,25 @@ def build_huffman(input_symbols, output_symbols=binary_output):
         parent = (left[0]+right[0], {'left':left, 'right':right})
         heapq.heappush(heap, parent)
         
-    def annotate_leaves(node, prefix):
+    def build_dict(node, prefix):
         if 'sym' in node[1]:
-            node[1]['path'] = prefix
+            d[node[1]['sym']] = prefix
             return
         
-        annotate_leaves(node[1]['left'], prefix + '0')
-        annotate_leaves(node[1]['right'], prefix+ '1')
-        
-    annotate_leaves(heap[0], '')
-        
-    pp.pprint(heap)
+        build_dict(node[1]['left'], prefix + '0')
+        build_dict(node[1]['right'], prefix+ '1')
+    
+    d = {}
+    build_dict(heap[0], '')
+    return d
 
 if __name__ == '__main__':
     import code
+    import pprint
     
-    build_huffman(alpha_input)
+    pp = pprint.PrettyPrinter()
+    
+    heap = build_huffman(alpha_input)
+    pp.pprint(heap)
     
     code.interact(local=globals())
