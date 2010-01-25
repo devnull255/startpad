@@ -4,6 +4,8 @@
    - Tree building
    - Encoding/decoding strings
    
+   Designed to allow for variable-cost and more than binary output symbols.
+   
    (c) 2010 Mike Koss
 """
 
@@ -54,13 +56,39 @@ def build_huffman(input_symbols, output_symbols=binary_output):
     build_dict(heap[0], '')
     return d
 
+def huffman_encode(s, d):
+    sOut = ''
+    for ch in s:
+        if ch not in d:
+            continue
+        sOut += d[ch]
+    return sOut
+
+def huffman_decode(s, d):
+    d = dict([(value,key) for key,value in d.items()])
+    sOut = ''
+    sIn = ''
+    for ch in s:
+        sIn += ch
+        if sIn in d:
+            sOut += d[sIn]
+            sIn = ''
+    if sIn != '':
+        raise Exception("Unrecognize sequence: %s" % sIn)
+    return sOut
+        
+
 if __name__ == '__main__':
     import code
     import pprint
     
     pp = pprint.PrettyPrinter()
     
-    heap = build_huffman(alpha_input)
-    pp.pprint(heap)
+    d = build_huffman(alpha_input)
+    pp.pprint(d)
+    
+    sCode = huffman_encode("Four score and seven years ago".upper(), d)
+    print sCode
+    print huffman_decode(sCode, d)
     
     code.interact(local=globals())
