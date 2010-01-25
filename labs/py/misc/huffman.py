@@ -57,6 +57,9 @@ def build_huffman(input_symbols, output_symbols=binary_output):
     return d
 
 def huffman_encode(s, d):
+    """ Use huffman encoding dictionary to encode an input string.
+    Unrecognized source characters are ignored.
+    """
     sOut = ''
     for ch in s:
         if ch not in d:
@@ -77,7 +80,6 @@ def huffman_decode(s, d):
         raise Exception("Unrecognize sequence: %s" % sIn)
     return sOut
         
-
 if __name__ == '__main__':
     import code
     import pprint
