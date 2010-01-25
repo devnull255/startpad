@@ -46,32 +46,18 @@ def enum_morse():
         size += 2
             
 def enum_morse_size(size):
-    for dots in range((size+1)/2, -1, -1):
-        sizeT = size - dots * 2
-        for dashes in range((sizeT+1)/4, -1, -1):
-            if dots*2 + dashes*4 - 1 != size:
-                continue 
-            for pattern in enum_dots_dashes(dots, dashes):
-                yield pattern
-                
-def enum_dots_dashes(dots, dashes):
-    if dots == 0 and dashes == 0:
-        yield ''
+    assert(size >= 1 and size % 2 == 1)
+    if size == 1:
+        yield '.'
         return
-    if dots == 0:
-        yield '-' * dashes
+    if size == 3:
+        yield '-'
+        yield '..'
         return
-    if dashes == 0:
-        yield '.' * dots
-        return
-
-    if dots >= 1:
-        for pattern in enum_dots_dashes(dots-1, dashes):
-            yield '.' + pattern
-    if dashes >= 1:
-        for pattern in enum_dots_dashes(dots, dashes-1):
-            yield '-' + pattern
-
+    for p in enum_morse_size(size-4):
+        yield '-' + p
+    for p in enum_morse_size(size-2):
+        yield '.' + p
 
 if __name__ == '__main__':
     import code
