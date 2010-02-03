@@ -1,0 +1,30 @@
+Todo:
+
+- Application icon
+- Tab icons
+- Settings layout
+	- Rotors
+	- Rings
+	- Start
+	- Plugboard
+- Simulator layout
+	- Text output field
+	- Rotor display
+	- Android keyboard in alpha-only mode? Fixed?
+- Port Enigma Encryption Code from JavaScript
+- Handle Key events
+- Lock to portrait orientation
+
+Later ToDo:
+
+- Enigma panel image
+- Light up lights for output
+- Plugboard settings graphically
+- SMS message (link to app?)
+
+Android questions:
+
+- Can I put TabHost in main.xml directly, instead of creating it on the fly as
+  was done in ApiDemos?
+- Why isn't the Layout Editor working in eclipse?
+
