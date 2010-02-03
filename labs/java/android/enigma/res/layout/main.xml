@@ -13,14 +13,92 @@
         android:layout_height="fill_parent"
         android:orientation="vertical">
         
-        <Spinner
-        	android:id="@+id/spn_rotors_1"
-        	android:layout_width="wrap_content"
+        <TextView
+        	android:layout_width="fill_parent"
         	android:layout_height="wrap_content"
-        	android:layout_centerHorizontal="true"
-        	android:prompt="@string/rotor_prompt"
-        	android:drawSelectorOnTop="true"
-        	/>
+        	android:textSize="30sp"
+        	android:text="Rotors:"/>
+        	
+       	<LinearLayout
+       		android:layout_width="wrap_content"
+       		android:layout_height="wrap_content"
+       		android:orientation="horizontal"
+       		android:layout_gravity="center_horizontal"
+       		android:padding="5dp"
+       		>
+       		
+  		    <Spinner
+	        	android:id="@+id/spn_reflector"
+	        	android:layout_width="wrap_content"
+	        	android:layout_height="wrap_content"
+	        	android:prompt="@string/reflector_prompt"
+	        	android:drawSelectorOnTop="true"
+	        	/>
+        
+	        <Spinner
+	        	android:id="@+id/spn_rotors_1"
+	        	android:layout_width="wrap_content"
+	        	android:layout_height="wrap_content"
+	        	android:prompt="@string/rotor_prompt"
+	        	android:drawSelectorOnTop="true"
+	        	/>
+	        	
+	        <Spinner
+	        	android:id="@+id/spn_rotors_2"
+	        	android:layout_width="wrap_content"
+	        	android:layout_height="wrap_content"
+	        	android:prompt="@string/rotor_prompt"
+	        	android:drawSelectorOnTop="true"
+	        	/>
+	        	
+	        <Spinner
+	        	android:id="@+id/spn_rotors_3"
+	        	android:layout_width="wrap_content"
+	        	android:layout_height="wrap_content"
+	        	android:prompt="@string/rotor_prompt"
+	        	android:drawSelectorOnTop="true"
+	        	/>
+       	</LinearLayout>
+       	
+       	
+        <TextView
+        	android:layout_width="fill_parent"
+        	android:layout_height="wrap_content"
+        	android:textSize="30sp"
+        	android:text="Rings:"/>
+        	
+       	<LinearLayout
+       		android:layout_width="wrap_content"
+       		android:layout_height="wrap_content"
+       		android:orientation="horizontal"
+       		android:layout_gravity="center_horizontal"
+       		android:padding="5dp"
+       		>
+        
+	        <Spinner
+	        	android:id="@+id/spn_rings_1"
+	        	android:layout_width="wrap_content"
+	        	android:layout_height="wrap_content"
+	        	android:prompt="@string/ring_prompt"
+	        	android:drawSelectorOnTop="true"
+	        	/>
+	        	
+	        <Spinner
+	        	android:id="@+id/spn_rings_2"
+	        	android:layout_width="wrap_content"
+	        	android:layout_height="wrap_content"
+	        	android:prompt="@string/ring_prompt"
+	        	android:drawSelectorOnTop="true"
+	        	/>
+	        	
+	        <Spinner
+	        	android:id="@+id/spn_rings_3"
+	        	android:layout_width="wrap_content"
+	        	android:layout_height="wrap_content"
+	        	android:prompt="@string/ring_prompt"
+	        	android:drawSelectorOnTop="true"
+	        	/>
+       	</LinearLayout>
         	
     </LinearLayout>
 </FrameLayout>
