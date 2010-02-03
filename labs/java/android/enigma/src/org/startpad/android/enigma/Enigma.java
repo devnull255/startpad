@@ -31,10 +31,7 @@ public class Enigma extends TabActivity {
         
         // Initializing the Settings view
         
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-                this, R.array.reflector_names, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        ((Spinner) findViewById(R.id.spn_reflector)).setAdapter(adapter);
+        ArrayAdapter<CharSequence> adapter;
         
         adapter = ArrayAdapter.createFromResource(
                 this, R.array.rotor_names, android.R.layout.simple_spinner_item);

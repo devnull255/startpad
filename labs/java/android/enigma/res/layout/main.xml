@@ -27,14 +27,6 @@
        		android:padding="5dp"
        		>
        		
-  		    <Spinner
-	        	android:id="@+id/spn_reflector"
-	        	android:layout_width="wrap_content"
-	        	android:layout_height="wrap_content"
-	        	android:prompt="@string/reflector_prompt"
-	        	android:drawSelectorOnTop="true"
-	        	/>
-        
 	        <Spinner
 	        	android:id="@+id/spn_rotors_1"
 	        	android:layout_width="wrap_content"
@@ -98,7 +90,21 @@
 	        	android:prompt="@string/ring_prompt"
 	        	android:drawSelectorOnTop="true"
 	        	/>
+	        	
        	</LinearLayout>
+
+	    <TextView
+        	android:layout_width="fill_parent"
+        	android:layout_height="wrap_content"
+        	android:textSize="30sp"
+        	android:text="Plugboard:"/>
         	
+        <EditText android:id="@+id/plugboard"
+        	android:layout_width="fill_parent"
+        	android:layout_height="wrap_content"
+        	android:capitalize="characters"
+        	android:hint="Sequence of letter pairs, e.g. AB CD"
+        	android:singleLine="true"/>
+
     </LinearLayout>
 </FrameLayout>
