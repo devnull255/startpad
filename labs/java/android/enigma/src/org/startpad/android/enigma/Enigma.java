@@ -31,10 +31,25 @@ public class Enigma extends TabActivity {
         
         // Initializing the Settings view
         
-        Spinner s1 = (Spinner) findViewById(R.id.spn_rotors_1);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                this, R.array.reflector_names, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ((Spinner) findViewById(R.id.spn_reflector)).setAdapter(adapter);
+        
+        adapter = ArrayAdapter.createFromResource(
                 this, R.array.rotor_names, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        s1.setAdapter(adapter);
+        
+        ((Spinner) findViewById(R.id.spn_rotors_1)).setAdapter(adapter);
+        ((Spinner) findViewById(R.id.spn_rotors_2)).setAdapter(adapter);
+        ((Spinner) findViewById(R.id.spn_rotors_3)).setAdapter(adapter);
+        
+        adapter = ArrayAdapter.createFromResource(
+                this, R.array.alpha, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        
+        ((Spinner) findViewById(R.id.spn_rings_1)).setAdapter(adapter);
+        ((Spinner) findViewById(R.id.spn_rings_2)).setAdapter(adapter);
+        ((Spinner) findViewById(R.id.spn_rings_3)).setAdapter(adapter);
     }
 }
