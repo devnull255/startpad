@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World, Enigma!</string>
     <string name="app_name">Enigma Simulator</string>
+    <string name="rotor_prompt">Choose a Rotor</string>
 </resources>
