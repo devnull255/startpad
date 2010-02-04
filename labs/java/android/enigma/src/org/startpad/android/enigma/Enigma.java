@@ -1,18 +1,19 @@
 package org.startpad.android.enigma;
 
-import java.util.List;
-
 import org.startpad.android.enigma.R;
 
 import android.app.TabActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.AdapterView;
+import android.widget.ToggleButton;
 import android.widget.AdapterView.OnItemSelectedListener;
 
 public class Enigma extends TabActivity
@@ -20,6 +21,9 @@ public class Enigma extends TabActivity
 	private static final String TAG = "Enigma";
     Spinner[] aspnRotors = new Spinner[3];
     int[] aRotors = new int[] {0,1,2};
+    ToggleButton toggleGroup;
+    boolean fGroup = false;
+    EditText edit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -38,15 +42,36 @@ public class Enigma extends TabActivity
                 .setIndicator("Settings")
                 .setContent(R.id.settings));
         
-        // Initializing the Settings view
+        // Initialize Simulator view
+        toggleGroup = (ToggleButton) findViewById(R.id.group_text);
+        toggleGroup.setOnClickListener(
+        		new ToggleButton.OnClickListener()
+	        		{
+					public void onClick(View v)
+						{
+						fGroup = !fGroup;
+						Log.d(TAG, "Group: " + fGroup);
+						}
+	        		});
+        
+        edit = (EditText) findViewById(R.id.input);
+        edit.setOnKeyListener(
+        		new EditText.OnKeyListener()
+	        		{
+					public boolean onKey(View v, int keyCode, KeyEvent event)
+						{	
+							Log.d(TAG, "Key");
+							return false;
+						}
+	        		});
+        
+        // Initialize Settings view
         
         ArrayAdapter<CharSequence> adapter;
         
         adapter = ArrayAdapter.createFromResource(this, R.array.rotor_names, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        
 
-        
         for (int i = 0; i < 3; i++)
         	{
         	aspnRotors[i] = (Spinner) findViewById(R.id.spn_rotors_1 + i);

@@ -3,10 +3,33 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
-    <TextView android:id="@+id/sim"
+    <LinearLayout android:id="@+id/sim"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:text="This is where the simulator content will go."/>
+        android:orientation="vertical">
+        
+        <EditText android:id="@+id/input"
+        	android:layout_width="fill_parent"
+        	android:layout_height="wrap_content"
+        	android:capitalize="characters"
+        	android:hint="Input message"
+        	android:singleLine="true"/>
+        	
+        <TextView android:id="@+id/input"
+        	android:layout_width="fill_parent"
+        	android:layout_height="wrap_content"
+        	android:textSize="30sp"
+        	android:text="RXGOP FTIGH FTJ"/>
+        	
+        <ToggleButton android:id="@+id/group_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="6dp"
+            android:textOn="Group Letters"
+            android:textOff="Group Letters"/>
+        
+    </LinearLayout>
         
     <LinearLayout android:id="@+id/settings"
         android:layout_width="fill_parent"
