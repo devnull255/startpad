@@ -2,7 +2,7 @@ Todo:
 
 - Application icon
 - Tab icons
-- Settings layout
+X Settings layout
 	- Rotors
 	- Rings
 	- Start
@@ -12,8 +12,8 @@ Todo:
 	- Rotor display
 	- Android keyboard in alpha-only mode? Fixed?
 - Port Enigma Encryption Code from JavaScript
-- Handle Key events
-- Lock to portrait orientation
+X Handle Key events
+X Lock to portrait orientation
 
 Later ToDo:
 

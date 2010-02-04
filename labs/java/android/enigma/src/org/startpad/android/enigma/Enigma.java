@@ -3,11 +3,14 @@ package org.startpad.android.enigma;
 import org.startpad.android.enigma.R;
 
 import android.app.TabActivity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -41,7 +44,10 @@ public class Enigma extends TabActivity
         tabHost.addTab(tabHost.newTabSpec("settings")
                 .setIndicator("Settings")
                 .setContent(R.id.settings));
-        
+        tabHost.addTab(tabHost.newTabSpec("info")
+                .setIndicator("Enigma Info")
+                .setContent(R.id.enigma_info));
+       
         // Initialize Simulator view
         toggleGroup = (ToggleButton) findViewById(R.id.group_text);
         toggleGroup.setOnClickListener(
@@ -64,6 +70,11 @@ public class Enigma extends TabActivity
 							return false;
 						}
 	        		});
+        
+        // Initialize Wikipedia based info page
+        WebView wv = (WebView) findViewById(R.id.enigma_info);
+        wv.getSettings().setJavaScriptEnabled(true);
+        wv.loadUrl("http://en.m.wikipedia.org/wiki/Enigma_machine");
         
         // Initialize Settings view
         
