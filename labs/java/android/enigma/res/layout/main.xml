@@ -6,7 +6,13 @@
     <LinearLayout android:id="@+id/sim"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        >
+        
+        <ImageView
+        	android:layout_width="fill_parent"
+        	android:layout_height="wrap_content"
+        	android:src="@drawable/enigma_panel"/>
         
         <EditText android:id="@+id/input"
         	android:layout_width="fill_parent"
@@ -130,4 +136,10 @@
         	android:singleLine="true"/>
 
     </LinearLayout>
+    
+    <WebView android:id="@+id/enigma_info"
+        android:layout_height="fill_parent"
+        android:layout_width="fill_parent"
+        />
+
 </FrameLayout>
