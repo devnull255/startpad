@@ -6,16 +6,21 @@ import android.app.TabActivity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnKeyListener;
 import android.webkit.WebView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.AdapterView;
+import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.widget.AdapterView.OnItemSelectedListener;
 
@@ -27,6 +32,7 @@ public class Enigma extends TabActivity
     ToggleButton toggleGroup;
     boolean fGroup = false;
     EditText edit;
+    TextView output;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -39,16 +45,20 @@ public class Enigma extends TabActivity
         LayoutInflater.from(this).inflate(R.layout.main, tabHost.getTabContentView(), true);
 
         tabHost.addTab(tabHost.newTabSpec("sim")
-                .setIndicator("Simulator")
+                .setIndicator("Simulation")
                 .setContent(R.id.sim));
+        tabHost.addTab(tabHost.newTabSpec("encoder")
+                .setIndicator("Encoder")
+                .setContent(R.id.encoder));
         tabHost.addTab(tabHost.newTabSpec("settings")
                 .setIndicator("Settings")
                 .setContent(R.id.settings));
         tabHost.addTab(tabHost.newTabSpec("info")
-                .setIndicator("Enigma Info")
+                .setIndicator("Info")
                 .setContent(R.id.enigma_info));
        
-        // Initialize Simulator view
+        // Initialize Encoder view
+        
         toggleGroup = (ToggleButton) findViewById(R.id.group_text);
         toggleGroup.setOnClickListener(
         		new ToggleButton.OnClickListener()
@@ -56,22 +66,26 @@ public class Enigma extends TabActivity
 					public void onClick(View v)
 						{
 						fGroup = !fGroup;
-						Log.d(TAG, "Group: " + fGroup);
 						}
 	        		});
         
+        output = (TextView) findViewById(R.id.output);
         edit = (EditText) findViewById(R.id.input);
-        edit.setOnKeyListener(
-        		new EditText.OnKeyListener()
-	        		{
-					public boolean onKey(View v, int keyCode, KeyEvent event)
-						{	
-							Log.d(TAG, "Key");
-							return false;
-						}
-	        		});
+        edit.addTextChangedListener(new TextWatcher()
+        	{
+
+			public void afterTextChanged(Editable arg0)
+				{
+				Log.d(TAG, "Changed!");
+				output.setText("-> " + edit.getText() + " <- ");
+				}
+
+			public void beforeTextChanged(CharSequence s, int start, int count,	int after) {}
+			public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        	});
         
-        // Initialize Wikipedia based info page
+        // Initialize Wikipedia-based info WebView
+        
         WebView wv = (WebView) findViewById(R.id.enigma_info);
         wv.getSettings().setJavaScriptEnabled(true);
         wv.loadUrl("http://en.m.wikipedia.org/wiki/Enigma_machine");
@@ -90,6 +104,8 @@ public class Enigma extends TabActivity
         	aspnRotors[i].setSelection(aRotors[i]);
         	
         	aspnRotors[i].setOnItemSelectedListener(
+        			// TODO: Send to publich method on this class instead of making new
+        			// class instance?
             		new OnItemSelectedListener()
             			{
     					public void onItemSelected(AdapterView<?> parent, View view, int pos, long id)
