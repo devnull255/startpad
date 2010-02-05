@@ -24,7 +24,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.widget.AdapterView.OnItemSelectedListener;
 
-public class Enigma extends TabActivity
+public class EnigmaApp extends TabActivity
 	{
 	private static final String TAG = "Enigma";
     Spinner[] aspnRotors = new Spinner[3];
