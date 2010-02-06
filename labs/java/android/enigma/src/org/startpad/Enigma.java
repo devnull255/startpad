@@ -319,7 +319,6 @@ public class Enigma
 
         Enigma e = new Enigma(new Trace()
             {
-                @Override
                 public void Callback(String trace)
                     {
                     System.out.println("Trace: " + trace);
@@ -333,7 +332,8 @@ public class Enigma
         if (e.trace != null)
             {
             System.out.println("has trace");
-            } else
+            }
+        else
             {
             System.out.println("no trace");
             }
