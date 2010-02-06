@@ -1,5 +1,7 @@
 package org.startpad.android.enigma;
 
+import org.startpad.Enigma;
+
 import org.startpad.android.enigma.R;
 
 import android.app.TabActivity;
@@ -33,11 +35,15 @@ public class EnigmaApp extends TabActivity
     boolean fGroup = false;
     EditText edit;
     TextView output;
+    Enigma machine;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     	{
         super.onCreate(savedInstanceState);
+        
+        machine = new Enigma(null);
+        
         TabHost tabHost = getTabHost();
         
         // Setup top-level tabbled layout screen 
@@ -77,7 +83,11 @@ public class EnigmaApp extends TabActivity
 			public void afterTextChanged(Editable arg0)
 				{
 				Log.d(TAG, "Changed!");
-				output.setText("-> " + edit.getText() + " <- ");
+				machine.init(null);
+				String code = machine.encode(edit.getText().toString());
+				Log.d(TAG, "Code: " + code);
+				
+				output.setText(code);
 				}
 
 			public void beforeTextChanged(CharSequence s, int start, int count,	int after) {}
