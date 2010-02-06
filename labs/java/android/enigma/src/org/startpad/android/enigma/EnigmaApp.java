@@ -29,20 +29,41 @@ import android.widget.AdapterView.OnItemSelectedListener;
 public class EnigmaApp extends TabActivity
 	{
 	private static final String TAG = "Enigma";
+	
+	// Machine settings
     Spinner[] aspnRotors = new Spinner[3];
+    Spinner[] aspnStart = new Spinner[3];
+    Spinner[] aspnRings = new Spinner[3];
+    EditText plugboard;
+    
     int[] aRotors = new int[] {0,1,2};
     ToggleButton toggleGroup;
-    boolean fGroup = false;
+    boolean fGroup = true;
     EditText edit;
     TextView output;
-    Enigma machine;
+    Enigma machine = new Enigma(null);
+    Enigma.Settings settings = new Enigma.Settings();
+    
+    private void updateEncoding()
+        {
+        machine.init(null);
+        String code = machine.encode(edit.getText().toString());
+        if (fGroup)
+            code = Enigma.groupLetters(code);
+        Log.d(TAG, "Code: " + code);
+        
+        output.setText(code);
+        }
+    
+    private void updateSettings()
+        {
+
+        }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     	{
         super.onCreate(savedInstanceState);
-        
-        machine = new Enigma(null);
         
         TabHost tabHost = getTabHost();
         
@@ -65,6 +86,9 @@ public class EnigmaApp extends TabActivity
        
         // Initialize Encoder view
         
+        output = (TextView) findViewById(R.id.output);
+        edit = (EditText) findViewById(R.id.input);
+        
         toggleGroup = (ToggleButton) findViewById(R.id.group_text);
         toggleGroup.setOnClickListener(
         		new ToggleButton.OnClickListener()
@@ -72,22 +96,18 @@ public class EnigmaApp extends TabActivity
 					public void onClick(View v)
 						{
 						fGroup = !fGroup;
+						updateEncoding();
 						}
 	        		});
+        toggleGroup.setChecked(fGroup);
         
-        output = (TextView) findViewById(R.id.output);
-        edit = (EditText) findViewById(R.id.input);
         edit.addTextChangedListener(new TextWatcher()
         	{
 
 			public void afterTextChanged(Editable arg0)
 				{
 				Log.d(TAG, "Changed!");
-				machine.init(null);
-				String code = machine.encode(edit.getText().toString());
-				Log.d(TAG, "Code: " + code);
-				
-				output.setText(code);
+				updateEncoding();
 				}
 
 			public void beforeTextChanged(CharSequence s, int start, int count,	int after) {}
@@ -114,7 +134,7 @@ public class EnigmaApp extends TabActivity
         	aspnRotors[i].setSelection(aRotors[i]);
         	
         	aspnRotors[i].setOnItemSelectedListener(
-        			// TODO: Send to publich method on this class instead of making new
+        			// TODO: Send to public method on this class instead of making new
         			// class instance?
             		new OnItemSelectedListener()
             			{
@@ -152,7 +172,19 @@ public class EnigmaApp extends TabActivity
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         
         for (int i = 0; i < 3; i++)
-        	((Spinner) findViewById(R.id.spn_rings_1 + i)).setAdapter(adapter);
-
+            {
+            aspnRings[i] = (Spinner) findViewById(R.id.spn_rings_1 + i);
+            aspnRings[i].setAdapter(adapter);
+            }
+        
+        for (int i = 0; i < 3; i++)
+            {
+            aspnStart[i] = (Spinner) findViewById(R.id.spn_start_1 + i);
+            aspnStart[i].setAdapter(adapter);
+            }
+        
+        plugboard = (EditText) findViewById(R.id.plugboard);
+        
+        updateSettings();
     	}
 	}
