@@ -13,6 +13,9 @@
 
 package org.startpad;
 
+import java.util.Iterator;
+import java.util.ArrayList;
+
 public class Enigma
 {
 	static class Rotor
@@ -32,6 +35,11 @@ public class Enigma
 			this.notch = notch;
 			
 			this.CreateMapping();
+			}
+		
+		public String toString()
+			{
+			return this.name;
 			}
 		
 		private void CreateMapping()
@@ -78,6 +86,8 @@ public class Enigma
 	Rotor[] rotors = new Rotor[3];
 	Rotor reflector;
 	int[] position = new int[3];
+	int[] rings = new int[3];
+	int[] mapPlugs = new int[26];
 	
 	public Enigma(Trace trace)
 		{
@@ -109,6 +119,149 @@ public class Enigma
 		
 		for (int i = 0; i < 3; i++)
 			this.position[i] = iFromCh(this.settings.position[i]);
+		
+		for (int i = 0; i < 3; i++)
+			this.rings[i] = iFromCh(this.settings.rings[i]);
+		
+		this.settings.plugs = this.settings.plugs.toUpperCase();
+		this.settings.plugs = this.settings.plugs.replaceAll("[^A-Z]", "");
+		if (this.settings.plugs.length() % 2 == 1)
+			throw new IllegalArgumentException("Plugboard settings must have an even number of characters.");
+		
+		for (int i = 0; i < 26; i++)
+			this.mapPlugs[i] = i;
+		
+		for (int i = 0; i < this.settings.plugs.length(); i += 2)
+			{
+			int iFrom = iFromCh(this.settings.plugs.charAt(i));
+			int iTo = iFromCh(this.settings.plugs.charAt(i+1));
+			
+			if (this.mapPlugs[iFrom] != iFrom)
+				throw new IllegalArgumentException("Redefinition of plug settings for " + chFromI(iFrom));
+			
+			if (this.mapPlugs[iTo] != iTo)
+				throw new IllegalArgumentException("Redifinition of plug setting for " + chFromI(iTo));
+			
+			this.mapPlugs[iFrom] = iTo;
+			this.mapPlugs[iTo] = iFrom;
+			}
+		}
+	
+	public String encode(String s)
+		{
+		String sOut = "";
+		
+		for (int i = 0; i < s.length(); i++)
+			sOut += this.encodeChar(s.charAt(i));
+		return sOut;
+		}
+	
+	private char encodeChar(char ch)
+		{
+		ArrayList<Integer> tracePath = new ArrayList<Integer>();
+		
+		ch = Character.toUpperCase(ch);
+		
+		if (ch < 'A' || ch > 'Z')
+			return ch;
+		
+		this.incrementRotors();
+		
+		int i = iFromCh(ch);
+		tracePath.add(i);
+		
+		i = this.mapPlugs[i];
+		tracePath.add(i);
+		
+		for (int r = 2; r >= 0; r--)
+			{
+			int d = this.rotors[r].map[(i + this.position[r] - this.rings[r] + 26) % 26];
+			i = (i + d) % 26;
+			tracePath.add(i);
+			}
+		
+		i = (i + this.reflector.map[i]) % 26;
+		tracePath.add(i);
+		
+		for (int r = 0; r < 3; r++)
+			{
+			int d = this.rotors[r].mapReverse[(i + this.position[r] - this.rings[r] + 26) % 26];
+			i = (i + d) % 26;
+			tracePath.add(i);
+			}
+		
+		i = this.mapPlugs[i];
+		tracePath.add(i);
+		
+		if (this.trace != null)
+			{
+			String s = "";
+			String sSep = "";
+			
+			Iterator<Integer> iter = tracePath.iterator();
+			while (iter.hasNext())
+				{
+				s += sSep + chFromI(iter.next());
+				sSep = "->";
+				}
+			trace.Callback(s);
+			}
+		
+		return chFromI(i);
+		}
+	
+	private void incrementRotors()
+		{
+		/* Note that notches are components of the outer rings.  So wheel
+		 * motion is tied to the visible rotor position (letter or number)
+		 * NOT the wiring position - which is dictated by the rings settings
+		 * (or offset from the 'A' position).
+		 */
+			
+		// Middle notch - all rotors rotate
+		if (this.position[1] == iFromCh(this.rotors[1].notch))
+			{
+			this.position[0] += 1;
+			this.position[1] += 1;
+			}
+		// Right notch - two rotors rotate
+		else if (this.position[2] == iFromCh(this.rotors[2].notch))
+			this.position[1] += 1;
+		
+		this.position[2] += 1;
+		
+		for (int i = 0; i < 3; i++)
+			this.position[i] = this.position[i] % 26;
+		}
+	
+	public String toString()
+		{
+		String s = "Rotors: ";
+		String sSep;
+		
+		s += this.reflector.toString();
+		sSep = "-";
+		for (int i = 0; i < 3; i++)
+			s += sSep + this.rotors[i].toString();
+		
+		s += " Position: ";
+		
+		for (int i = 0; i < 3; i++)
+			s += chFromI(this.position[i]);
+		
+		s += " Rings: ";
+		for (int i = 0; i < 3; i++)
+			s += chFromI(this.settings.rings[i]);
+		
+		s += " Plugs: ";
+		sSep = "";
+		for (int i = 0; i < this.settings.plugs.length(); i+= 2)
+			{
+			s += sSep + this.settings.plugs.substring(i, i +2);
+			sSep = " ";
+			}
+		
+		return s;
 		}
 	
 	private Rotor rotorFromName(String name)
@@ -137,7 +290,7 @@ public class Enigma
 		return groupBy(s, 5, ' ');
 		}
 	
-	public static String groupBy(String s, int n, char c)
+	private static String groupBy(String s, int n, char c)
 		{
 		String sOut = "";
 		String sSep = "";
@@ -168,7 +321,9 @@ public class Enigma
 					}
 			});
 			
-			System.out.println('Z' - 'A');
+			//e = new Enigma(null);
+			
+			System.out.println("Machine: " + e.toString());
 			
 			if (e.trace != null)
 				{
@@ -180,6 +335,8 @@ public class Enigma
 				}
 			
 			System.out.println(groupBy("abcdefghijklmnop", 5, ' '));
+			
+			System.out.println(e.encode("Enigma Revealed!"));
 		}
 
 }
