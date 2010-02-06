@@ -275,7 +275,7 @@ public class Enigma
         for (int i = 0; i < rotorsBox.length; i++)
             if (name == rotorsBox[i].name)
                 return rotorsBox[i];
-        return null;
+        throw new IllegalArgumentException("Invalid Rotor Name: " + name);
         }
 
     private static int iFromCh(char ch)

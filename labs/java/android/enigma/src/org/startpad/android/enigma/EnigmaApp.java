@@ -46,7 +46,7 @@ public class EnigmaApp extends TabActivity
     
     private void updateEncoding()
         {
-        machine.init(null);
+    	updateSettings();
         String code = machine.encode(edit.getText().toString());
         if (fGroup)
             code = Enigma.groupLetters(code);
@@ -57,7 +57,24 @@ public class EnigmaApp extends TabActivity
     
     private void updateSettings()
         {
-
+    	for (int i = 0; i < 3; i++)
+    	    {
+    	    String s = (String) aspnRotors[i].getSelectedItem();
+    	    Log.d(TAG, "Rotor: " + s + "." + s.length());
+    		settings.rotors[i] = s;
+    	    }
+    	
+    	for (int i = 0; i < 3; i++)
+    		settings.position[i] = ((String) aspnStart[i].getSelectedItem()).charAt(0);
+    	
+    	for (int i = 0; i < 3; i++)
+    		settings.rings[i] = ((String) aspnRings[i].getSelectedItem()).charAt(0);
+    	
+    	settings.plugs = plugboard.getText().toString();
+    	
+    	machine.init(settings);
+    	
+    	// updateEncoding();
         }
 
     @Override
