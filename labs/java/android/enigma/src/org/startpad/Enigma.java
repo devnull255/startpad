@@ -55,13 +55,22 @@ public class Enigma
             }
         }
 
-    static class Settings
+    static public class Settings
         {
-        String[] rotors;
-        String reflector;
-        char[] position;
-        char[] rings;
-        String plugs;
+        public String[] rotors;
+        public String reflector;
+        public char[] position;
+        public char[] rings;
+        public String plugs;
+        
+        public Settings()
+            {
+            rotors = new String[] { "I", "II", "III" };
+            reflector = "B";
+            position = new char[] { 'M', 'C', 'K' };
+            rings = new char[] { 'A', 'A', 'A' };
+            plugs = "";
+            }
         }
 
     public interface Trace
@@ -82,7 +91,7 @@ public class Enigma
 
     // Instance variables
 
-    Settings settings;
+    Settings settings = new Settings();
     Rotor[] rotors = new Rotor[3];
     Rotor reflector;
     int[] position = new int[3];
@@ -96,14 +105,6 @@ public class Enigma
         if (this.trace != null)
             this.trace.Callback("Constructed");
 
-        // Default settings
-        Settings settings = new Settings();
-
-        settings.rotors = new String[] { "I", "II", "III" };
-        settings.reflector = "B";
-        settings.position = new char[] { 'M', 'C', 'K' };
-        settings.rings = new char[] { 'A', 'A', 'A' };
-        settings.plugs = "";
         init(settings);
         }
 
