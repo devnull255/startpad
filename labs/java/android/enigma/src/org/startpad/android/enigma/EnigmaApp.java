@@ -46,7 +46,7 @@ public class EnigmaApp extends TabActivity
     
     private void updateEncoding()
         {
-    	updateSettings();
+        machine.init(null);
         String code = machine.encode(edit.getText().toString());
         if (fGroup)
             code = Enigma.groupLetters(code);
@@ -74,7 +74,7 @@ public class EnigmaApp extends TabActivity
     	
     	machine.init(settings);
     	
-    	// updateEncoding();
+    	updateEncoding();
         }
 
     @Override
@@ -179,6 +179,8 @@ public class EnigmaApp extends TabActivity
     						aRotors[iMe] = (int) id;
     						
     						Log.d(TAG, "Rotors: " + aRotors[0] + ", " + aRotors[1] + ", " + aRotors[2]);
+    						
+    						updateEncoding();
     						}
 
     					public void onNothingSelected(AdapterView<?> arg0) {}
@@ -188,20 +190,41 @@ public class EnigmaApp extends TabActivity
         adapter = ArrayAdapter.createFromResource(this, R.array.alpha, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         
+        class SettingsListener implements OnItemSelectedListener
+            {
+            private EnigmaApp app;
+            
+            public SettingsListener(EnigmaApp app)
+                {
+                this.app = app;
+                }
+            
+            public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3)
+                {
+                app.updateSettings();
+                }
+    
+            public void onNothingSelected(AdapterView<?> arg0) {}
+            }
+        
         for (int i = 0; i < 3; i++)
             {
             aspnRings[i] = (Spinner) findViewById(R.id.spn_rings_1 + i);
             aspnRings[i].setAdapter(adapter);
+            aspnRings[i].setOnItemSelectedListener(new SettingsListener(this));
             }
         
         for (int i = 0; i < 3; i++)
             {
             aspnStart[i] = (Spinner) findViewById(R.id.spn_start_1 + i);
             aspnStart[i].setAdapter(adapter);
+            aspnStart[i].setOnItemSelectedListener(new SettingsListener(this));
             }
         
         plugboard = (EditText) findViewById(R.id.plugboard);
         
         updateSettings();
     	}
-	}
+    
+
+    }
