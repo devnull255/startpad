@@ -5,18 +5,16 @@ import org.startpad.Enigma;
 import org.startpad.android.enigma.R;
 
 import android.app.TabActivity;
-import android.content.Intent;
-import android.net.Uri;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.ClipboardManager;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnKeyListener;
 import android.webkit.WebView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -52,6 +50,10 @@ public class EnigmaApp extends TabActivity
     TabHost tabHost;
     InputMethodManager imm;
     IBinder token;
+    ClipboardManager cbm;
+    MediaPlayer mpDown;
+    MediaPlayer mpUp;
+    MediaPlayer mpRotor;
     
     private void updateEncoding()
         {
@@ -72,6 +74,9 @@ public class EnigmaApp extends TabActivity
             code = Enigma.groupLetters(code);
         
         output.setText(code);
+        
+        // Always copy results to clipboard
+        cbm.setText(code);
         }
     
     private void updateSettings()
@@ -79,7 +84,6 @@ public class EnigmaApp extends TabActivity
     	for (int i = 0; i < 3; i++)
     	    {
     	    String s = (String) aspnRotors[i].getSelectedItem();
-    	    Log.d(TAG, "Rotor: " + s + "." + s.length());
     		settings.rotors[i] = s;
     	    }
     	
@@ -113,8 +117,13 @@ public class EnigmaApp extends TabActivity
         
         tabHost = getTabHost();
         imm = (InputMethodManager) this.getSystemService(INPUT_METHOD_SERVICE);
+        cbm = (ClipboardManager) this.getSystemService(CLIPBOARD_SERVICE);
         
-        toast = Toast.makeText(this, "", toast.LENGTH_LONG);
+        mpDown = MediaPlayer.create(this, R.raw.key_down);
+        mpUp = MediaPlayer.create(this, R.raw.key_up);
+        mpRotor = MediaPlayer.create(this, R.raw.rotor);
+        
+        toast = Toast.makeText(this, "", Toast.LENGTH_LONG);
         
         // Setup top-level tabbled layout screen 
         
@@ -133,8 +142,6 @@ public class EnigmaApp extends TabActivity
                 .setIndicator("Info")
                 .setContent(R.id.enigma_info));
         
-        token = tabHost.getTabContentView().getWindowToken();
-        
         tabHost.setOnTabChangedListener(new OnTabChangeListener()
             {
             public void onTabChanged(String tabId)
@@ -142,11 +149,10 @@ public class EnigmaApp extends TabActivity
                 // BUG: This is NOT working to hide the virtual keyboard
                 // on all tab changes ... why not?
                 imm.hideSoftInputFromInputMethod(token, InputMethodManager.HIDE_NOT_ALWAYS);
-
+                
                 if (tabId.equals("sim") || tabId.equals("encoder"))
                     {
                     updateSettings();
-                    Log.d(TAG, "Tab " + fLegalSettings);
                     if (!fLegalSettings)
                         {
                         tabHost.setCurrentTabByTag("settings");
@@ -162,6 +168,9 @@ public class EnigmaApp extends TabActivity
         
         output = (TextView) findViewById(R.id.output);
         edit = (EditText) findViewById(R.id.input);
+        
+        token = edit.getApplicationWindowToken();
+        Log.d(TAG, "Token: " + (token != null ? token.toString() : "null"));
         
         toggleGroup = (ToggleButton) findViewById(R.id.group_text);
         toggleGroup.setOnClickListener(
@@ -180,8 +189,10 @@ public class EnigmaApp extends TabActivity
 
 			public void afterTextChanged(Editable arg0)
 				{
-				Log.d(TAG, "Changed!");
 				updateEncoding();
+				
+		        mpDown.seekTo(0);
+		        mpDown.start();
 				}
 
 			public void beforeTextChanged(CharSequence s, int start, int count,	int after) {}
@@ -218,8 +229,6 @@ public class EnigmaApp extends TabActivity
     						for (iMe = 0; iMe < 3; iMe++)
     							if (aspnRotors[iMe] == parent)
     								break;
-
-    						Log.d(TAG, "Selected:" + iMe + " to:"+ id);
     						
     						// If rotor already used - swap it out with this rotor's value
     						for (int i = 0; i < 3; i++)
@@ -234,7 +243,10 @@ public class EnigmaApp extends TabActivity
 	    						}
     						
     						aRotors[iMe] = (int) id;
-    						    						}
+    						
+    						mpRotor.seekTo(0);
+    						mpRotor.start();
+    						}
 
     					public void onNothingSelected(AdapterView<?> arg0) {}
             			});
@@ -243,16 +255,31 @@ public class EnigmaApp extends TabActivity
         adapter = ArrayAdapter.createFromResource(this, R.array.alpha, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         
+        class RotorSettingsListener implements OnItemSelectedListener
+            {
+            public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3)
+                {
+                mpRotor.seekTo(0);
+                mpRotor.start();
+                }
+    
+            public void onNothingSelected(AdapterView<?> arg0) {}
+            }
+        
+        RotorSettingsListener listener = new RotorSettingsListener();
+        
         for (int i = 0; i < 3; i++)
             {
             aspnRings[i] = (Spinner) findViewById(R.id.spn_rings_1 + i);
             aspnRings[i].setAdapter(adapter);
+            aspnRings[i].setOnItemSelectedListener(listener);
             }
         
         for (int i = 0; i < 3; i++)
             {
             aspnStart[i] = (Spinner) findViewById(R.id.spn_start_1 + i);
             aspnStart[i].setAdapter(adapter);
+            aspnStart[i].setOnItemSelectedListener(listener);
             }
         
         plugboard = (EditText) findViewById(R.id.plugboard);
