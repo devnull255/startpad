@@ -273,7 +273,7 @@ public class Enigma
     private Rotor rotorFromName(String name)
         {
         for (int i = 0; i < rotorsBox.length; i++)
-            if (name == rotorsBox[i].name)
+            if (name.equals(rotorsBox[i].name))
                 return rotorsBox[i];
         throw new IllegalArgumentException("Invalid Rotor Name: " + name);
         }
