@@ -47,6 +47,7 @@ public class EnigmaApp extends TabActivity
     Toast toast;
     boolean fLegalSettings = true;
     String sSettingsError;
+    TabHost tabHost;
     
     private void updateEncoding()
         {
@@ -86,6 +87,7 @@ public class EnigmaApp extends TabActivity
     	
     	settings.plugs = plugboard.getText().toString();
     	
+    	fLegalSettings = true;
     	try
     	    {
     	    machine.init(settings);
@@ -97,7 +99,6 @@ public class EnigmaApp extends TabActivity
     	    Log.d(TAG, e.getMessage());
     	    }
     	
-    	fLegalSettings = true;
     	updateEncoding();
         }
 
@@ -106,7 +107,7 @@ public class EnigmaApp extends TabActivity
     	{
         super.onCreate(savedInstanceState);
         
-        TabHost tabHost = getTabHost();
+        tabHost = getTabHost();
         
         toast = Toast.makeText(this, "", toast.LENGTH_LONG);
         
@@ -131,11 +132,13 @@ public class EnigmaApp extends TabActivity
             {
             public void onTabChanged(String tabId)
                 {
-                if (!tabId.equals("settings"))
+                if (tabId.equals("sim") || tabId.equals("encoder"))
                     {
                     updateSettings();
+                    Log.d(TAG, "Tab " + fLegalSettings);
                     if (!fLegalSettings)
                         {
+                        tabHost.setCurrentTabByTag("settings");
                         toast.cancel();
                         toast.setText(sSettingsError);
                         toast.show();
@@ -220,11 +223,7 @@ public class EnigmaApp extends TabActivity
 	    						}
     						
     						aRotors[iMe] = (int) id;
-    						
-    						Log.d(TAG, "Rotors: " + aRotors[0] + ", " + aRotors[1] + ", " + aRotors[2]);
-    						
-    						updateEncoding();
-    						}
+    						    						}
 
     					public void onNothingSelected(AdapterView<?> arg0) {}
             			});
@@ -233,41 +232,20 @@ public class EnigmaApp extends TabActivity
         adapter = ArrayAdapter.createFromResource(this, R.array.alpha, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         
-        class SettingsListener implements OnItemSelectedListener
-            {
-            private EnigmaApp app;
-            
-            public SettingsListener(EnigmaApp app)
-                {
-                this.app = app;
-                }
-            
-            public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3)
-                {
-                app.updateSettings();
-                }
-    
-            public void onNothingSelected(AdapterView<?> arg0) {}
-            }
-        
         for (int i = 0; i < 3; i++)
             {
             aspnRings[i] = (Spinner) findViewById(R.id.spn_rings_1 + i);
             aspnRings[i].setAdapter(adapter);
-            aspnRings[i].setOnItemSelectedListener(new SettingsListener(this));
             }
         
         for (int i = 0; i < 3; i++)
             {
             aspnStart[i] = (Spinner) findViewById(R.id.spn_start_1 + i);
             aspnStart[i].setAdapter(adapter);
-            aspnStart[i].setOnItemSelectedListener(new SettingsListener(this));
             }
         
         plugboard = (EditText) findViewById(R.id.plugboard);
         
         updateSettings();
     	}
-    
-
     }
