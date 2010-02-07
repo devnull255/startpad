@@ -12,12 +12,15 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.ClipboardManager;
 import android.util.Log;
+import android.view.View.OnTouchListener;
 import android.view.inputmethod.InputMethodManager;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.AdapterView;
@@ -30,6 +33,8 @@ import android.widget.TabHost.OnTabChangeListener;
 public class EnigmaApp extends TabActivity
 	{
 	private static final String TAG = "Enigma";
+	
+	ImageView sim;
 	
 	// Machine settings
     Spinner[] aspnRotors = new Spinner[3];
@@ -161,6 +166,29 @@ public class EnigmaApp extends TabActivity
                         toast.show();
                         }
                     }
+                }
+            });
+        
+        // Initialize Simulation View
+        
+        sim = (ImageView) findViewById(R.id.sim);
+        sim.setOnTouchListener(new OnTouchListener()
+            {
+            public boolean onTouch(View view, MotionEvent event)
+                {
+                Log.d(TAG, "Touch!");
+                switch (event.getAction())
+                {
+                case MotionEvent.ACTION_DOWN:
+                    mpDown.seekTo(0);
+                    mpDown.start();
+                    break;
+                case MotionEvent.ACTION_UP:
+                    mpUp.seekTo(0);
+                    mpUp.start();
+                    break;
+                }
+                return true;
                 }
             });
        
