@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.TabHost.OnTabChangeListener;
 
 public class EnigmaApp extends TabActivity
 	{
@@ -41,16 +42,29 @@ public class EnigmaApp extends TabActivity
     boolean fGroup = true;
     EditText edit;
     TextView output;
-    Enigma machine = new Enigma(null);
     Enigma.Settings settings = new Enigma.Settings();
+    Enigma machine = new Enigma(null);
+    Toast toast;
+    boolean fLegalSettings = true;
+    String sSettingsError;
     
     private void updateEncoding()
         {
-        machine.init(null);
-        String code = machine.encode(edit.getText().toString());
+        String code;
+        
+        try
+            {
+            machine.init(null);
+            code = machine.encode(edit.getText().toString());
+            }
+        catch (Exception e)
+            {
+            output.setText("- error -");
+            return;
+            }
+        
         if (fGroup)
             code = Enigma.groupLetters(code);
-        Log.d(TAG, "Code: " + code);
         
         output.setText(code);
         }
@@ -72,8 +86,18 @@ public class EnigmaApp extends TabActivity
     	
     	settings.plugs = plugboard.getText().toString();
     	
-    	machine.init(settings);
+    	try
+    	    {
+    	    machine.init(settings);
+    	    }
+    	catch (Exception e)
+    	    {
+    	    fLegalSettings = false;
+    	    sSettingsError = e.getMessage();
+    	    Log.d(TAG, e.getMessage());
+    	    }
     	
+    	fLegalSettings = true;
     	updateEncoding();
         }
 
@@ -83,6 +107,8 @@ public class EnigmaApp extends TabActivity
         super.onCreate(savedInstanceState);
         
         TabHost tabHost = getTabHost();
+        
+        toast = Toast.makeText(this, "", toast.LENGTH_LONG);
         
         // Setup top-level tabbled layout screen 
         
@@ -100,6 +126,23 @@ public class EnigmaApp extends TabActivity
         tabHost.addTab(tabHost.newTabSpec("info")
                 .setIndicator("Info")
                 .setContent(R.id.enigma_info));
+        
+        tabHost.setOnTabChangedListener(new OnTabChangeListener()
+            {
+            public void onTabChanged(String tabId)
+                {
+                if (!tabId.equals("settings"))
+                    {
+                    updateSettings();
+                    if (!fLegalSettings)
+                        {
+                        toast.cancel();
+                        toast.setText(sSettingsError);
+                        toast.show();
+                        }
+                    }
+                }
+            });
        
         // Initialize Encoder view
         
