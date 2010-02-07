@@ -8,9 +8,11 @@ import android.app.TabActivity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.inputmethod.InputMethodManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,6 +50,8 @@ public class EnigmaApp extends TabActivity
     boolean fLegalSettings = true;
     String sSettingsError;
     TabHost tabHost;
+    InputMethodManager imm;
+    IBinder token;
     
     private void updateEncoding()
         {
@@ -108,6 +112,7 @@ public class EnigmaApp extends TabActivity
         super.onCreate(savedInstanceState);
         
         tabHost = getTabHost();
+        imm = (InputMethodManager) this.getSystemService(INPUT_METHOD_SERVICE);
         
         toast = Toast.makeText(this, "", toast.LENGTH_LONG);
         
@@ -128,10 +133,16 @@ public class EnigmaApp extends TabActivity
                 .setIndicator("Info")
                 .setContent(R.id.enigma_info));
         
+        token = tabHost.getTabContentView().getWindowToken();
+        
         tabHost.setOnTabChangedListener(new OnTabChangeListener()
             {
             public void onTabChanged(String tabId)
                 {
+                // BUG: This is NOT working to hide the virtual keyboard
+                // on all tab changes ... why not?
+                imm.hideSoftInputFromInputMethod(token, InputMethodManager.HIDE_NOT_ALWAYS);
+
                 if (tabId.equals("sim") || tabId.equals("encoder"))
                     {
                     updateSettings();
