@@ -128,7 +128,7 @@ public class Enigma
         this.settings.plugs = this.settings.plugs.replaceAll("[^A-Z]", "");
         if (this.settings.plugs.length() % 2 == 1)
             throw new IllegalArgumentException(
-                    "Plugboard settings must have an even number of characters.");
+                    "Plugboard settings must have an even number of letters.");
 
         for (int i = 0; i < 26; i++)
             this.mapPlugs[i] = i;
@@ -144,7 +144,7 @@ public class Enigma
 
             if (this.mapPlugs[iTo] != iTo)
                 throw new IllegalArgumentException(
-                        "Redifinition of plug setting for " + chFromI(iTo));
+                        "Redefinition of plug setting for " + chFromI(iTo));
 
             this.mapPlugs[iFrom] = iTo;
             this.mapPlugs[iTo] = iFrom;
