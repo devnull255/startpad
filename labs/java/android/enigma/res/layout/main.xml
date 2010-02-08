@@ -7,7 +7,7 @@
        	android:layout_width="fill_parent"
        	android:layout_height="fill_parent"
        	android:scaleType="fitXY"
-       	android:src="@drawable/enigma_panel"/>
+       	android:src="@drawable/enigma"/>
 
     <LinearLayout android:id="@+id/encoder"
         android:layout_width="fill_parent"

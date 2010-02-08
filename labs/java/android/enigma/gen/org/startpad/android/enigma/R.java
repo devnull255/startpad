@@ -16,8 +16,11 @@ public final class R {
     public static final class attr {
     }
     public static final class drawable {
-        public static final int enigma_panel=0x7f020000;
-        public static final int icon=0x7f020001;
+        public static final int cover_open=0x7f020000;
+        public static final int enigma=0x7f020001;
+        public static final int icon=0x7f020002;
+        public static final int letters=0x7f020003;
+        public static final int lid=0x7f020004;
     }
     public static final class id {
         public static final int encoder=0x7f070001;

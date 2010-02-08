@@ -174,18 +174,30 @@ public class EnigmaApp extends TabActivity
         sim = (ImageView) findViewById(R.id.sim);
         sim.setOnTouchListener(new OnTouchListener()
             {
+            boolean fDown = false;
             public boolean onTouch(View view, MotionEvent event)
                 {
-                Log.d(TAG, "Touch!");
                 switch (event.getAction())
                 {
                 case MotionEvent.ACTION_DOWN:
-                    mpDown.seekTo(0);
-                    mpDown.start();
+                    Log.d(TAG, event.toString());
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    if (!fDown && event.getPressure() > 0.25)
+                        {
+                        fDown = true;
+                        mpDown.seekTo(0);
+                        mpDown.start();
+                        Log.d(TAG, "Pressure: " + event.getPressure());
+                        }
                     break;
                 case MotionEvent.ACTION_UP:
-                    mpUp.seekTo(0);
-                    mpUp.start();
+                    if (fDown)
+                        {
+                        fDown = false;            
+                        mpUp.seekTo(0);
+                        mpUp.start();
+                        }
                     break;
                 }
                 return true;
