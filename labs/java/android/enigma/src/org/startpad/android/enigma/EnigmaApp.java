@@ -35,8 +35,10 @@ public class EnigmaApp extends TabActivity
 	{
 	private static final String TAG = "Enigma";
 	
-	ImageView sim;
+	View sim;
 	boolean fLidClosed = true;
+	static int simWidth = 1024;
+	static int simHeight = 1200;
 	
 	// Machine settings
     Spinner[] aspnRotors = new Spinner[3];
@@ -174,7 +176,7 @@ public class EnigmaApp extends TabActivity
         
         // Initialize Simulation View
         
-        sim = (ImageView) findViewById(R.id.sim);
+        sim = (View) findViewById(R.id.sim);
         sim.setOnTouchListener(new OnTouchListener()
             {
             boolean fDown = false;
