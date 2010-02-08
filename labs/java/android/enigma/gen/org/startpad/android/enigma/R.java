@@ -55,5 +55,6 @@ public final class R {
         public static final int ring_prompt=0x7f060003;
         public static final int rotor_prompt=0x7f060002;
         public static final int start_prompt=0x7f060004;
+        public static final int startup_message=0x7f060005;
     }
 }

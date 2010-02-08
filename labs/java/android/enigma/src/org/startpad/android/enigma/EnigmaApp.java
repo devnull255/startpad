@@ -5,6 +5,7 @@ import org.startpad.Enigma;
 import org.startpad.android.enigma.R;
 
 import android.app.TabActivity;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -35,6 +36,7 @@ public class EnigmaApp extends TabActivity
 	private static final String TAG = "Enigma";
 	
 	ImageView sim;
+	boolean fLidClosed = true;
 	
 	// Machine settings
     Spinner[] aspnRotors = new Spinner[3];
@@ -128,7 +130,8 @@ public class EnigmaApp extends TabActivity
         mpUp = MediaPlayer.create(this, R.raw.key_up);
         mpRotor = MediaPlayer.create(this, R.raw.rotor);
         
-        toast = Toast.makeText(this, "", Toast.LENGTH_LONG);
+        toast = Toast.makeText(this, R.string.startup_message, Toast.LENGTH_LONG);
+        toast.show();
         
         // Setup top-level tabbled layout screen 
         
@@ -177,6 +180,12 @@ public class EnigmaApp extends TabActivity
             boolean fDown = false;
             public boolean onTouch(View view, MotionEvent event)
                 {
+                if (fLidClosed)
+                    {
+                    fLidClosed = false;
+                    sim.setBackgroundResource(R.drawable.enigma);
+                    return false;
+                    }
                 switch (event.getAction())
                 {
                 case MotionEvent.ACTION_DOWN:
