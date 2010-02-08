@@ -1,17 +1,30 @@
 Todo:
 
+- Tab names: Enigma, Message, Settings, Info
+- Synch enigma machine state between Sim and Message tabs
+- Message view
+  - add labels
+  - Send button
+  - Reset button
+  - Send SMS
+  - Send email
 - Application icon
 - Tab icons
+- Simulator
+  - Open cover (swipe)
+  - Display rotor settings
+  - Change rotor settings (swipe)
+  - Display depressed key encoding
 X Settings layout
 	- Rotors
 	- Rings
 	- Start
 	- Plugboard
-- Simulator layout
+X Simulator layout
 	- Text output field
 	- Rotor display
 	- Android keyboard in alpha-only mode? Fixed?
-- Port Enigma Encryption Code from JavaScript
+X Port Enigma Encryption Code from JavaScript
 X Handle Key events
 X Lock to portrait orientation
 
