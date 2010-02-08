@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Enigma Simulator</string>
+    <string name="app_name">Pocket Enigma Machine</string>
     <string name="reflector_prompt">Choose a Reflector</string>
     <string name="rotor_prompt">Choose a Rotor</string>
     <string name="ring_prompt">Ring Position</string>
