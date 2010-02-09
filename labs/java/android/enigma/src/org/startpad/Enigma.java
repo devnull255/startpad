@@ -250,10 +250,7 @@ public class Enigma
         for (int i = 0; i < 3; i++)
             s += sSep + this.rotors[i].toString();
 
-        s += " Position: ";
-
-        for (int i = 0; i < 3; i++)
-            s += chFromI(this.position[i]);
+        s += " Position: " + sPosition();
 
         s += " Rings: ";
         for (int i = 0; i < 3; i++)
@@ -269,6 +266,20 @@ public class Enigma
 
         return s;
         }
+    
+    public String sPosition()
+	    {
+    	String s = "";
+        for (int i = 0; i < 3; i++)
+            s += chFromI(position[i]);
+	    return s;
+	    }
+    
+    public char spinRotor(int iRotor, int dSpin)
+	    {
+	    position[iRotor] = (position[iRotor] + dSpin + 26) % 26;
+	    return chFromI(position[iRotor]);
+	    }
 
     private Rotor rotorFromName(String name)
         {
