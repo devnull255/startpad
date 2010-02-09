@@ -131,10 +131,10 @@ public class EnigmaApp extends TabActivity
         LayoutInflater.from(this).inflate(R.layout.main, tabHost.getTabContentView(), true);
 
         tabHost.addTab(tabHost.newTabSpec("sim")
-                .setIndicator("Simulation")
+                .setIndicator("Enigma")
                 .setContent(R.id.sim));
         tabHost.addTab(tabHost.newTabSpec("encoder")
-                .setIndicator("Encoder")
+                .setIndicator("Message")
                 .setContent(R.id.encoder));
         tabHost.addTab(tabHost.newTabSpec("settings")
                 .setIndicator("Settings")
