@@ -5,6 +5,7 @@ import org.startpad.Enigma;
 import org.startpad.android.enigma.R;
 
 import android.app.TabActivity;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -30,6 +31,8 @@ import android.widget.TabHost.OnTabChangeListener;
 public class EnigmaApp extends TabActivity
 	{
 	private static final String TAG = "Enigma";
+	
+	EnigmaView sim;
 	
 	// Machine settings
     Spinner[] aspnRotors = new Spinner[3];
@@ -119,6 +122,8 @@ public class EnigmaApp extends TabActivity
         imm = (InputMethodManager) this.getSystemService(INPUT_METHOD_SERVICE);
         cbm = (ClipboardManager) this.getSystemService(CLIPBOARD_SERVICE);
         
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        
         mpDown = MediaPlayer.create(this, R.raw.key_down);
         mpUp = MediaPlayer.create(this, R.raw.key_up);
         mpRotor = MediaPlayer.create(this, R.raw.rotor);
@@ -164,6 +169,9 @@ public class EnigmaApp extends TabActivity
                     }
                 }
             });
+        
+        sim = (EnigmaView) findViewById(R.id.sim);
+        sim.setMachine(machine);
         
         // Initialize Encoder view
         
