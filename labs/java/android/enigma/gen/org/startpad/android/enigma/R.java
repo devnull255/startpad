@@ -16,16 +16,20 @@ public final class R {
     public static final class attr {
     }
     public static final class dimen {
+        public static final int d_key=0x7f06000b;
+        public static final int dx_key=0x7f06000d;
         public static final int dx_letters=0x7f060009;
         public static final int dx_rotor=0x7f060004;
         public static final int dy_letters=0x7f060007;
         public static final int dy_rotor=0x7f060005;
+        public static final int dy_row=0x7f06000c;
         public static final int x_center_rotor=0x7f060002;
         public static final int x_left_rotor=0x7f060001;
         public static final int x_letters=0x7f060008;
         public static final int x_right_rotor=0x7f060003;
         public static final int y_letters=0x7f060006;
         public static final int y_rotors=0x7f060000;
+        public static final int y_row_1=0x7f06000a;
     }
     public static final class drawable {
         public static final int cover_open=0x7f020000;

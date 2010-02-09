@@ -37,7 +37,6 @@ public class EnigmaView extends View {
 	
 	boolean fLidClosed = true;
 	
-	
 	protected void onMeasure(int xSpec, int ySpec)
 		{
 		super.onMeasure(xSpec, ySpec);
@@ -67,7 +66,7 @@ public class EnigmaView extends View {
 			rcRotors[i] = new Rect(axRotors[i]-dxRotor/2, yRotor-dyRotor/2,
 								   axRotors[i]+dxRotor/2, yRotor+dyRotor/2);
 			Log.d(TAG, "Rotor: " + rcRotors[i].toString());
-			rcRotors[i].inset(3, 3);
+			rcRotors[i].inset((int) (xScale*7), (int) (yScale*20));
 			}
 		
 		int yLetters = (int) (res.getDimension(R.dimen.y_letters) * yScale);
