@@ -7,7 +7,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 
-
 public class EnigmaView extends View {
 	Context context;
 	
@@ -70,19 +69,11 @@ public class EnigmaView extends View {
 	            switch (event.getAction())
 	            {
 	            case MotionEvent.ACTION_DOWN:
-	                Log.d(TAG, event.toString());
-	                break;
-	            case MotionEvent.ACTION_MOVE:
-	            	Log.d(TAG, "Pressure: " + event.getPressure());
-	            	// BUG: Pressue across devices can vary - 0.25 good for
-	            	// NexusOne, 0.10 for Droid - may not be safe across all
-	            	// devices.
-	                if (!fDown && event.getPressure() > 0.10)
+	                if (!fDown)
 	                    {
 	                    fDown = true;
 	                    mpDown.seekTo(0);
 	                    mpDown.start();
-	                    Log.d(TAG, "Pressure: " + event.getPressure());
 	                    }
 	                break;
 	            case MotionEvent.ACTION_UP:
