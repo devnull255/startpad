@@ -5,7 +5,6 @@ import org.startpad.Enigma;
 import org.startpad.android.enigma.R;
 
 import android.app.TabActivity;
-import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -13,15 +12,12 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.ClipboardManager;
 import android.util.Log;
-import android.view.View.OnTouchListener;
 import android.view.inputmethod.InputMethodManager;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.AdapterView;
@@ -34,11 +30,6 @@ import android.widget.TabHost.OnTabChangeListener;
 public class EnigmaApp extends TabActivity
 	{
 	private static final String TAG = "Enigma";
-	
-	View sim;
-	boolean fLidClosed = true;
-	static int simWidth = 1024;
-	static int simHeight = 1200;
 	
 	// Machine settings
     Spinner[] aspnRotors = new Spinner[3];
@@ -174,47 +165,6 @@ public class EnigmaApp extends TabActivity
                 }
             });
         
-        // Initialize Simulation View
-        
-        sim = (View) findViewById(R.id.sim);
-        sim.setOnTouchListener(new OnTouchListener()
-            {
-            boolean fDown = false;
-            public boolean onTouch(View view, MotionEvent event)
-                {
-                if (fLidClosed)
-                    {
-                    fLidClosed = false;
-                    sim.setBackgroundResource(R.drawable.enigma);
-                    return false;
-                    }
-                switch (event.getAction())
-                {
-                case MotionEvent.ACTION_DOWN:
-                    Log.d(TAG, event.toString());
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    if (!fDown && event.getPressure() > 0.25)
-                        {
-                        fDown = true;
-                        mpDown.seekTo(0);
-                        mpDown.start();
-                        Log.d(TAG, "Pressure: " + event.getPressure());
-                        }
-                    break;
-                case MotionEvent.ACTION_UP:
-                    if (fDown)
-                        {
-                        fDown = false;            
-                        mpUp.seekTo(0);
-                        mpUp.start();
-                        }
-                    break;
-                }
-                return true;
-                }
-            });
-       
         // Initialize Encoder view
         
         output = (TextView) findViewById(R.id.output);

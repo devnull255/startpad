@@ -1,24 +1,101 @@
 package org.startpad.android.enigma;
 import android.content.Context;
+import android.media.MediaPlayer;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 
 
 public class EnigmaView extends View {
+	Context context;
+	
+	private static final String TAG = "EnigmaView";
+	static int simWidth = 1024;
+	static int simHeight = 1200;
+	
+    MediaPlayer mpDown;
+    MediaPlayer mpUp;
+    MediaPlayer mpRotor;
+	
+	boolean fLidClosed = true;
+	
+	int viewWidth;
+	int viewHeight;
+	
+	protected void onMeasure(int xSpec, int ySpec)
+		{
+		super.onMeasure(xSpec, ySpec);
+		viewWidth = getMeasuredWidth();
+		viewHeight = getMeasuredHeight();
+		Log.d(TAG, viewWidth + ", " + viewHeight);
+		}
 
 	public EnigmaView(Context context) {
 		super(context);
-		// TODO Auto-generated constructor stub
+		init(context);
 	}
 
 	public EnigmaView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		// TODO Auto-generated constructor stub
+		init(context);
 	}
 
 	public EnigmaView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		// TODO Auto-generated constructor stub
+		init(context);
 	}
-
+	
+    // Initialize Simulation View
+    private void init(Context context)
+	    {
+    	this.context = context;
+    	
+        mpDown = MediaPlayer.create(context, R.raw.key_down);
+        mpUp = MediaPlayer.create(context, R.raw.key_up);
+        mpRotor = MediaPlayer.create(context, R.raw.rotor);
+    	
+	    setOnTouchListener(new OnTouchListener()
+	        {
+	        boolean fDown = false;
+	        public boolean onTouch(View view, MotionEvent event)
+	            {
+	            if (fLidClosed)
+	                {
+	                fLidClosed = false;
+	                setBackgroundResource(R.drawable.enigma);
+	                return false;
+	                }
+	            switch (event.getAction())
+	            {
+	            case MotionEvent.ACTION_DOWN:
+	                Log.d(TAG, event.toString());
+	                break;
+	            case MotionEvent.ACTION_MOVE:
+	            	Log.d(TAG, "Pressure: " + event.getPressure());
+	            	// BUG: Pressue across devices can vary - 0.25 good for
+	            	// NexusOne, 0.10 for Droid - may not be safe across all
+	            	// devices.
+	                if (!fDown && event.getPressure() > 0.10)
+	                    {
+	                    fDown = true;
+	                    mpDown.seekTo(0);
+	                    mpDown.start();
+	                    Log.d(TAG, "Pressure: " + event.getPressure());
+	                    }
+	                break;
+	            case MotionEvent.ACTION_UP:
+	                if (fDown)
+	                    {
+	                    fDown = false;            
+	                    mpUp.seekTo(0);
+	                    mpUp.start();
+	                    }
+	                break;
+	            }
+	            return true;
+	            }
+	        });
+	    }
 }
