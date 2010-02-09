@@ -1,30 +1,31 @@
 package org.startpad.android.enigma;
+
+import org.startpad.Enigma;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.media.MediaPlayer;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 
 public class EnigmaView extends View {
 	Context context;
 	Resources res;
+	Enigma machine;
 	
 	private static final String TAG = "EnigmaView";
 	static int simWidth = 1024;
 	static int simHeight = 1200;
 	int viewWidth;
 	int viewHeight;
-	float dxRotor;
-	float dyRotor;
 	
-	private float[] axRotors = new float[3];
-	private float yRotor;
+	private Rect[] rcRotors = new Rect[3];
 	
     MediaPlayer mpDown;
     MediaPlayer mpUp;
@@ -38,14 +39,26 @@ public class EnigmaView extends View {
 		super.onMeasure(xSpec, ySpec);
 		viewWidth = getMeasuredWidth();
 		viewHeight = getMeasuredHeight();
+		int yRotor;
+		int[] axRotors = new int[3];
+		int dxRotor;
+		int dyRotor;
 		
-		yRotor = res.getDimension(R.dimen.y_rotors)/simHeight*viewHeight;
-		axRotors[0] = res.getDimension(R.dimen.x_left_rotor)/simWidth*viewWidth;
-		axRotors[1] = res.getDimension(R.dimen.x_center_rotor)/simWidth*viewWidth;
-		axRotors[2] = res.getDimension(R.dimen.x_right_rotor)/simWidth*viewWidth;
+		yRotor = (int) (res.getDimension(R.dimen.y_rotors)/simHeight*viewHeight);
+		axRotors[0] = (int) (res.getDimension(R.dimen.x_left_rotor)/simWidth*viewWidth);
+		axRotors[1] = (int) (res.getDimension(R.dimen.x_center_rotor)/simWidth*viewWidth);
+		axRotors[2] = (int) (res.getDimension(R.dimen.x_right_rotor)/simWidth*viewWidth);
 		
-		dxRotor = res.getDimension(R.dimen.dx_rotor)/simWidth*viewWidth;
-		dyRotor = res.getDimension(R.dimen.dy_rotor)/simHeight*viewHeight;
+		dxRotor = (int) (res.getDimension(R.dimen.dx_rotor)/simWidth*viewWidth);
+		dyRotor = (int) (res.getDimension(R.dimen.dy_rotor)/simHeight*viewHeight);
+		
+		for (int i = 0; i < 3; i++)
+			{
+			rcRotors[i] = new Rect(axRotors[i]-dxRotor/2, yRotor-dyRotor/2,
+								   axRotors[i]+dxRotor/2, yRotor+dyRotor/2);
+			Log.d(TAG, "Rotor: " + rcRotors[i].toString());
+			rcRotors[i].inset(3, 3);
+			}
 		
 		Log.d(TAG, "Y: " + yRotor);
 		
@@ -63,12 +76,12 @@ public class EnigmaView extends View {
 		Paint paint = new Paint();
 		paint.setTextAlign(Paint.Align.CENTER);
 		paint.setColor(Color.BLACK);
-		paint.setTextSize((float) (dyRotor*0.7));
+		paint.setTextSize(rcRotors[0].height());
 		paint.setAntiAlias(true);
 		
 		for (int i = 0; i < 3; i++)
 			{
-			canvas.drawText("W", axRotors[i], (float) (yRotor+dyRotor*0.7/2), paint);
+			canvas.drawText("W", rcRotors[i].centerX(), rcRotors[i].bottom, paint);
 			}
 		}
 
@@ -86,6 +99,11 @@ public class EnigmaView extends View {
 		super(context, attrs, defStyle);
 		init(context);
 	}
+	
+	public void setMachine(Enigma machine)
+		{
+		this.machine = machine;	
+		}
 	
     // Initialize Simulation View
     private void init(Context context)
