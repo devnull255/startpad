@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="y_rotors">300px</dimen>
+    
+    <dimen name="x_left_rotor">310px</dimen>
+    <dimen name="x_center_rotor">410px</dimen>
+    <dimen name="x_right_rotor">510px</dimen>
+    
+    <dimen name="dx_rotor">60px</dimen>
+    <dimen name="dy_rotor">88px</dimen>
+    
+    <dimen name="y_letters">520px</dimen>
+    <dimen name="dy_letters">199px</dimen>
+    <dimen name="x_letters">128px</dimen>
+    <dimen name="dx_letters">785px</dimen>
+    
+    <dimen name="y_row_1">785px</dimen>
+    <dimen name="d_key">67px</dimen>
+    <dimen name="dy_row">102px</dimen>
+    <dimen name="dx_key">105px</dimen>
+</resources>

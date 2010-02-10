@@ -1,0 +1,34 @@
+Features:
+
+X Factor javascipt out of .htm file
+  - Evolution.js
+  - Mesh.js
+  - GraphZones.js
+  - Stats.js
+- Sparkline colors - use Windows task manager graph (green on black)
+- Sparkline intermittent error - line 168.
+- Make work in IE
+- Adjust static display cache - only turn on when % of static organisms is over 20%
+- Flush triangles of the mesh that were skipped, periodically (so over time, the background
+  gradient is more up to date in the stale areas).
+- Build sensing of other organisms in a cone to the front of the creature (keep sense area
+  constant - evolve distance vs. spread ratio).
+
+Admin:
+- Unit test for mesh.js
+- Unit test for GraphZones.js
+- Unit test for Status.js
+- Unit test for Organism
+- Unit test for Evo
+
+Bugs:
+X Fix sparkline asserts at end of 800 generations
+- Allow sparkline to have data gaps - display as holes
+- Dead organisms not getting cleared from static display
+- clicking anywhere on the screen pauses the game (button doesnt matter)
+- Some orgs still have energy > maxenergy
+-Some orgs are being born with negative birth energy
+-Phantom orgs being drawn on the static org canvas (maybe clear and redrawn a random chunks every turn?)
+- Eat amount is getting ridiculous... could be causing weirdness
+- Might also be good to fix it to have some energy on the edges of the field (right now its a border of emptiness) 
+  because I think it might kill off many of the organisms that are trying to move around (prefers stopped orgs)

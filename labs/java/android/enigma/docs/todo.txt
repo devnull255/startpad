@@ -1,0 +1,55 @@
+Dev Lab Questions
+
+- Access to audio (record and playback) during a phone call (in channel)
+- Executing an Activity every 15 minutes (background)
+- Intercepting SMS
+i IRC office hours?
+- AdSense for Mobile Applications - client SDK for banners
+i JDK 1.6 - Java Properties
+- ForceClose - best way to see call stack after the fact?
+
+Todo:
+
+- Tab names: Enigma, Message, Settings, Info
+- Synch enigma machine state between Sim and Message tabs
+- Message view
+  - add labels
+  - Send button
+  - Reset button
+  - Send SMS
+  - Send email
+- Application icon
+- Tab icons
+- Simulator
+  - Open cover (swipe)
+  - Display rotor settings
+  - Change rotor settings (swipe)
+  - Display depressed key encoding
+- How to enable adjusting of media volume (not ringer volume)
+  when runing.
+X Settings layout
+	- Rotors
+	- Rings
+	- Start
+	- Plugboard
+X Simulator layout
+	- Text output field
+	- Rotor display
+	- Android keyboard in alpha-only mode? Fixed?
+X Port Enigma Encryption Code from JavaScript
+X Handle Key events
+X Lock to portrait orientation
+
+Later ToDo:
+
+- Enigma panel image
+- Light up lights for output
+- Plugboard settings graphically
+- SMS message (link to app?)
+
+Android questions:
+
+- Can I put TabHost in main.xml directly, instead of creating it on the fly as
+  was done in ApiDemos?
+- Why isn't the Layout Editor working in eclipse?
+
