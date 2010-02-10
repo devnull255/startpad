@@ -9,14 +9,13 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.media.MediaPlayer;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 public class EnigmaView extends View {
-	Context context;
+	EnigmaApp enigmaApp;
 	Resources res;
 	Enigma machine;
 	Drawable letters;
@@ -30,10 +29,6 @@ public class EnigmaView extends View {
 	private Rect[] rcRotors = new Rect[3];
 	private Rect[] rcSpinners = new Rect[3];
 	private Rect rcLetters;
-	
-    MediaPlayer mpDown;
-    MediaPlayer mpUp;
-    MediaPlayer mpRotor;
 	
 	boolean fLidClosed = true;
 	
@@ -123,13 +118,9 @@ public class EnigmaView extends View {
     // Initialize Simulation View
     private void init(Context context)
 	    {
-    	this.context = context;
+    	this.enigmaApp = (EnigmaApp) context;
     	this.res = context.getResources();
     	this.letters = this.res.getDrawable(R.drawable.letters);
-    	
-        mpDown = MediaPlayer.create(context, R.raw.key_down);
-        mpUp = MediaPlayer.create(context, R.raw.key_up);
-        mpRotor = MediaPlayer.create(context, R.raw.rotor);
     	
 	    setOnTouchListener(new OnTouchListener()
 	        {
@@ -150,8 +141,7 @@ public class EnigmaView extends View {
 	                if (!fDown)
 	                    {
 	                    fDown = true;
-	                    mpDown.seekTo(0);
-	                    mpDown.start();
+	                    enigmaApp.playSound(EnigmaApp.SoundEffect.KEY_DOWN);
 	                    
 	                    machine.spinRotor(2, 1);
 	                    invalidate(rcRotors[2]);
@@ -160,9 +150,8 @@ public class EnigmaView extends View {
 	            case MotionEvent.ACTION_UP:
 	                if (fDown)
 	                    {
-	                    fDown = false;            
-	                    mpUp.seekTo(0);
-	                    mpUp.start();
+	                    fDown = false;
+	                    enigmaApp.playSound(EnigmaApp.SoundEffect.KEY_UP);
 	                    }
 	                break;
 	            }
