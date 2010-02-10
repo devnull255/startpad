@@ -33,6 +33,10 @@ public class EnigmaApp extends TabActivity
 	private static final String TAG = "Enigma";
 	
 	boolean fHasMedia = false;
+	enum SoundEffect { KEY_DOWN, KEY_UP, ROTOR };
+    MediaPlayer mpDown;
+    MediaPlayer mpUp;
+    MediaPlayer mpRotor;
 	
 	EnigmaView sim;
 	
@@ -56,9 +60,6 @@ public class EnigmaApp extends TabActivity
     InputMethodManager imm;
     IBinder token;
     ClipboardManager cbm;
-    MediaPlayer mpDown;
-    MediaPlayer mpUp;
-    MediaPlayer mpRotor;
     
     private void updateEncoding()
         {
@@ -199,9 +200,7 @@ public class EnigmaApp extends TabActivity
 			public void afterTextChanged(Editable arg0)
 				{
 				updateEncoding();
-				
-		        mpDown.seekTo(0);
-		        mpDown.start();
+				playSound(SoundEffect.KEY_DOWN);
 				}
 
 			public void beforeTextChanged(CharSequence s, int start, int count,	int after) {}
@@ -252,9 +251,7 @@ public class EnigmaApp extends TabActivity
 	    						}
     						
     						aRotors[iMe] = (int) id;
-    						
-    						mpRotor.seekTo(0);
-    						mpRotor.start();
+    						playSound(SoundEffect.ROTOR);
     						}
 
     					public void onNothingSelected(AdapterView<?> arg0) {}
@@ -268,8 +265,7 @@ public class EnigmaApp extends TabActivity
             {
             public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3)
                 {
-                mpRotor.seekTo(0);
-                mpRotor.start();
+                playSound(SoundEffect.ROTOR);
                 }
     
             public void onNothingSelected(AdapterView<?> arg0) {}
@@ -308,7 +304,9 @@ public class EnigmaApp extends TabActivity
                 mpUp = MediaPlayer.create(this, R.raw.key_up);
                 mpRotor = MediaPlayer.create(this, R.raw.rotor);
                 
-                Log.d(TAG, "Media: " + (mpRotor != null ? mpRotor.toString() : "null"));
+                Log.d(TAG, "Down: " + (mpDown != null ? mpDown.toString() : "null"));
+                Log.d(TAG, "Up: " + (mpUp != null ? mpUp.toString() : "null"));
+                Log.d(TAG, "Rotor: " + (mpRotor != null ? mpRotor.toString() : "null"));
                 fHasMedia = true;
                 }
             }
@@ -319,10 +317,51 @@ public class EnigmaApp extends TabActivity
             super.onStop();
             Log.d(TAG, "onStop");
             
-            mpRotor.release();
-            mpUp.release();
-            mpDown.release();
+            if (mpRotor != null)
+                {
+                mpRotor.release();
+                mpRotor = null;
+                }
+            
+            if (mpUp != null)
+                {
+                mpUp.release();
+                mpUp = null;
+                }
+            
+            if (mpDown != null)
+                {
+                mpDown.release();
+                mpDown = null;
+                }
             
             fHasMedia = false;
+            }
+        
+        void playSound(SoundEffect snd)
+            {
+            MediaPlayer mp = null;
+            
+            switch (snd)
+            {
+            case KEY_DOWN:
+                mp = mpDown;
+                break;
+            case KEY_UP:
+                mp = mpUp;
+                break;
+            case ROTOR:
+                mp = mpRotor;
+                break;
+            }
+            
+            if (mp != null)
+                {
+                Log.d(TAG, "Playing: " + mp.toString());
+                mp.seekTo(0);
+                mp.start();
+                }
+            else
+                Log.e(TAG, "Sound resource not available!");
             }
     }
