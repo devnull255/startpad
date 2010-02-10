@@ -15,7 +15,6 @@ import android.view.MotionEvent;
 import android.view.View;
 
 public class EnigmaView extends View {
-	EnigmaApp enigmaApp;
 	Resources res;
 	Enigma machine;
 	Drawable letters;
@@ -118,7 +117,6 @@ public class EnigmaView extends View {
     // Initialize Simulation View
     private void init(Context context)
 	    {
-    	this.enigmaApp = (EnigmaApp) context;
     	this.res = context.getResources();
     	this.letters = this.res.getDrawable(R.drawable.letters);
     	
@@ -141,7 +139,7 @@ public class EnigmaView extends View {
 	                if (!fDown)
 	                    {
 	                    fDown = true;
-	                    enigmaApp.playSound(EnigmaApp.SoundEffect.KEY_DOWN);
+	                    EnigmaApp.SoundEffect.KEY_DOWN.play();
 	                    
 	                    machine.spinRotor(2, 1);
 	                    invalidate(rcRotors[2]);
@@ -151,7 +149,7 @@ public class EnigmaView extends View {
 	                if (fDown)
 	                    {
 	                    fDown = false;
-	                    enigmaApp.playSound(EnigmaApp.SoundEffect.KEY_UP);
+	                    EnigmaApp.SoundEffect.KEY_UP.play();
 	                    }
 	                break;
 	            }

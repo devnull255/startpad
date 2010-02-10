@@ -5,6 +5,7 @@ import org.startpad.Enigma;
 import org.startpad.android.enigma.R;
 
 import android.app.TabActivity;
+import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -31,12 +32,57 @@ import android.widget.TabHost.OnTabChangeListener;
 public class EnigmaApp extends TabActivity
 	{
 	private static final String TAG = "Enigma";
+	private static Context context = null;
 	
 	boolean fHasMedia = false;
-	enum SoundEffect { KEY_DOWN, KEY_UP, ROTOR };
-    MediaPlayer mpDown;
-    MediaPlayer mpUp;
-    MediaPlayer mpRotor;
+	enum SoundEffect
+	    {
+	    KEY_DOWN(R.raw.key_down),
+	    KEY_UP(R.raw.key_up),
+	    ROTOR(R.raw.rotor);
+	    
+	    public int rid;
+	    private MediaPlayer mp = null;
+	    
+	    SoundEffect(int rid)
+	        {
+	        this.rid = rid;
+	        }
+	    
+	    public void play()
+	        {
+	        if (this.mp != null)
+	            {
+	            Log.d(TAG, "Playing: " + mp.toString());
+	            this.mp.seekTo(0);
+	            this.mp.start();
+	            }
+	        else
+	            {
+	            Log.d(TAG, "Media not loaded: " + this.toString());
+	            }
+	        }
+	    
+	    public void load()
+	        {
+	        if (this.mp != null)
+	            return;
+	        
+	        Log.d(TAG, "Context:" + context);
+	        
+	        this.mp = MediaPlayer.create(context, this.rid);
+	        Log.d(TAG, this.toString() + ": " + (mp != null ? mp.toString() : "null"));
+	        }
+	    
+	    public void unload()
+	        {
+	        if (this.mp != null)
+	            {
+	            this.mp.release();
+	            this.mp = null;
+	            }
+	        }
+        }
 	
 	EnigmaView sim;
 	
@@ -121,7 +167,9 @@ public class EnigmaApp extends TabActivity
     	{
         super.onCreate(savedInstanceState);
         
-        Log.d(TAG, "onCreate");
+        EnigmaApp.context = this;
+        
+        Log.d(TAG, "onCreate: " + context);
         
         tabHost = getTabHost();
         imm = (InputMethodManager) this.getSystemService(INPUT_METHOD_SERVICE);
@@ -200,7 +248,7 @@ public class EnigmaApp extends TabActivity
 			public void afterTextChanged(Editable arg0)
 				{
 				updateEncoding();
-				playSound(SoundEffect.KEY_DOWN);
+				SoundEffect.KEY_DOWN.play();
 				}
 
 			public void beforeTextChanged(CharSequence s, int start, int count,	int after) {}
@@ -251,7 +299,7 @@ public class EnigmaApp extends TabActivity
 	    						}
     						
     						aRotors[iMe] = (int) id;
-    						playSound(SoundEffect.ROTOR);
+    						SoundEffect.ROTOR.play();
     						}
 
     					public void onNothingSelected(AdapterView<?> arg0) {}
@@ -265,7 +313,7 @@ public class EnigmaApp extends TabActivity
             {
             public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3)
                 {
-                playSound(SoundEffect.ROTOR);
+                SoundEffect.ROTOR.play();
                 }
     
             public void onNothingSelected(AdapterView<?> arg0) {}
@@ -300,13 +348,8 @@ public class EnigmaApp extends TabActivity
             
             if (!fHasMedia)
                 {
-                mpDown = MediaPlayer.create(this, R.raw.key_down);
-                mpUp = MediaPlayer.create(this, R.raw.key_up);
-                mpRotor = MediaPlayer.create(this, R.raw.rotor);
-                
-                Log.d(TAG, "Down: " + (mpDown != null ? mpDown.toString() : "null"));
-                Log.d(TAG, "Up: " + (mpUp != null ? mpUp.toString() : "null"));
-                Log.d(TAG, "Rotor: " + (mpRotor != null ? mpRotor.toString() : "null"));
+                for (SoundEffect snd : SoundEffect.values())
+                    snd.load();
                 fHasMedia = true;
                 }
             }
@@ -317,51 +360,9 @@ public class EnigmaApp extends TabActivity
             super.onStop();
             Log.d(TAG, "onStop");
             
-            if (mpRotor != null)
-                {
-                mpRotor.release();
-                mpRotor = null;
-                }
-            
-            if (mpUp != null)
-                {
-                mpUp.release();
-                mpUp = null;
-                }
-            
-            if (mpDown != null)
-                {
-                mpDown.release();
-                mpDown = null;
-                }
-            
+            for (SoundEffect snd : SoundEffect.values())
+                snd.unload();
             fHasMedia = false;
             }
-        
-        void playSound(SoundEffect snd)
-            {
-            MediaPlayer mp = null;
-            
-            switch (snd)
-            {
-            case KEY_DOWN:
-                mp = mpDown;
-                break;
-            case KEY_UP:
-                mp = mpUp;
-                break;
-            case ROTOR:
-                mp = mpRotor;
-                break;
-            }
-            
-            if (mp != null)
-                {
-                Log.d(TAG, "Playing: " + mp.toString());
-                mp.seekTo(0);
-                mp.start();
-                }
-            else
-                Log.e(TAG, "Sound resource not available!");
-            }
+
     }
