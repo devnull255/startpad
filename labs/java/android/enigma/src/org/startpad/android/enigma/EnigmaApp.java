@@ -32,6 +32,8 @@ public class EnigmaApp extends TabActivity
 	{
 	private static final String TAG = "Enigma";
 	
+	boolean fHasMedia = false;
+	
 	EnigmaView sim;
 	
 	// Machine settings
@@ -118,15 +120,13 @@ public class EnigmaApp extends TabActivity
     	{
         super.onCreate(savedInstanceState);
         
+        Log.d(TAG, "onCreate");
+        
         tabHost = getTabHost();
         imm = (InputMethodManager) this.getSystemService(INPUT_METHOD_SERVICE);
         cbm = (ClipboardManager) this.getSystemService(CLIPBOARD_SERVICE);
         
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
-        
-        mpDown = MediaPlayer.create(this, R.raw.key_down);
-        mpUp = MediaPlayer.create(this, R.raw.key_up);
-        mpRotor = MediaPlayer.create(this, R.raw.rotor);
         
         toast = Toast.makeText(this, R.string.startup_message, Toast.LENGTH_LONG);
         toast.show();
@@ -148,13 +148,16 @@ public class EnigmaApp extends TabActivity
                 .setIndicator("Info")
                 .setContent(R.id.enigma_info));
         
+
+        // token = edit.getApplicationWindowToken();
+        
         tabHost.setOnTabChangedListener(new OnTabChangeListener()
             {
             public void onTabChanged(String tabId)
                 {
                 // BUG: This is NOT working to hide the virtual keyboard
                 // on all tab changes ... why not?
-                imm.hideSoftInputFromInputMethod(token, InputMethodManager.HIDE_NOT_ALWAYS);
+                // imm.hideSoftInputFromInputMethod(token, InputMethodManager.HIDE_NOT_ALWAYS);
                 
                 if (tabId.equals("sim") || tabId.equals("encoder"))
                     {
@@ -177,9 +180,6 @@ public class EnigmaApp extends TabActivity
         
         output = (TextView) findViewById(R.id.output);
         edit = (EditText) findViewById(R.id.input);
-        
-        token = edit.getApplicationWindowToken();
-        Log.d(TAG, "Token: " + (token != null ? token.toString() : "null"));
         
         toggleGroup = (ToggleButton) findViewById(R.id.group_text);
         toggleGroup.setOnClickListener(
@@ -295,4 +295,34 @@ public class EnigmaApp extends TabActivity
         
         updateSettings();
     	}
+    
+        @Override
+        protected void onStart()
+            {
+            super.onStart();
+            Log.d(TAG, "onStart");
+            
+            if (!fHasMedia)
+                {
+                mpDown = MediaPlayer.create(this, R.raw.key_down);
+                mpUp = MediaPlayer.create(this, R.raw.key_up);
+                mpRotor = MediaPlayer.create(this, R.raw.rotor);
+                
+                Log.d(TAG, "Media: " + (mpRotor != null ? mpRotor.toString() : "null"));
+                fHasMedia = true;
+                }
+            }
+    
+        @Override
+        protected void onStop()
+            {
+            super.onStop();
+            Log.d(TAG, "onStop");
+            
+            mpRotor.release();
+            mpUp.release();
+            mpDown.release();
+            
+            fHasMedia = false;
+            }
     }
