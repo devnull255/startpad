@@ -6,14 +6,15 @@ Dev Lab Questions
 i IRC office hours?
 - AdSense for Mobile Applications - client SDK for banners
 i JDK 1.6 - Java Properties
-- ForceClose - best way to see call stack after the fact?
+X ForceClose - best way to see call stack after the fact?
+
 
 Todo:
 
-- Tab names: Enigma, Message, Settings, Info
 - Synch enigma machine state between Sim and Message tabs
 - Message view
-  - add labels
+  - append to Input from main sim
+  - add labels: Input, Output
   - Send button
   - Reset button
   - Send SMS
@@ -21,12 +22,15 @@ Todo:
 - Application icon
 - Tab icons
 - Simulator
-  - Open cover (swipe)
-  - Display rotor settings
-  - Change rotor settings (swipe)
-  - Display depressed key encoding
-- How to enable adjusting of media volume (not ringer volume)
-  when runing.
+  - Change lid opening to swipe effect
+  1 Open internal cover to reveal insides (touch either cover screw)
+  X Display rotor settings
+  3 Change rotor settings (swipe)
+  X Display depressed key encoding
+  2 min display letter - 1 second
+X Tab names: Enigma, Message, Settings, Info
+X How to enable adjusting of media volume (not ringer volume)
+  when running.
 X Settings layout
 	- Rotors
 	- Rings

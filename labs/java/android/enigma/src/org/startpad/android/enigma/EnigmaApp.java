@@ -200,15 +200,9 @@ public class EnigmaApp extends TabActivity
             {
             public void onTabChanged(String tabId)
                 {
-                // BUG: This is NOT working to hide the virtual keyboard
-                // on all tab changes ... why not?
-                // imm.hideSoftInputFromInputMethod(token, InputMethodManager.HIDE_NOT_ALWAYS);
-                
-                if (tabId.equals("sim") || tabId.equals("info"))
-                    {
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(tabHost.getApplicationWindowToken(), 0);
-                    }
+                // Hide the soft keyboard on ALL tab switches.
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(tabHost.getApplicationWindowToken(), 0);
                 
                 if (tabId.equals("sim") || tabId.equals("encoder"))
                     {

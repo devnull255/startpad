@@ -5,3 +5,6 @@ syntax: glob
 .svn/*
 eclipse-workspaces/*
 bin/*
+.classpath
+.settings/*
+.project

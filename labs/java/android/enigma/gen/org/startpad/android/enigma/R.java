@@ -22,12 +22,14 @@ public final class R {
         public static final int dx_right_key=0x7f06000e;
         public static final int dx_right_light=0x7f060015;
         public static final int dx_rotor=0x7f060004;
+        public static final int dx_screw=0x7f06001b;
         public static final int dx_up_key=0x7f06000f;
         public static final int dx_up_light=0x7f060016;
         public static final int dy_key=0x7f06000d;
         public static final int dy_letters=0x7f060007;
         public static final int dy_light=0x7f060014;
         public static final int dy_rotor=0x7f060005;
+        public static final int dy_screw=0x7f06001c;
         public static final int dy_up_key=0x7f060010;
         public static final int dy_up_light=0x7f060017;
         /**  Keyboard layout positioning 
@@ -38,8 +40,10 @@ public final class R {
         public static final int x_P_light=0x7f060011;
         public static final int x_center_rotor=0x7f060002;
         public static final int x_left_rotor=0x7f060001;
+        public static final int x_left_screw=0x7f060019;
         public static final int x_letters=0x7f060008;
         public static final int x_right_rotor=0x7f060003;
+        public static final int x_right_screw=0x7f06001a;
         public static final int y_P_key=0x7f06000b;
         public static final int y_P_light=0x7f060012;
         /**   Lights overlay position 
@@ -48,6 +52,9 @@ public final class R {
         /**  Rotor window positioning 
          */
         public static final int y_rotors=0x7f060000;
+        /**  Cover screw locations 
+         */
+        public static final int y_screw=0x7f060018;
     }
     public static final class drawable {
         public static final int cover_open=0x7f020000;

@@ -33,4 +33,11 @@
    	<dimen name="dx_right_light">92px</dimen>
    	<dimen name="dx_up_light">-33px</dimen>
    	<dimen name="dy_up_light">-82px</dimen>
+   	
+   	<!-- Cover screw locations -->
+  	<dimen name="y_screw">679px</dimen>
+   	<dimen name="x_left_screw">26px</dimen>
+   	<dimen name="x_right_screw">954px</dimen>
+   	<dimen name="dx_screw">47px</dimen>
+   	<dimen name="dy_screw">47px</dimen>
 </resources>
