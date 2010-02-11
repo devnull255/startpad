@@ -1,6 +1,7 @@
 package org.startpad.android.enigma;
 
 import org.startpad.Enigma;
+import org.startpad.android.enigma.EnigmaApp.SoundEffect;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -17,16 +18,20 @@ import android.view.View;
 import android.widget.Toast;
 
 public class EnigmaView extends View {
-	Resources res;
+    private Context context;
+	private Resources res;
+	
 	Enigma machine;
 	Drawable letters;
-	Context context;
 	
 	private static final String TAG = "EnigmaView";
-	static int simWidth = 1024;
-	static int simHeight = 1200;
-	int viewWidth;
-	int viewHeight;
+	private static int simWidth = 1024;
+	private static int simHeight = 1200;
+	private int viewWidth;
+	private int viewHeight;
+	
+    private float xScale;
+    private float yScale;
 	
 	private Rect[] rcRotors = new Rect[3];
 	private Rect rcAllRotors;
@@ -43,6 +48,70 @@ public class EnigmaView extends View {
 	
 	Toast toast;
 	
+   enum RegPoint
+       {
+       DPT_ROTOR(R.dimen.dx_rotor, R.dimen.dy_rotor),
+       
+       PT_LETTERS(R.dimen.x_letters, R.dimen.y_letters),
+       DPT_LETTERS(R.dimen.dx_letters, R.dimen.dy_letters),
+       
+       PT_P_KEY(R.dimen.x_P_key, R.dimen.y_P_key),
+       DPT_KEY(R.dimen.dx_key, R.dimen.dy_key),
+       DPT_RIGHT_KEY(R.dimen.dx_right_key, 0),
+       DPT_UP_KEY(R.dimen.dx_up_key, R.dimen.dy_up_key),
+       
+       PT_P_LIGHT(R.dimen.x_P_light, R.dimen.y_P_light),
+       DPT_LIGHT(R.dimen.dx_light, R.dimen.dy_light),
+       DPT_RIGHT_LIGHT(R.dimen.dx_right_light, 0),
+       DPT_UP_LIGHT(R.dimen.dx_up_light, R.dimen.dy_up_light),
+
+       ;
+
+       private int ridX;
+       private int ridY;
+       private Point ptRaw;
+       private Point ptScaled;
+       
+       RegPoint(int ridX, int ridY)
+           {
+           this.ridX = ridX;
+           this.ridY = ridY;
+           }
+       
+       public void init(Resources res, float xScale, float yScale)
+           {
+           ensurePoint(res);
+           ptScaled = new Point((int) (ptRaw.x * xScale), (int) (ptRaw.y * yScale));
+           }
+       
+       private void ensurePoint(Resources res)
+           {
+           if (ptRaw == null)
+               {
+               int x = 0;
+               int y = 0;
+               
+               if (ridX != 0)
+                   x = (int) (res.getDimension(ridX));
+               if (ridY != 0)
+                   y = (int) (res.getDimension(ridY));
+               ptRaw = new Point(x,y);
+               }
+           }
+       
+       public Point getPoint()
+           {
+           return ptScaled;
+           }
+       
+       static Rect rectFromPtDpt(RegPoint rpt, RegPoint rdpt)
+           {
+           Point pt = rpt.getPoint();
+           Point dpt = rdpt.getPoint();
+           return new Rect(pt.x, pt.y, pt.x + dpt.x, pt.y + dpt.y);
+           }
+       }
+	
 	protected void onMeasure(int xSpec, int ySpec)
 		{
 		super.onMeasure(xSpec, ySpec);
@@ -50,27 +119,26 @@ public class EnigmaView extends View {
 		viewHeight = getMeasuredHeight();
 		int yRotor;
 		int[] axRotors = new int[3];
-		int dxRotor;
-		int dyRotor;
-		
-		float xScale;
-		float yScale;
 		
 		xScale = (float) viewWidth/simWidth;
 		yScale = (float) viewHeight/simHeight;
 		
+		Log.d(TAG, "Scaling: " + xScale + ", " + yScale);
+		
+        for (RegPoint rpt : RegPoint.values())
+            rpt.init(this.res, xScale, yScale);
+		
+		// Setup rotor windows - from centers and window sizes
 		yRotor = (int) (res.getDimension(R.dimen.y_rotors) * yScale);
 		axRotors[0] = (int) (res.getDimension(R.dimen.x_left_rotor) * xScale);
 		axRotors[1] = (int) (res.getDimension(R.dimen.x_center_rotor) * xScale);
 		axRotors[2] = (int) (res.getDimension(R.dimen.x_right_rotor) * xScale);
 		
-		dxRotor = (int) (res.getDimension(R.dimen.dx_rotor) * xScale);
-		dyRotor = (int) (res.getDimension(R.dimen.dy_rotor) * yScale);
-		
+		Point dptRotor = RegPoint.DPT_ROTOR.getPoint();
 		for (int i = 0; i < 3; i++)
 			{
-			rcRotors[i] = new Rect(axRotors[i]-dxRotor/2, yRotor-dyRotor/2,
-								   axRotors[i]+dxRotor/2, yRotor+dyRotor/2);
+			rcRotors[i] = new Rect(axRotors[i]-dptRotor.x/2, yRotor-dptRotor.y/2,
+								   axRotors[i]+dptRotor.x/2, yRotor+dptRotor.y/2);
             if (i == 0)
                 rcAllRotors = new Rect(rcRotors[i]);
             else
@@ -78,40 +146,16 @@ public class EnigmaView extends View {
 			rcRotors[i].inset((int) (xScale*7), (int) (yScale*20));
 			}
 		
-		int yLetters = (int) (res.getDimension(R.dimen.y_letters) * yScale);
-		int dyLetters = (int) (res.getDimension(R.dimen.dy_letters) * yScale);
-		int xLetters = (int) (res.getDimension(R.dimen.x_letters) * xScale);
-		int dxLetters = (int) (res.getDimension(R.dimen.dx_letters) * xScale);
-		
-		rcLetters = new Rect(xLetters, yLetters, xLetters+dxLetters, yLetters+dyLetters);
+		// Setup lights overlay PNG
+		rcLetters = RegPoint.rectFromPtDpt(RegPoint.PT_LETTERS, RegPoint.DPT_LETTERS);
 		
 		// Setup dimensions of keyboard for hit testing
-		int xP = (int) (res.getDimension(R.dimen.x_P_key) * xScale);
-		int yP = (int) (res.getDimension(R.dimen.y_P_key) * yScale);
-		int dxKey = (int) (res.getDimension(R.dimen.dx_key) * xScale);
-		int dyKey = (int) (res.getDimension(R.dimen.dy_key) * yScale);
-		Rect rcPKey = new Rect(xP, yP, xP + dxKey, yP + dyKey);
-		
-		int dxRightKey = (int) (res.getDimension(R.dimen.dx_right_key) * xScale);
-		int dxUpKey = (int) (res.getDimension(R.dimen.dx_up_key) * xScale);
-		int dyUpKey = (int) (res.getDimension(R.dimen.dy_up_key) * yScale);
-		Point ptRightKey = new Point(dxRightKey, 0);
-		Point ptUpKey = new Point(dxUpKey, dyUpKey);
-		qKeys.setSize(rcPKey, ptRightKey, ptUpKey);
+		Rect rcPKey = RegPoint.rectFromPtDpt(RegPoint.PT_P_KEY, RegPoint.DPT_KEY);
+		qKeys.setSize(rcPKey, RegPoint.DPT_RIGHT_KEY.getPoint(), RegPoint.DPT_UP_KEY.getPoint());
 		
 		// Setup dimensions of lights for display
-		xP = (int) (res.getDimension(R.dimen.x_P_light) * xScale);
-        yP = (int) (res.getDimension(R.dimen.y_P_light) * yScale);
-        int dxLight = (int) (res.getDimension(R.dimen.dx_light) * xScale);
-        int dyLight = (int) (res.getDimension(R.dimen.dy_light) * yScale);
-        Rect rcPLight = new Rect(xP, yP, xP + dxLight, yP + dyLight);
-        
-        int dxRightLight = (int) (res.getDimension(R.dimen.dx_right_light) * xScale);
-        int dxUpLight = (int) (res.getDimension(R.dimen.dx_up_light) * xScale);
-        int dyUpLight = (int) (res.getDimension(R.dimen.dy_up_light) * yScale);
-        Point ptRightLight = new Point(dxRightLight, 0);
-        Point ptUpLight = new Point(dxUpLight, dyUpLight);
-        qLights.setSize(rcPLight, ptRightLight, ptUpLight);
+		Rect rcPLight = RegPoint.rectFromPtDpt(RegPoint.PT_P_LIGHT, RegPoint.DPT_LIGHT);
+		qLights.setSize(rcPLight, RegPoint.DPT_RIGHT_LIGHT.getPoint(), RegPoint.DPT_UP_LIGHT.getPoint());
 		}
 	
 	protected void onDraw(Canvas canvas)
