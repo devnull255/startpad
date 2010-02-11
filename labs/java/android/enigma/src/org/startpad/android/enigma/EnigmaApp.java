@@ -177,9 +177,6 @@ public class EnigmaApp extends TabActivity
         
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         
-        toast = Toast.makeText(this, R.string.startup_message, Toast.LENGTH_LONG);
-        toast.show();
-        
         // Setup top-level tabbled layout screen 
         
         LayoutInflater.from(this).inflate(R.layout.main, tabHost.getTabContentView(), true);
@@ -197,7 +194,6 @@ public class EnigmaApp extends TabActivity
                 .setIndicator("Info")
                 .setContent(R.id.enigma_info));
         
-
         // token = edit.getApplicationWindowToken();
         
         tabHost.setOnTabChangedListener(new OnTabChangeListener()
@@ -217,6 +213,7 @@ public class EnigmaApp extends TabActivity
                         toast.cancel();
                         toast.setText(sSettingsError);
                         toast.show();
+
                         }
                     }
                 }
