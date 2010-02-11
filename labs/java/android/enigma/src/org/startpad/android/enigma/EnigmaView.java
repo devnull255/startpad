@@ -14,11 +14,13 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 public class EnigmaView extends View {
 	Resources res;
 	Enigma machine;
 	Drawable letters;
+	Context context;
 	
 	private static final String TAG = "EnigmaView";
 	static int simWidth = 1024;
@@ -31,13 +33,15 @@ public class EnigmaView extends View {
 	private Rect[] rcSpinners = new Rect[3];
 	private Rect rcLetters;
 	
-	Qwertzu qLights = new Qwertzu();
-	Qwertzu qKeys = new Qwertzu();
+	QWERTZU qLights = new QWERTZU();
+	QWERTZU qKeys = new QWERTZU();
 	
 	boolean fDown = false;
 	char chLight = 0;
 	
 	boolean fLidClosed = true;
+	
+	Toast toast;
 	
 	protected void onMeasure(int xSpec, int ySpec)
 		{
@@ -71,7 +75,6 @@ public class EnigmaView extends View {
                 rcAllRotors = new Rect(rcRotors[i]);
             else
                 rcAllRotors.union(rcRotors[i]);
-			Log.d(TAG, "Rotor: " + rcRotors[i].toString());
 			rcRotors[i].inset((int) (xScale*7), (int) (yScale*20));
 			}
 		
@@ -163,8 +166,12 @@ public class EnigmaView extends View {
     // Initialize Simulation View
     private void init(Context context)
 	    {
+	    this.context = context;
     	this.res = context.getResources();
     	this.letters = this.res.getDrawable(R.drawable.letters);
+    	
+        toast = Toast.makeText(context, R.string.startup_message, Toast.LENGTH_LONG);
+        toast.show();
     	
 	    setOnTouchListener(new OnTouchListener()
 	        {
@@ -175,6 +182,9 @@ public class EnigmaView extends View {
 	                fLidClosed = false;
 	                setBackgroundResource(R.drawable.enigma);
 	                invalidate(0, 0, viewWidth, viewHeight);
+	                
+	                toast = Toast.makeText(((EnigmaView) view).context, R.string.sim_hint, Toast.LENGTH_LONG);
+	                toast.show();
 	                return true;
 	                }
 	            
@@ -184,7 +194,10 @@ public class EnigmaView extends View {
 	                Point ptClick = new Point((int) event.getX(), (int) event.getY());
 	                char ch = qKeys.charFromPt(ptClick);
 	                if (ch == 0)
+	                    {
+	                    Log.d(TAG, "No key detected");
 	                    return false;
+                        }
 
                     fDown = true;
 
@@ -217,7 +230,7 @@ public class EnigmaView extends View {
     
     private static String[] asRows = new String[] {"QWERTZUIO", "ASDFGHJK", "PYXCVBNML"};
     
-    class Qwertzu
+    class QWERTZU
         {
         private Point ptRight;
         private Rect[] arcRows;
@@ -240,19 +253,35 @@ public class EnigmaView extends View {
         
         public char charFromPt(Point ptClick)
             {
+            int d2Min = -1;
+            char chBest = 0;
+            
+            Log.d(TAG, "charFromPt" + ptClick);
+            
+            if (ptClick.y < arcRows[0].top - 10)
+                return 0;
+            
+            Log.d(TAG, "possible key");
+                
             for (int i = 0; i < arcRows.length; i++)
                 {
                 Rect rcChar = new Rect(arcRows[i]);
-                
+
                 for (int j = 0; j < asRows[i].length(); j++)
                     {
-                    if (rcChar.contains(ptClick.x, ptClick.y))
-                        return asRows[i].charAt(j);
+                    Point ptChar = new Point(rcChar.centerX(), rcChar.centerY());
+                    int d2 = (int) (Math.pow(ptChar.x - ptClick.x,2) + Math.pow(ptChar.y - ptClick.y, 2));
+                    if (d2Min < 0 || d2 < d2Min)
+                        {
+                        d2Min = d2;
+                        chBest = asRows[i].charAt(j);
+                        Log.d(TAG, "Better " + chBest + " at " + d2);
+                        }
                     rcChar.offset(ptRight.x, ptRight.y);
                     }
                 }
-                
-            return 0;
+            
+            return chBest;
             }
         
         public Rect rectFromChar(char ch)
