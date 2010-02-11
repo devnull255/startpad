@@ -160,7 +160,7 @@ public class Enigma
         return sOut;
         }
 
-    private char encodeChar(char ch)
+    public char encodeChar(char ch)
         {
         ArrayList<Integer> tracePath = new ArrayList<Integer>();
 
