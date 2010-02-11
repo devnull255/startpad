@@ -204,6 +204,12 @@ public class EnigmaApp extends TabActivity
                 // on all tab changes ... why not?
                 // imm.hideSoftInputFromInputMethod(token, InputMethodManager.HIDE_NOT_ALWAYS);
                 
+                if (tabId.equals("sim") || tabId.equals("info"))
+                    {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(tabHost.getApplicationWindowToken(), 0);
+                    }
+                
                 if (tabId.equals("sim") || tabId.equals("encoder"))
                     {
                     updateSettings();
