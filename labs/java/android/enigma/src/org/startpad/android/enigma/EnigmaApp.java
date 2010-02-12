@@ -54,6 +54,8 @@ public class EnigmaApp extends TabActivity
 	        if (this.mp != null)
 	            {
 	            Log.d(TAG, "Playing: " + mp.toString());
+	            if (this.mp.isPlaying())
+	                this.mp.pause();
 	            this.mp.seekTo(0);
 	            this.mp.start();
 	            }

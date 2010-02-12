@@ -94,7 +94,7 @@ public class Enigma
     Settings settings = new Settings();
     Rotor[] rotors = new Rotor[3];
     Rotor reflector;
-    int[] position = new int[3];
+    public int[] position = new int[3];
     int[] rings = new int[3];
     int[] mapPlugs = new int[26];
 
@@ -289,13 +289,13 @@ public class Enigma
         throw new IllegalArgumentException("Invalid Rotor Name: " + name);
         }
 
-    private static int iFromCh(char ch)
+    public static int iFromCh(char ch)
         {
         ch = Character.toUpperCase(ch);
         return ch - 'A';
         }
 
-    private static char chFromI(int i)
+    public static char chFromI(int i)
         {
         return (char) ((int) 'A' + i);
         }
