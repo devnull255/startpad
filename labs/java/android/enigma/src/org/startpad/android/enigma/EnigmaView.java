@@ -40,6 +40,7 @@ public class EnigmaView extends View {
 	private Rect rcLetters;
 	private Rect rcScrews[] = new Rect[2];
 	private int[] adySpin = new int[3];
+	private int dyLetterRotor;
 	
 	QWERTZU qLights = new QWERTZU();
 	QWERTZU qKeys = new QWERTZU();
@@ -53,6 +54,7 @@ public class EnigmaView extends View {
 	boolean fLidClosed = true;
 	boolean fCoverOpen = false;
 	int iSpinning = -1;
+	int diSpinLast;
 	
 	Toast toast;
 	
@@ -157,11 +159,15 @@ public class EnigmaView extends View {
                 rcAllRotors = new Rect(rcRotors[i]);
             else
                 rcAllRotors.union(rcRotors[i]);
+            
+            // Adjust for baselilne of a character
 			rcRotors[i].inset((int) (xScale*7), (int) (yScale*20));
+			rcRotors[i].offset(0, -1);
 			
 			rcSpinners[i] = new Rect(rcRotors[i].centerX(), rcRotors[i].centerY() - dptSpinner.y/2,
 			                         rcRotors[i].centerX() + dptSpinner.x, rcRotors[i].centerY() + dptSpinner.y/2);
 			}
+		dyLetterRotor = rcRotors[0].height();
 		
 		// Setup lights overlay PNG
 		rcLetters = RegPoint.rectFromPtDpt(RegPoint.PT_LETTERS, RegPoint.DPT_LETTERS);
@@ -192,12 +198,34 @@ public class EnigmaView extends View {
 		paint.setTextSize(rcRotors[0].height());
 		paint.setAntiAlias(true);
 		
-		String sPosition = machine.sPosition();
-		
 		for (int i = 0; i < 3; i++)
 			{
-			canvas.drawText(sPosition.substring(i,i+1), rcRotors[i].centerX(), rcRotors[i].bottom + adySpin[i],
-			    paint);
+			// Draw letter above and below the current letter (assume up to 3 letters partially visible
+			// in the rotor window.
+			int iCenter = machine.position[i];
+			int dy = Math.abs(adySpin[i]);
+			int diLetter = dy / dyLetterRotor;
+			int dyNudge = dy % dyLetterRotor;
+			if (adySpin[i] < 0)
+			    {
+			    iCenter = (iCenter + diLetter) % 26;
+			    dyNudge = -dyNudge;
+			    }
+			else
+			    {
+			    iCenter = (iCenter + (26 - diLetter)) % 26;
+			    }
+			
+			canvas.save();
+			canvas.clipRect(rcAllRotors);
+			for (int j = -1; j <= 1; j++)
+			    {
+			    String sChar = Character.toString(Enigma.chFromI((iCenter + j + 26) % 26));
+			    canvas.drawText(sChar, rcRotors[i].centerX(),
+			                    rcRotors[i].bottom + dyNudge + j * dyLetterRotor,
+			                    paint);
+			    }
+			canvas.restore();
 			}
 		
 		if (fDown)
@@ -209,6 +237,16 @@ public class EnigmaView extends View {
     		canvas.restore();
 		    }
 		}
+	
+	protected int diRotorSpin(int dy)
+	    {
+	    int dyT = Math.abs(dy);
+	    int di = (dyT + dyLetterRotor/2) / dyLetterRotor;
+	    if (dy < 0)
+	        return di % 26;
+	    else
+	        return (26 - di) % 26;
+	    }
 
 	public EnigmaView(Context context) {
 		super(context);
@@ -247,7 +285,8 @@ public class EnigmaView extends View {
 	            switch (event.getAction())
 	            {
 	            case MotionEvent.ACTION_DOWN:
-	                if (fDown)
+	                // Defensive?
+	                if (fDown || iSpinning >= 0)
 	                    return false;
 	                
                     if (fLidClosed)
@@ -256,6 +295,8 @@ public class EnigmaView extends View {
                         setBackgroundResource(R.drawable.enigma);
                         invalidate();
                         
+                        // BUG: Why is this EnigmaView cast needed here - but other
+                        // class variable refs are not?
                         toast = Toast.makeText(((EnigmaView) view).context, R.string.sim_hint, Toast.LENGTH_LONG);
                         toast.show();
                         return true;
@@ -281,20 +322,9 @@ public class EnigmaView extends View {
 	                        return true;
 	                        }
 	                
-	                // Spin the rotors
-	                for (int i = 0; i < 3; i++)
-	                    {
-	                    if (rcSpinners[i].contains(ptClick.x, ptClick.y))
-	                        {
-	                        iSpinning = i;
-	                        ptClickLast = ptClick;
-	                        return true;
-	                        }
-	                    }
-	                
 	                // Press a key if user clicks the keyboard
 	                char ch = qKeys.charFromPt(ptClick);
-	                if (ch == 0)
+	                if (ch != 0)
 	                    {
 	                    fDown = true;
 	                    msDown = System.currentTimeMillis();
@@ -309,23 +339,53 @@ public class EnigmaView extends View {
 	                    return true;
                         }
 
-                    Log.d(TAG, "No click action");
+                    // Spin the rotors
+                    for (int i = 0; i < 3; i++)
+                        {
+                        if (rcSpinners[i].contains(ptClick.x, ptClick.y))
+                            {
+                            Log.d(TAG, "Spinning rotor: " + i);
+                            iSpinning = i;
+                            ptClickLast = new Point(ptClick);
+                            diSpinLast = 0;
+                            return true;
+                            }
+                        }
+                    
+	                Log.d(TAG, "No click action");
                     break;
 	                
 	            case MotionEvent.ACTION_MOVE:
+	                // TODO: Track user slides across keys
+	                if (fDown)
+	                    return false;
+	                
 	                Point ptMove = new Point((int) event.getX(), (int) event.getY());
 	                
 	                if (iSpinning != -1)
 	                    {
 	                    int dy = ptMove.y - ptClickLast.y;
 	                    
+	                    Log.d(TAG, "Spin Delta: " + dy);
+	                    adySpin[iSpinning] = dy;
+	                    invalidate(rcAllRotors);
+	                    
+                        int diSpin = diRotorSpin(dy);
+                        if (diSpinLast != diSpin)
+                            {
+                            diSpinLast = diSpin;
+                            EnigmaApp.SoundEffect.ROTOR.play();
+                            }
+	                    return true;
 	                    }
 
 	            case MotionEvent.ACTION_UP:
 	                if (iSpinning != -1)
 	                    {
 	                    adySpin[iSpinning] = 0;
-	                    iSpinning = -1;
+	                    machine.position[iSpinning] = (machine.position[iSpinning] + diSpinLast) % 26;
+                        iSpinning = -1;
+	                    invalidate(rcAllRotors);
 	                    return true;
 	                    }
 
@@ -334,7 +394,6 @@ public class EnigmaView extends View {
 	                    long msTime = System.currentTimeMillis() - msDown;
 	                    if (msTime < 1000)
 	                        {
-	                        Log.d(TAG, "Delaying up by" + (1000 - msTime));
 	                        handler.postDelayed(new Runnable()
     	                        {
                                 public void run()
@@ -344,7 +403,6 @@ public class EnigmaView extends View {
     	                        }, 1000 - msTime);
 	                        return true;
 	                        }
-	                    Log.d(TAG, "Immediate Up");
 	                    doKeyUp();
 	                    }
 	                break;
@@ -393,13 +451,9 @@ public class EnigmaView extends View {
             int d2Min = -1;
             char chBest = 0;
             
-            Log.d(TAG, "charFromPt" + ptClick);
-            
             if (ptClick.y < arcRows[0].top - 10)
                 return 0;
             
-            Log.d(TAG, "possible key");
-                
             for (int i = 0; i < arcRows.length; i++)
                 {
                 Rect rcChar = new Rect(arcRows[i]);
@@ -412,7 +466,6 @@ public class EnigmaView extends View {
                         {
                         d2Min = d2;
                         chBest = asRows[i].charAt(j);
-                        Log.d(TAG, "Better " + chBest + " at " + d2);
                         }
                     rcChar.offset(ptRight.x, ptRight.y);
                     }
