@@ -37,6 +37,7 @@ public class EnigmaView extends View {
 	private Rect rcAllRotors;
 	private Rect[] rcSpinners = new Rect[3];
 	private Rect rcLetters;
+	private Rect rcScrews[] = new Rect[2];
 	
 	QWERTZU qLights = new QWERTZU();
 	QWERTZU qKeys = new QWERTZU();
@@ -45,10 +46,12 @@ public class EnigmaView extends View {
 	char chLight = 0;
 	
 	boolean fLidClosed = true;
+	boolean fCoverOpen = false;
 	
 	Toast toast;
 	
-   enum RegPoint
+	// Registration points for known positions on the engima image
+    enum RegPoint
        {
        DPT_ROTOR(R.dimen.dx_rotor, R.dimen.dy_rotor),
        
@@ -64,6 +67,10 @@ public class EnigmaView extends View {
        DPT_LIGHT(R.dimen.dx_light, R.dimen.dy_light),
        DPT_RIGHT_LIGHT(R.dimen.dx_right_light, 0),
        DPT_UP_LIGHT(R.dimen.dx_up_light, R.dimen.dy_up_light),
+       
+       PT_LEFT_SCREW(R.dimen.x_left_screw, R.dimen.y_screw),
+       PT_RIGHT_SCREW(R.dimen.x_right_screw, R.dimen.y_screw),
+       DPT_SCREW(R.dimen.dx_screw, R.dimen.dy_screw),
 
        ;
 
@@ -156,12 +163,17 @@ public class EnigmaView extends View {
 		// Setup dimensions of lights for display
 		Rect rcPLight = RegPoint.rectFromPtDpt(RegPoint.PT_P_LIGHT, RegPoint.DPT_LIGHT);
 		qLights.setSize(rcPLight, RegPoint.DPT_RIGHT_LIGHT.getPoint(), RegPoint.DPT_UP_LIGHT.getPoint());
+		
+		rcScrews[0] = RegPoint.rectFromPtDpt(RegPoint.PT_LEFT_SCREW, RegPoint.DPT_SCREW);
+		rcScrews[1] = RegPoint.rectFromPtDpt(RegPoint.PT_RIGHT_SCREW, RegPoint.DPT_SCREW);
+		for (int i = 0; i < 2; i++)
+		    rcScrews[i].inset(-5, -5);
 		}
 	
 	protected void onDraw(Canvas canvas)
 		{
 		super.onDraw(canvas);
-		if (fLidClosed)
+		if (fLidClosed || fCoverOpen)
 			return;
 		
 		Paint paint = new Paint();
@@ -221,21 +233,39 @@ public class EnigmaView extends View {
 	        {
 	        public boolean onTouch(View view, MotionEvent event)
 	            {
-	            if (fLidClosed)
-	                {
-	                fLidClosed = false;
-	                setBackgroundResource(R.drawable.enigma);
-	                invalidate(0, 0, viewWidth, viewHeight);
-	                
-	                toast = Toast.makeText(((EnigmaView) view).context, R.string.sim_hint, Toast.LENGTH_LONG);
-	                toast.show();
-	                return true;
-	                }
-	            
 	            switch (event.getAction())
 	            {
 	            case MotionEvent.ACTION_DOWN:
-	                Point ptClick = new Point((int) event.getX(), (int) event.getY());
+                    if (fLidClosed)
+                        {
+                        fLidClosed = false;
+                        setBackgroundResource(R.drawable.enigma);
+                        invalidate(0, 0, viewWidth, viewHeight);
+                        
+                        toast = Toast.makeText(((EnigmaView) view).context, R.string.sim_hint, Toast.LENGTH_LONG);
+                        toast.show();
+                        return true;
+                        }
+                    
+                    if (fCoverOpen)
+                        {
+                        fCoverOpen = false;
+                        setBackgroundResource(R.drawable.enigma);
+                        invalidate();
+                        return true;
+                        }
+	            
+                    Point ptClick = new Point((int) event.getX(), (int) event.getY());
+	                
+	                for (int i = 0; i < 2; i++)
+	                    if (rcScrews[i].contains(ptClick.x, ptClick.y))
+	                        {
+	                        fCoverOpen = true;
+	                        setBackgroundResource(R.drawable.cover_open);
+	                        invalidate();
+	                        return true;
+	                        }
+	                
 	                char ch = qKeys.charFromPt(ptClick);
 	                if (ch == 0)
 	                    {

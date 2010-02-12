@@ -22,7 +22,7 @@ Todo:
 - Application icon
 - Tab icons
 - Simulator
-  - Change lid opening to swipe effect
+  - Change lid and cover opening to swipe effect
   1 Open internal cover to reveal insides (touch either cover screw)
   X Display rotor settings
   3 Change rotor settings (swipe)
