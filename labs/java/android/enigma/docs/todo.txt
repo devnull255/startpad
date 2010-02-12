@@ -23,11 +23,11 @@ Todo:
 - Tab icons
 - Simulator
   - Change lid and cover opening to swipe effect
-  1 Open internal cover to reveal insides (touch either cover screw)
+  X Open internal cover to reveal insides (touch either cover screw)
   X Display rotor settings
   3 Change rotor settings (swipe)
   X Display depressed key encoding
-  2 min display letter - 1 second
+  X min display letter - 1 second
 X Tab names: Enigma, Message, Settings, Info
 X How to enable adjusting of media volume (not ringer volume)
   when running.

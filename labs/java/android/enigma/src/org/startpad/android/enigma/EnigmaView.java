@@ -11,6 +11,7 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -43,7 +44,9 @@ public class EnigmaView extends View {
 	QWERTZU qKeys = new QWERTZU();
 	
 	boolean fDown = false;
+	long msDown;
 	char chLight = 0;
+	Handler handler = new Handler();
 	
 	boolean fLidClosed = true;
 	boolean fCoverOpen = false;
@@ -236,6 +239,9 @@ public class EnigmaView extends View {
 	            switch (event.getAction())
 	            {
 	            case MotionEvent.ACTION_DOWN:
+	                if (fDown)
+	                    return false;
+	                
                     if (fLidClosed)
                         {
                         fLidClosed = false;
@@ -274,6 +280,7 @@ public class EnigmaView extends View {
                         }
 
                     fDown = true;
+                    msDown = System.currentTimeMillis();
 
                     chLight = machine.encodeChar(ch);
                     Log.d(TAG, "Encode " + ch + " -> " + chLight);
@@ -287,9 +294,21 @@ public class EnigmaView extends View {
 	            case MotionEvent.ACTION_UP:
 	                if (fDown)
 	                    {
-	                    fDown = false;
-	                    invalidate(qLights.rectFromChar(chLight));
-	                    EnigmaApp.SoundEffect.KEY_UP.play();
+	                    long msTime = System.currentTimeMillis() - msDown;
+	                    if (msTime < 1000)
+	                        {
+	                        Log.d(TAG, "Delaying up by" + (1000 - msTime));
+	                        handler.postDelayed(new Runnable()
+    	                        {
+                                public void run()
+                                    {
+                                    doKeyUp();
+                                    }
+    	                        }, 1000 - msTime);
+	                        return true;
+	                        }
+	                    Log.d(TAG, "Immediate Up");
+	                    doKeyUp();
 	                    }
 	                break;
 	            }
@@ -297,6 +316,13 @@ public class EnigmaView extends View {
 	            }
 	        });
 	    }
+    
+    private void doKeyUp()
+        {
+        fDown = false;
+        invalidate(qLights.rectFromChar(chLight));
+        EnigmaApp.SoundEffect.KEY_UP.play();
+        }
     
     /* Convert from x,y to a keyboard/light character.  Assumes QWERTU
      * character layout.
