@@ -28,6 +28,7 @@ Todo:
   3 Change rotor settings (swipe)
   X Display depressed key encoding
   X min display letter - 1 second
+  4 Display typed letter
 X Tab names: Enigma, Message, Settings, Info
 X How to enable adjusting of media volume (not ringer volume)
   when running.

@@ -39,17 +39,20 @@ public class EnigmaView extends View {
 	private Rect[] rcSpinners = new Rect[3];
 	private Rect rcLetters;
 	private Rect rcScrews[] = new Rect[2];
+	private int[] adySpin = new int[3];
 	
 	QWERTZU qLights = new QWERTZU();
 	QWERTZU qKeys = new QWERTZU();
 	
 	boolean fDown = false;
+	Point ptClickLast;
 	long msDown;
 	char chLight = 0;
 	Handler handler = new Handler();
 	
 	boolean fLidClosed = true;
 	boolean fCoverOpen = false;
+	int iSpinning = -1;
 	
 	Toast toast;
 	
@@ -57,6 +60,7 @@ public class EnigmaView extends View {
     enum RegPoint
        {
        DPT_ROTOR(R.dimen.dx_rotor, R.dimen.dy_rotor),
+       DPT_SPINNER(R.dimen.dx_spinner, R.dimen.dy_spinner),
        
        PT_LETTERS(R.dimen.x_letters, R.dimen.y_letters),
        DPT_LETTERS(R.dimen.dx_letters, R.dimen.dy_letters),
@@ -74,7 +78,6 @@ public class EnigmaView extends View {
        PT_LEFT_SCREW(R.dimen.x_left_screw, R.dimen.y_screw),
        PT_RIGHT_SCREW(R.dimen.x_right_screw, R.dimen.y_screw),
        DPT_SCREW(R.dimen.dx_screw, R.dimen.dy_screw),
-
        ;
 
        private int ridX;
@@ -138,13 +141,14 @@ public class EnigmaView extends View {
         for (RegPoint rpt : RegPoint.values())
             rpt.init(this.res, xScale, yScale);
 		
-		// Setup rotor windows - from centers and window sizes
+		// Setup rotor windows and spinner rects - from centers and window sizes
 		yRotor = (int) (res.getDimension(R.dimen.y_rotors) * yScale);
 		axRotors[0] = (int) (res.getDimension(R.dimen.x_left_rotor) * xScale);
 		axRotors[1] = (int) (res.getDimension(R.dimen.x_center_rotor) * xScale);
 		axRotors[2] = (int) (res.getDimension(R.dimen.x_right_rotor) * xScale);
 		
 		Point dptRotor = RegPoint.DPT_ROTOR.getPoint();
+		Point dptSpinner = RegPoint.DPT_SPINNER.getPoint();
 		for (int i = 0; i < 3; i++)
 			{
 			rcRotors[i] = new Rect(axRotors[i]-dptRotor.x/2, yRotor-dptRotor.y/2,
@@ -154,6 +158,9 @@ public class EnigmaView extends View {
             else
                 rcAllRotors.union(rcRotors[i]);
 			rcRotors[i].inset((int) (xScale*7), (int) (yScale*20));
+			
+			rcSpinners[i] = new Rect(rcRotors[i].centerX(), rcRotors[i].centerY() - dptSpinner.y/2,
+			                         rcRotors[i].centerX() + dptSpinner.x, rcRotors[i].centerY() + dptSpinner.y/2);
 			}
 		
 		// Setup lights overlay PNG
@@ -189,7 +196,8 @@ public class EnigmaView extends View {
 		
 		for (int i = 0; i < 3; i++)
 			{
-			canvas.drawText(sPosition.substring(i,i+1), rcRotors[i].centerX(), rcRotors[i].bottom, paint);
+			canvas.drawText(sPosition.substring(i,i+1), rcRotors[i].centerX(), rcRotors[i].bottom + adySpin[i],
+			    paint);
 			}
 		
 		if (fDown)
@@ -246,7 +254,7 @@ public class EnigmaView extends View {
                         {
                         fLidClosed = false;
                         setBackgroundResource(R.drawable.enigma);
-                        invalidate(0, 0, viewWidth, viewHeight);
+                        invalidate();
                         
                         toast = Toast.makeText(((EnigmaView) view).context, R.string.sim_hint, Toast.LENGTH_LONG);
                         toast.show();
@@ -263,6 +271,7 @@ public class EnigmaView extends View {
 	            
                     Point ptClick = new Point((int) event.getX(), (int) event.getY());
 	                
+                    // Open Lid, if user clicks on the lid screws
 	                for (int i = 0; i < 2; i++)
 	                    if (rcScrews[i].contains(ptClick.x, ptClick.y))
 	                        {
@@ -272,26 +281,54 @@ public class EnigmaView extends View {
 	                        return true;
 	                        }
 	                
+	                // Spin the rotors
+	                for (int i = 0; i < 3; i++)
+	                    {
+	                    if (rcSpinners[i].contains(ptClick.x, ptClick.y))
+	                        {
+	                        iSpinning = i;
+	                        ptClickLast = ptClick;
+	                        return true;
+	                        }
+	                    }
+	                
+	                // Press a key if user clicks the keyboard
 	                char ch = qKeys.charFromPt(ptClick);
 	                if (ch == 0)
 	                    {
-	                    Log.d(TAG, "No key detected");
-	                    return false;
+	                    fDown = true;
+	                    msDown = System.currentTimeMillis();
+
+	                    chLight = machine.encodeChar(ch);
+	                    Log.d(TAG, "Encode " + ch + " -> " + chLight);
+	                    
+	                    invalidate(rcAllRotors);
+	                    invalidate(qLights.rectFromChar(chLight));
+	                        
+	                    EnigmaApp.SoundEffect.KEY_DOWN.play();
+	                    return true;
                         }
 
-                    fDown = true;
-                    msDown = System.currentTimeMillis();
-
-                    chLight = machine.encodeChar(ch);
-                    Log.d(TAG, "Encode " + ch + " -> " + chLight);
-                    
-                    invalidate(rcAllRotors);
-                    invalidate(qLights.rectFromChar(chLight));
+                    Log.d(TAG, "No click action");
+                    break;
+	                
+	            case MotionEvent.ACTION_MOVE:
+	                Point ptMove = new Point((int) event.getX(), (int) event.getY());
+	                
+	                if (iSpinning != -1)
+	                    {
+	                    int dy = ptMove.y - ptClickLast.y;
 	                    
-                    EnigmaApp.SoundEffect.KEY_DOWN.play();
-	                break;
+	                    }
 
 	            case MotionEvent.ACTION_UP:
+	                if (iSpinning != -1)
+	                    {
+	                    adySpin[iSpinning] = 0;
+	                    iSpinning = -1;
+	                    return true;
+	                    }
+
 	                if (fDown)
 	                    {
 	                    long msTime = System.currentTimeMillis() - msDown;
@@ -312,7 +349,7 @@ public class EnigmaView extends View {
 	                    }
 	                break;
 	            }
-	            return true;
+	            return false;
 	            }
 	        });
 	    }
