@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+	<!-- All image positioning based on  1024 x 1200 Enigma Machine image file -->
+	
 	<!-- Rotor window positioning -->
     <dimen name="y_rotors">300px</dimen>
     
@@ -9,6 +11,10 @@
     
     <dimen name="dx_rotor">60px</dimen>
     <dimen name="dy_rotor">88px</dimen>
+    
+    <!-- Rotor spinner control size -->
+    <dimen name="dx_spinner">104px</dimen>
+    <dimen name="dy_spinner">289px</dimen>
     
     <!--  Lights overlay position -->
     <dimen name="y_letters">520px</dimen>
