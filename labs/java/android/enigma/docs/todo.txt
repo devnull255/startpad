@@ -1,17 +1,7 @@
-Dev Lab Questions
-
-- Access to audio (record and playback) during a phone call (in channel)
-- Executing an Activity every 15 minutes (background)
-- Intercepting SMS
-i IRC office hours?
-- AdSense for Mobile Applications - client SDK for banners
-i JDK 1.6 - Java Properties
-X ForceClose - best way to see call stack after the fact?
-
-
 Todo:
 
 - Synch enigma machine state between Sim and Message tabs
+  - Position changes in sim don't reflect Settings changes
 - Message view
   - append to Input from main sim
   - add labels: Input, Output
@@ -25,11 +15,15 @@ Todo:
   - Change lid and cover opening to swipe effect
   X Open internal cover to reveal insides (touch either cover screw)
   X Display rotor settings
-  3 Change rotor settings (swipe)
+  X Change rotor settings (swipe)
   X Display depressed key encoding
   X min display letter - 1 second
   4 Display typed letter
-- Overlay mask of windows is wrong color! (jpg fix)
+  2 Resize images to save space
+  1 Overlay mask of windows is wrong color! (jpg fix)
+- Settings
+  - BUG: Ring settings do not seem to be working (turn over point wrong).
+  - Use Scrolling view so keyboard does not obliterate tabs
 X Tab names: Enigma, Message, Settings, Info
 X How to enable adjusting of media volume (not ringer volume)
   when running.
@@ -48,10 +42,15 @@ X Lock to portrait orientation
 
 Later ToDo:
 
-- Enigma panel image
-- Light up lights for output
 - Plugboard settings graphically
-- SMS message (link to app?)
+- 3D view mode - walk around machine is 3 states:
+  - Lid Closed
+  - Lid Open
+  - Cover Open
+  - Animate between states using 3D library
+  - Pan/tilt/zoom
+  - Augmented reality view - make it look like it is sitting on a table
+    in view of the camera.
 
 Android questions:
 
