@@ -41,6 +41,7 @@ public class EnigmaView extends View {
 	private Rect rcScrews[] = new Rect[2];
 	private int[] adySpin = new int[3];
 	private int dyLetterRotor;
+	private static float SPIN_SENSITIVITY = (float) 0.5;
 	
 	QWERTZU qLights = new QWERTZU();
 	QWERTZU qKeys = new QWERTZU();
@@ -203,7 +204,7 @@ public class EnigmaView extends View {
 			// Draw letter above and below the current letter (assume up to 3 letters partially visible
 			// in the rotor window.
 			int iCenter = machine.position[i];
-			int dy = Math.abs(adySpin[i]);
+			int dy = (int) (Math.abs(adySpin[i]) * SPIN_SENSITIVITY);
 			int diLetter = dy / dyLetterRotor;
 			int dyNudge = dy % dyLetterRotor;
 			if (adySpin[i] < 0)
@@ -240,7 +241,7 @@ public class EnigmaView extends View {
 	
 	protected int diRotorSpin(int dy)
 	    {
-	    int dyT = Math.abs(dy);
+	    int dyT = (int) (Math.abs(dy) * SPIN_SENSITIVITY);
 	    int di = (dyT + dyLetterRotor/2) / dyLetterRotor;
 	    if (dy < 0)
 	        return di % 26;
