@@ -6,6 +6,7 @@ import org.startpad.android.enigma.R;
 
 import android.app.TabActivity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -171,6 +172,8 @@ public class EnigmaApp extends TabActivity
         
         EnigmaApp.context = this;
         
+        Resources res = getResources();
+        
         Log.d(TAG, "onCreate: " + context);
         
         tabHost = getTabHost();
@@ -184,16 +187,16 @@ public class EnigmaApp extends TabActivity
         LayoutInflater.from(this).inflate(R.layout.main, tabHost.getTabContentView(), true);
 
         tabHost.addTab(tabHost.newTabSpec("sim")
-                .setIndicator("Enigma")
+                .setIndicator("Enigma", res.getDrawable(R.drawable.tab_enigma))
                 .setContent(R.id.sim));
         tabHost.addTab(tabHost.newTabSpec("encoder")
-                .setIndicator("Message")
+                .setIndicator("Message", res.getDrawable(R.drawable.tab_message))
                 .setContent(R.id.encoder));
         tabHost.addTab(tabHost.newTabSpec("settings")
-                .setIndicator("Settings")
+                .setIndicator("Settings", res.getDrawable(R.drawable.tab_settings))
                 .setContent(R.id.settings));
         tabHost.addTab(tabHost.newTabSpec("info")
-                .setIndicator("Info")
+                .setIndicator("Info", res.getDrawable(R.drawable.tab_info))
                 .setContent(R.id.enigma_info));
         
         // token = edit.getApplicationWindowToken();
