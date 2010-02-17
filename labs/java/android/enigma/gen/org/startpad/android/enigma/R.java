@@ -64,9 +64,14 @@ public final class R {
     public static final class drawable {
         public static final int cover_open=0x7f020000;
         public static final int enigma=0x7f020001;
-        public static final int icon=0x7f020002;
+        public static final int launcher=0x7f020002;
         public static final int letters=0x7f020003;
         public static final int lid=0x7f020004;
+        public static final int tab_enigma=0x7f020005;
+        public static final int tab_info=0x7f020006;
+        public static final int tab_message=0x7f020007;
+        public static final int tab_settings=0x7f020008;
+        public static final int tag_settings=0x7f020009;
     }
     public static final class id {
         public static final int encoder=0x7f080001;

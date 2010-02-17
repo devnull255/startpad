@@ -4,13 +4,13 @@ Todo:
   - Position changes in sim don't reflect Settings changes
 - Message view
   - append to Input from main sim
-  - add labels: Input, Output
+  3 add labels: Input, Output
   - Send button
-  - Reset button
-  - Send SMS
-  - Send email
-- Application icon
-- Tab icons
+  6 Reset button
+  4 Send SMS
+  5 Send email
+1 Application icon
+2 Tab icons
 - Simulator
   - Change lid and cover opening to swipe effect
   X Open internal cover to reveal insides (touch either cover screw)
@@ -19,8 +19,8 @@ Todo:
   X Display depressed key encoding
   X min display letter - 1 second
   4 Display typed letter
-  2 Resize images to save space
-  1 Overlay mask of windows is wrong color! (jpg fix)
+  X Resize images to save space
+  X Overlay mask of windows is wrong color! (jpg fix)
 - Settings
   - BUG: Ring settings do not seem to be working (turn over point wrong).
   - Use Scrolling view so keyboard does not obliterate tabs

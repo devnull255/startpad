@@ -345,7 +345,6 @@ public class EnigmaView extends View {
                         {
                         if (rcSpinners[i].contains(ptClick.x, ptClick.y))
                             {
-                            Log.d(TAG, "Spinning rotor: " + i);
                             iSpinning = i;
                             ptClickLast = new Point(ptClick);
                             diSpinLast = 0;
@@ -353,7 +352,6 @@ public class EnigmaView extends View {
                             }
                         }
                     
-	                Log.d(TAG, "No click action");
                     break;
 	                
 	            case MotionEvent.ACTION_MOVE:
@@ -367,7 +365,6 @@ public class EnigmaView extends View {
 	                    {
 	                    int dy = ptMove.y - ptClickLast.y;
 	                    
-	                    Log.d(TAG, "Spin Delta: " + dy);
 	                    adySpin[iSpinning] = dy;
 	                    invalidate(rcAllRotors);
 	                    
