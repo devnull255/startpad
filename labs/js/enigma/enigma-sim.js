@@ -5,13 +5,13 @@
 */
 global_namespace.Define('startpad.enigma.sim', function (NS) {
 	var Enigma = NS.Import('startpad.enigma');
-	var machine = new Enigma.Enigma();
 	var DOM = NS.Import('startpad.DOM');
 	var Event = NS.Import('startpad.events');
 	var Format = NS.Import('startpad.format-util');
 	
-Enigma.fnTrace = function(s) {console.log(s);}
-
+	Enigma.fnTrace = function(s) {console.log(s);}
+	var machine = new Enigma.Enigma();
+	
 NS.Extend(NS, {
 	aInitFields: ['rotors', 'position', 'rings', 'plugs', 'keep_spacing'],
 	sTwitter: "http://twitter.com/home?source=Enigma&status={key}{code} - http://bit.ly/enigma-machine",
