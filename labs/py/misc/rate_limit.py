@@ -8,13 +8,12 @@ class RateLimit(object):
     a specified threshold.  In the absence of updated values, the value of the level will
     drop by half each secs_half seconds.
     """
-    def __init__(self, threshold, secs_half=60):
+    def __init__(self, secs_half=60):
         self.value = 0.0
-        self.threshold = threshold
         self.k = 0.5 ** (1.0/secs_half)
         self.secs_last = 0
         
-    def is_exceeded(self, secs, value=1.0):
+    def is_exceeded(self, secs, threshold, value=1.0):
         """
         Update and return the current value of the accumulator IFF the accumulated
         value would not exceed the given threshold.
@@ -23,7 +22,7 @@ class RateLimit(object):
         if secs < self.secs_last:
             return True
 
-        _is_exceeded = self.current_value(secs) + value > self.threshold
+        _is_exceeded = self.current_value(secs) + value > threshold
         
         # Only update the score on success - allows minimum rate through
         # regardless of how frequently it is called.
@@ -50,7 +49,7 @@ class RateLimit(object):
 
 class TestRateLimit(unittest.TestCase):
     def test_base(self):
-        rate = RateLimit(0)
+        rate = RateLimit()
         self.assertEqual(rate.current_value(10), 0)
         v = rate.current_value(20, 100)
         self.assertEqual(v, 100)
@@ -58,7 +57,7 @@ class TestRateLimit(unittest.TestCase):
         self.assertAlmostEqual(rate.current_value(80), 50)
         self.assertAlmostEqual(rate.current_value(140), 25)
         
-        rate = RateLimit(0)
+        rate = RateLimit()
         v = rate.current_value(1)
         for x in range(1, 100):
             v2 = rate.current_value(x,1)
@@ -67,20 +66,20 @@ class TestRateLimit(unittest.TestCase):
             v = v2
 
     def test_limits(self):
-        rate = RateLimit(75)
+        rate = RateLimit()
         for x in range(1,200):
             v = rate.current_value(x)
             self.assert_(v <= 75)
-            if rate.is_exceeded(x):
+            if rate.is_exceeded(x, 75):
                 break
         self.assert_(x > 100)
         
     def test_converge(self):
         for half in range(1,50,10):
-            rate = RateLimit(100,half)
+            rate = RateLimit(half)
             limit = 1.0/(1.0 - rate.k)
             for x in xrange(half*10):
-                rate.is_exceeded(x)
+                rate.is_exceeded(x, 100)
             #print "Half life: %d -> %.2f" % (half, rate.current_value(x))           
             self.assertAlmostEqual(rate.current_value(x), limit, 0)
         
