@@ -1,0 +1,48 @@
+# Mercurial configuration file
+[ui]
+username = Mike Koss <mckoss@startpad.org>
+verbose = True
+style = compact
+
+[hooks]
+pretxncommit.crlf = python:hgext.win32text.forbidcrlf
+
+[extensions]
+# color =
+rebase =
+mq =
+win32text =
+graphlog =
+
+[decode]
+**.txt = cleverdecode:
+**.py = cleverdecode:
+**.yaml = cleverdecode:
+**.html = cleverdecode:
+**.js = cleverdecode:
+**.css = cleverdecode:
+
+[encode]
+**.txt = cleverencode:
+**.py = cleverencode:
+**.yaml = cleverencode:
+**.html = cleverencode:
+**.js = cleverencode:
+**.css = cleverencode:
+
+[color]
+status.modified = yellow
+status.added = green
+status.removed = red
+status.deleted = magenta
+status.unknown = cyan
+status.ignored = cyan
+diff.diffline = bold
+diff.extended = cyan bold
+diff.file_a = red bold
+diff.file_b = green bold
+diff.hunk = yellow
+diff.deleted = red
+diff.inserted = green
+diff.changed = white
+diff.trailingwhitespace = bold red_background
