@@ -71,13 +71,15 @@
   (interactive)
   (if (< (point) (mark))
       (exchange-point-and-mark))
-  (indent-rigidly (mark) (point) tab-width))
+  (indent-rigidly (mark) (point) 4))
 
 (defun decrease-indent ()
   (interactive)
   (if (< (point) (mark))
       (exchange-point-and-mark))
-  (indent-rigidly (mark) (point) (- tab-width)))
+  (indent-rigidly (mark) (point) -4))
 
 (global-set-key "\M-[" 'decrease-indent)
 (global-set-key "\M-]" 'increase-indent)
+
+(global-set-key [f12] 'speedbar)
