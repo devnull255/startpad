@@ -15,20 +15,10 @@ win32text =
 graphlog =
 
 [decode]
-**.txt = cleverdecode:
-**.py = cleverdecode:
-**.yaml = cleverdecode:
-**.html = cleverdecode:
-**.js = cleverdecode:
-**.css = cleverdecode:
+** = cleverdecode:
 
 [encode]
-**.txt = cleverencode:
-**.py = cleverencode:
-**.yaml = cleverencode:
-**.html = cleverencode:
-**.js = cleverencode:
-**.css = cleverencode:
+** = cleverencode:
 
 [color]
 status.modified = yellow
