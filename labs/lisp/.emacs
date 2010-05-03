@@ -83,3 +83,44 @@
 (global-set-key "\M-]" 'increase-indent)
 
 (global-set-key [f12] 'speedbar)
+
+(setq tags-table-list
+      '("/src/pageforest"
+        "/src/pageforest/appengine/static/src/js"
+        "/python25/lib/site-packages/django-1.1.1-py2.5.egg/django"
+        "/program files/google/google_appengine/google/appengine"
+        ))
+
+; Run lint on the current file (should be saved).
+; Adapted from http://xahlee.org/emacs/elisp_run_current_file.html
+(defun lint-current-file ()
+  (interactive)
+  (let (extention-alist fname suffix progName cmdStr)
+    (setq extention-alist
+          '(
+            ("py" . "lint -e")
+            ("js" . "jslint")
+            )
+          )
+    (setq fname (buffer-file-name))
+    (setq suffix (file-name-extension fname))
+    (setq progName (cdr (assoc suffix extention-alist)))
+    (setq cmdStr (concat progName " \""   fname "\""))
+
+    (if progName
+        (compile cmdStr)
+      (message "No recognized program file suffix for this file."))
+    )
+  )
+
+(global-set-key [f5] 'lint-current-file)
+
+; Do I have to define an intermediate function?
+(defun do-check () (interactive) (compile "check"))
+(global-set-key [f6] 'do-check)
+
+(defun pep8 ()
+  (interactive)
+  (compile (concat "pep8 \"" (buffer-file-name) "\""))
+)
+(global-set-key [f11] 'pep8)
