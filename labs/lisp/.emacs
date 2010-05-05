@@ -116,7 +116,7 @@
 (global-set-key [f5] 'lint-current-file)
 
 ; Do I have to define an intermediate function?
-(defun do-check () (interactive) (compile "check"))
+(defun do-check () (interactive) (compile "check -v"))
 (global-set-key [f6] 'do-check)
 
 (defun pep8 ()
