@@ -1,0 +1,62 @@
+Design Note for Kahnsept
+
+Kahnsept is constructed from 4 major components:
+
+- Database - the (in-memory) database that contains the complete schema for the Kahnsept system.
+- Query System - an expression language and query processor for executing queries against the store
+- Display System - a library of display functions that render Kahnsept data using various formats, views, and
+  layouts.
+- User Interface - an interactive user interface for users to interact with a Kahnsept database to create,
+  and modify Kahnsept data.
+  
+Database
+========
+The Kahnsept Database has some unique features when compared to standard data representations in typical
+programming languages.  It is inspired by the JavaScript object representation, with some special features added:
+
+- Mutiple inheritance - a Kahnsept can inherit "prototype" values from multiple parent Kahnsepts.
+- Anonymous properties - Unlike traditional property-based stores, a Kahnsept object's properties are
+  referenced by Type and (optional) Tag references - properties do NOT have a unique Name within their containing
+  Kahnsept.  One can think of all property access as a query on the parent Kahnsept, Type, and Tag identifiers.
+- All properties are multi-valued - Any Kahnsept property can be multi-valued
+- Converse relationships
+
+Type Description Objects
+========================
+Kahnsept types are based on extended Prototypes.  A prototype Kahnsept contains:
+- Required cardinality (m:n, e.g., 1:1 for "required" single values, 0:N for any number of
+  optional values)
+- default values
+- Query for selection of possible value instances
+
+Query Language
+==============
+Examples:
+
+Kahnsept - The root Kahnsept on which all others are children.
+k.Type - related Kahnsepts of a given Type
+k[Tag] - related Kahnsepts of tagged as Tag
+k.Type[Tag] - related Kahnsepts of a given type, and tagged as Tag
+
+*Type - all (ultimate) children of a given Type
+
+k.~ - all Kahnsepts that reference k
+k.~Type - 
+k.~[Tag] - all Kahnsepts that reference k using Tag
+k.~Type[Tag]
+
+For example:
+
+chris = a Person Kahnsept
+chris.Name - Chris's name
+chris.Phone - Chris's phone number(s)
+chris.Phone[home] - Chris's home phone numbers(s)
+chris.Location - Chris locaation(s)
+chris.Location[home] - Chris's home location
+home = chris.Location[home].Address - Chris's home address
+home.~Person[home] - the people who share the Chris's home location
+
+mike = new Person
+mike.Name = "Mike Koss"
+mike.Phone = {Home: "425 456 0814", Work: "206 388 3466"}
+mike.Location[Home] = chris.Location[Home]
