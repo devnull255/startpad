@@ -99,7 +99,7 @@
     (setq extention-alist
           '(
             ("py" . "lint -e")
-            ("js" . "jslint")
+            ("js" . "jslint --weak")
             )
           )
     (setq fname (buffer-file-name))
