@@ -82,13 +82,9 @@
 (global-set-key "\M-[" 'decrease-indent)
 (global-set-key "\M-]" 'increase-indent)
 
-(global-set-key [f12] 'speedbar)
-
 (setq tags-table-list
       '("/src/pageforest"
         "/src/pageforest/appengine/static/src/js"
-        "/python25/lib/site-packages/django-1.1.1-py2.5.egg/django"
-        "/program files/google/google_appengine/google/appengine"
         ))
 
 ; Run lint on the current file (should be saved).
@@ -112,15 +108,28 @@
       (message "No recognized program file suffix for this file."))
     )
   )
-
 (global-set-key [f5] 'lint-current-file)
 
 ; Do I have to define an intermediate function?
 (defun do-check () (interactive) (compile "check -v"))
 (global-set-key [f6] 'do-check)
 
+; Evaluate a region as a python expression and replace it with it's result
+(defun pyval-region ()
+  (interactive)
+  (shell-command-on-region (mark) (point) "pyval" t t))
+(global-set-key [f7] 'pyval-region)
+
+; Pretty print the selected region (javascript only for now)
+(defun pretty-print-region ()
+  (interactive)
+  (shell-command-on-region (mark) (point) "jspretty" t t))
+(global-set-key [f8] 'pretty-print-region)
+
 (defun pep8 ()
   (interactive)
   (compile (concat "pep8 \"" (buffer-file-name) "\""))
 )
 (global-set-key [f11] 'pep8)
+
+(global-set-key [f12] 'speedbar)
