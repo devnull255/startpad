@@ -1,0 +1,13 @@
+<script>
+
+// Google I/O 2010 Bootcamp sample
+function tabCreated(tab) {
+    console.log("tab created: " + tab.id);
+    for (var prop in tab) {
+        console.log(prop + ": " + tab[prop]);
+    }
+   chrome.tabs.update(tab.id, {selected: true});
+}
+
+chrome.tabs.onCreated.addListener(tabCreated);
+</script>
