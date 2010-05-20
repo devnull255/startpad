@@ -1,70 +1,99 @@
-var divPath = document.createElement('div');
-divPath.setAttribute('id', '_path');
-divPath.setAttribute('style', "height: 100px;border:1px solid red;");
-document.body.insertBefore(divPath, document.body.firstChild);
+namespace.lookup('org.startpad.xray.chrome').defineOnce(function (ns) {
 
-var nodeList = [];
-var nodeMap = {};
+    var divPath = document.createElement('div');
+    divPath.setAttribute('id', '_path');
+    divPath.setAttribute('style', "height: 100px;border:1px solid red;");
+    document.body.insertBefore(divPath, document.body.firstChild);
 
-function walkDOM(node, level) {
-    if (node.nodeType != 1)
-        return;
-
-    nodeList.push({node: node, level: level});
-    nodeMap[node] = nodeList.length - 1;
-
-    var children = node.children;
-    for (var i = 0; i < children.length; i++) {
-        walkDOM(children[i], level + 1);
+    function SourceLine(sf, node, level) {
+        this.node = node;
+        this.level = level;
+        this.lineNumber = sf.sourceList.length;
+        this.lineMatch = this.lineNumber;
+        sf.sourceList.push(this);
+        sf.nodeIndex[node] = this.lineNumber;
     }
-}
 
-function domPath(elem) {
-    s = "";
-    while (elem) {
-        s = elem.tagName + " - " + s;
-        elem = elem.parentElement;
-    }
-    return s;
-}
+    SourceLine.methods({
+        endNode: function (sf) {
+            if (sf.sourceList.length > this.lineNumber + 1) {
+                var closeNode = new SourceLine(sf, null, this.level);
+                closeNode.lineMatch = this.lineNumber;
+                this.lineMatch = closeNode.lineNumber;
+            }
+        },
 
-function onMouseMove(evt) {
-    var node = evt.target;
-    var line = nodeMap[node];
-    var minLine = Math.max(line - 3, 0);
-    var maxLine = Math.min(minLine + 5, nodeList.length);
+        format: function (sf) {
+            var i;
+            var s = "";
 
-    var s = "";
-    for (var dispLine = minLine; dispLine < maxLine; dispLine++) {
-        if (dispLine == line) {
-            s += '<b>';
+            for (i = 0; i < this.level; i++) {
+                s += "&nbsp;&nbsp;";
+            }
+
+            s += '&lt;';
+            if (this.lineMatch < this.lineNumber) {
+                var sourceOpen = sf.sourceList[this.lineMatch];
+                s += '/' + sourceOpen.node.tagName.toLowerCase();
+            }
+            else {
+                s += this.node.tagName.toLowerCase();
+                for (i = 0; i < this.node.attributes.length; i++) {
+                    var attr = this.node.attributes[i];
+                    s += ' ' + attr.name + '="' + attr.value + '"';
+                }
+            }
+            s += '&gt;';
+            return s;
         }
-        s += formatLine(nodeList[dispLine].node, nodeList[dispLine].level) + '<br\>';
-        if (dispLine == line) {
-            s += '</b>';
+    });
+
+    function SourceFile(rootNode) {
+        this.rootNode = rootNode;
+        this.sourceList = [];
+        this.nodeIndex = {};
+
+        this.walkDOM(rootNode, 0);
+        document.addEventListener('mousemove',
+                                  this.onMouseMove.fnMethod(this));
+    }
+
+    SourceFile.methods({
+        walkDOM: function(node, level) {
+            if (node.nodeType != 1) {
+                return;
+            }
+
+            var source = new SourceLine(this, node, level);
+
+            var children = node.children;
+            for (var i = 0; i < children.length; i++) {
+                this.walkDOM(children[i], level + 1);
+            }
+
+            source.endNode(this);
+        },
+
+        onMouseMove: function(evt) {
+            var node = evt.target;
+            console.log("mouse move", node.tagName);
+            var line = this.nodeIndex[node];
+            var minLine = Math.max(line - 2, 0);
+            var maxLine = Math.min(minLine + 5, this.sourceList.length);
+
+            var s = "";
+            for (var dispLine = minLine; dispLine < maxLine; dispLine++) {
+                var sT = this.sourceList[dispLine].format(this);
+                if (dispLine == line) {
+                    sT = '<b>' + sT + '</b>';
+                }
+                s += sT + '<br/>';
+            }
+            console.log(s);
+            divPath.innerHTML = s;
         }
-    }
+    });
 
-    divPath.innerHTML = s;
-}
 
-function formatLine(node, level) {
-    var s = "";
-
-    for (var i = 0; i < level; i++) {
-        s += "&nbsp;&nbsp;";
-    }
-
-    s += '&lt;' + node.tagName;
-    for (i = 0; i < node.attributes.length; i++) {
-        var attr = node.attributes[i];
-        s += ' ' + attr.name + '="' + attr.value + '"';
-    }
-    s += '&gt;';
-    console.log(s);
-    return s;
-}
-
-walkDOM(document.body.parentElement, 0);
-
-document.addEventListener('mousemove', onMouseMove);
+    var sf = new SourceFile(document.body.parentElement, 0);
+});

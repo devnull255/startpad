@@ -6,7 +6,7 @@
         "content_scripts": [
             {
             "matches": ["http://*/*", "file://*/*"],
-            "js": ["contentscript.js"]
+            "js": ["namespace.js", "contentscript.js"]
             }
         ]
 }
