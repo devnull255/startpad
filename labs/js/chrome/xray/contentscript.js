@@ -55,7 +55,13 @@ function formatLine(node, level) {
         s += "&nbsp;&nbsp;";
     }
 
-    s += node.tagName;
+    s += '&lt;' + node.tagName;
+    for (i = 0; i < node.attributes.length; i++) {
+        var attr = node.attributes[i];
+        s += ' ' + attr.name + '="' + attr.value + '"';
+    }
+    s += '&gt;';
+    console.log(s);
     return s;
 }
 
