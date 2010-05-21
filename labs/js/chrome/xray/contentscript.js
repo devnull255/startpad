@@ -3,9 +3,14 @@ namespace.lookup('org.startpad.xray.chrome').defineOnce(function (ns) {
     var TEXT_NODE = 3;
 
     var divPath = document.createElement('div');
-    divPath.setAttribute('id', '_path');
-    divPath.setAttribute('style', "background:black;color:green;font-family:Courier");
-    document.body.insertBefore(divPath, document.body.firstChild);
+    divPath.setAttribute('id', '_xray');
+    divPath.setAttribute('style',
+                         "position:absolute;top:0;left:0;" +
+                         "transparency
+                         "background:black;color:green;" +
+                         "font-family:Courier;font-size:12px;" +
+                         "margin:0;padding:0;");
+    document.body.appendChild(divPath);
 
     function SourceLine(sf, node, level, fOpen) {
         if (fOpen) {
@@ -42,7 +47,7 @@ namespace.lookup('org.startpad.xray.chrome').defineOnce(function (ns) {
 
         closeTag: function (node) {
             var len = this.line.length;
-            this.line = this.line.substr(0, len - 1) + "/&gt;";
+            this.line = this.line.substr(0, len - 4) + "/&gt;";
         }
     });
 
@@ -82,25 +87,25 @@ namespace.lookup('org.startpad.xray.chrome').defineOnce(function (ns) {
 
         },
 
+        dumpLines: function() {
+            var s = "";
+            for (var i = 0; i < this.sourceList.length; i++) {
+                s += '<p id="_xray_' + i + '" ' +
+                    'style="margin:0;padding:0;"' +
+                    '>' + this.sourceList[i].line + '</p>';
+            }
+            return s;
+        },
+
         onMouseMove: function(evt) {
             var node = evt.target;
             var lineNumber = this.nodeIndex[node];
-            var minLine = Math.max(lineNumber - 2, 0);
-            var maxLine = Math.min(minLine + 5, this.sourceList.length);
-
-            var s = "";
-            for (var dispLine = minLine; dispLine < maxLine; dispLine++) {
-                var sT = this.sourceList[dispLine].line;
-                if (dispLine == lineNumber) {
-                    sT = '<b>' + sT + '</b>';
-                }
-                s += sT + '<br/>';
-            }
-            console.log(s);
-            divPath.innerHTML = s;
+            var textLine = document.getElementById("_xray_" + lineNumber);
+            textLine.style.fontStyle = 'bold';
         }
     });
 
 
     var sf = new SourceFile(document.body.parentElement, 0);
+    divPath.innerHTML = sf.dumpLines();
 });
