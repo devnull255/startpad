@@ -1,50 +1,48 @@
 namespace.lookup('org.startpad.xray.chrome').defineOnce(function (ns) {
+    var ELEMENT_NODE = 1;
+    var TEXT_NODE = 3;
 
     var divPath = document.createElement('div');
     divPath.setAttribute('id', '_path');
-    divPath.setAttribute('style', "height: 100px;border:1px solid red;");
+    divPath.setAttribute('style', "background:black;color:green;font-family:Courier");
     document.body.insertBefore(divPath, document.body.firstChild);
 
-    function SourceLine(sf, node, level) {
-        this.node = node;
+    function SourceLine(sf, node, level, fOpen) {
+        if (fOpen) {
+            this.line = this.format(node);
+        }
+        else {
+            this.line = '&lt;/' + node.tagName.toLowerCase() + '&gt;';
+        }
         this.level = level;
         this.lineNumber = sf.sourceList.length;
-        this.lineMatch = this.lineNumber;
         sf.sourceList.push(this);
         sf.nodeIndex[node] = this.lineNumber;
     }
 
     SourceLine.methods({
-        endNode: function (sf) {
-            if (sf.sourceList.length > this.lineNumber + 1) {
-                var closeNode = new SourceLine(sf, null, this.level);
-                closeNode.lineMatch = this.lineNumber;
-                this.lineMatch = closeNode.lineNumber;
-            }
-        },
-
-        format: function (sf) {
+        format: function (node) {
             var i;
             var s = "";
 
-            for (i = 0; i < this.level; i++) {
-                s += "&nbsp;&nbsp;";
+            if (node.nodeType == TEXT_NODE) {
+                s = node.textContent.substr(0, 30);
+                return s;
             }
 
             s += '&lt;';
-            if (this.lineMatch < this.lineNumber) {
-                var sourceOpen = sf.sourceList[this.lineMatch];
-                s += '/' + sourceOpen.node.tagName.toLowerCase();
-            }
-            else {
-                s += this.node.tagName.toLowerCase();
-                for (i = 0; i < this.node.attributes.length; i++) {
-                    var attr = this.node.attributes[i];
-                    s += ' ' + attr.name + '="' + attr.value + '"';
-                }
+            s += node.tagName.toLowerCase();
+            for (i = 0; i < node.attributes.length; i++) {
+                var attr = node.attributes[i];
+                s += ' ' + attr.name + '="' + attr.value + '"';
             }
             s += '&gt;';
             return s;
+        },
+
+        closeTag: function (node) {
+            var len = this.line.length;
+            this.line = this.line.substr(0, len - 1) + "/&gt;";
         }
     });
 
@@ -55,36 +53,45 @@ namespace.lookup('org.startpad.xray.chrome').defineOnce(function (ns) {
 
         this.walkDOM(rootNode, 0);
         document.addEventListener('mousemove',
-                                  this.onMouseMove.fnMethod(this));
+                                 this.onMouseMove.fnMethod(this));
     }
 
     SourceFile.methods({
         walkDOM: function(node, level) {
-            if (node.nodeType != 1) {
+            if (node.nodeType != ELEMENT_NODE &&
+                node.nodeType != TEXT_NODE) {
                 return;
             }
 
-            var source = new SourceLine(this, node, level);
+            var source = new SourceLine(this, node, level, true);
+            var lines = this.sourceList.length;
 
             var children = node.children;
             for (var i = 0; i < children.length; i++) {
                 this.walkDOM(children[i], level + 1);
             }
 
-            source.endNode(this);
+            // Closing tag needed
+            // TODO: For small TEXT_NODE's put close on the same line
+            if (lines != this.sourceList.length) {
+                new SourceLine(this, node, level, false);
+            }
+            else {
+                source.closeTag();
+            }
+
         },
 
         onMouseMove: function(evt) {
             var node = evt.target;
-            console.log("mouse move", node.tagName);
-            var line = this.nodeIndex[node];
-            var minLine = Math.max(line - 2, 0);
+            var lineNumber = this.nodeIndex[node];
+            var minLine = Math.max(lineNumber - 2, 0);
             var maxLine = Math.min(minLine + 5, this.sourceList.length);
 
             var s = "";
             for (var dispLine = minLine; dispLine < maxLine; dispLine++) {
-                var sT = this.sourceList[dispLine].format(this);
-                if (dispLine == line) {
+                var sT = this.sourceList[dispLine].line;
+                if (dispLine == lineNumber) {
                     sT = '<b>' + sT + '</b>';
                 }
                 s += sT + '<br/>';
