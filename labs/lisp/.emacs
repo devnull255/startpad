@@ -86,6 +86,8 @@
 (global-set-key "\M-[" 'decrease-indent)
 (global-set-key "\M-]" 'increase-indent)
 
+(global-set-key (kbd "C-x SPC") 'fixup-whitespace)
+
 (setq tags-table-list
       '("/src/pageforest"
         "/src/pageforest/appengine/static/src/js"
@@ -100,6 +102,7 @@
           '(
             ("py" . "lint -e")
             ("js" . "jslint --strong")
+            ("html" . "tidy.py")
             )
           )
     (setq fname (buffer-file-name))
