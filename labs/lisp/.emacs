@@ -100,7 +100,7 @@
   (let (extention-alist fname suffix progName cmdStr)
     (setq extention-alist
           '(
-            ("py" . "lint -e")
+            ("py" . "lint8")
             ("js" . "jslint --strong")
             ("html" . "tidy.py")
             )
