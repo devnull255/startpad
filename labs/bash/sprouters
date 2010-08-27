@@ -1,23 +1,20 @@
 #!/bin/bash
-echo StartPad Router Usage
-echo =====================
+echo StartPad Router Usage...
 SECS=5
 
 VAL="s/^.*: \(.*\)/\1/"
-StartPad_UP=0
-StartPad_DOWN=0
-Entertonement_UP=0
-Entertonement_DOWN=0
-Impresys_UP=0
-Impresys_DOWN=0
 
 function track {
     NAME=$1
     DIR=$2
     VAR_NAME=$3
 
+    if [ -z ${!VAR_NAME} ]; then eval ${VAR_NAME}=0; fi
+
     BYTES=`snmpget -v1 -c $COMMUNITY $IP IF-MIB::if${DIR}Octets.$IF | sed -e "$VAL"`
-    printf "$NAME: %'d kbps\n" $(( ($BYTES - ${!VAR_NAME})/$SECS/100 ))
+    if [ ${!VAR_NAME} != 0 ]; then
+        printf "$NAME: %'d kbps\n" $(( ($BYTES - ${!VAR_NAME})/$SECS/100 ))
+    fi
     eval ${VAR_NAME}=$BYTES
 }
 
@@ -36,6 +33,7 @@ while true; do
     trackpair StartPad 192.168.1.1 public 7
     trackpair Entertonement 67.136.217.100 public 1
     trackpair Impresys 67.136.217.101 aviary10 7
+    trackpair Printer 192.168.1.2 public 1
 
     sleep $SECS
     echo =====================
