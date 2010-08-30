@@ -1,6 +1,13 @@
 #!/bin/bash
-echo StartPad Router Usage...
 SECS=5
+
+SECRET=$1
+if [ -z $SECRET ]; then
+    echo -n "Community string: "
+    stty -echo
+    read SECRET
+    stty echo
+fi
 
 VAL="s/^.*: \(.*\)/\1/"
 
@@ -28,11 +35,26 @@ function trackpair {
     track "$ROUTER DOWN" Out ${ROUTER}_DOWN
 }
 
+function uptime {
+    IP=$1
+    COMMUNITY=$2
+
+    NAME=`snmpget -v1 -c $COMMUNITY $IP SNMPv2-MIB::sysName.0 | sed -e "$VAL"`
+    UPTIME=`snmpget -v1 -c $COMMUNITY $IP DISMAN-EVENT-MIB::sysUpTimeInstance | sed -e "$VAL"`
+    printf "$NAME: $UPTIME\n"
+}
+
+uptime 192.168.1.1 public
+uptime 192.168.1.4 public
+uptime 192.168.1.2 public
+uptime 67.136.217.100 public
+uptime 67.136.217.101 $SECRET
+
 while true; do
     # StartPad
     trackpair StartPad 192.168.1.1 public 7
     trackpair Entertonement 67.136.217.100 public 1
-    trackpair Impresys 67.136.217.101 aviary10 7
+    trackpair Impresys 67.136.217.101 $SECRET 7
     trackpair Printer 192.168.1.2 public 1
 
     sleep $SECS
