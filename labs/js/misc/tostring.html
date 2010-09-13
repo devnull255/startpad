@@ -1,14 +1,15 @@
 <html>
 <head>
-<script src="http://www.pageforest.com/static/src/js/namespace.js"/>
-<script src="http://www.pageforest.com/static/src/js/base.js"/>
+<script src="http://www.pageforest.com/static/src/js/namespace.js"></script>
 <script>
 function Foo() {
 }
 
-Foo.prototype.toString = function() {
-    return "hello";
-}
+Foo.methods({
+    toString: function() {
+        return "hello";
+    }
+});
 
 function test() {
     var x = new Foo();
@@ -20,6 +21,7 @@ function test() {
         d.innerHTML = "SUCCESS";
     }
 }
+
 </script>
 </head>
 <body onload="test();">
