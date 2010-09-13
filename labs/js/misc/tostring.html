@@ -1,0 +1,27 @@
+<html>
+<head>
+<script>
+function Foo() {
+}
+
+Foo.prototype.toString = function() {
+    return "hello";
+}
+
+function test() {
+    var x = new Foo();
+    var d = document.getElementById('output');
+    var s = x.toString();
+    if (s != "hello") {
+        d.innerHTML = "FAIL: expected 'hello', and saw '" + s + "'";
+    } else {
+        d.innerHTML = "SUCCESS";
+    }
+}
+</script>
+</head>
+<body onload="test();">
+<h1>toString() override test</h1>
+<div id="output"></div>
+</body>
+</html>
