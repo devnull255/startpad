@@ -5,21 +5,28 @@
 function Foo() {
 }
 
-Foo.methods({
+var obj = {
     toString: function() {
         return "hello";
     }
-});
+};
+
+Foo.methods(obj);
 
 function test() {
     var x = new Foo();
     var d = document.getElementById('output');
     var s = x.toString();
+    var o = "";
     if (s != "hello") {
-        d.innerHTML = "FAIL: expected 'hello', and saw '" + s + "'";
+        o = "FAIL: expected 'hello', and saw '" + s + "'";
     } else {
-        d.innerHTML = "SUCCESS";
+        o = "SUCCESS";
     }
+
+    o += "<br/> obj.hasOwnProperty('toString') == " + obj.hasOwnProperty('toString');
+
+    d.innerHTML = o;
 }
 
 </script>
