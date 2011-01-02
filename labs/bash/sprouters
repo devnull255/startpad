@@ -64,7 +64,7 @@ uptime 192.168.1.4 public
 uptime 192.168.1.2 public
 uptime 67.136.217.100 public
 uptime 67.136.217.101 $SECRET
-#uptime 67.136.217.102 public
+uptime 67.136.217.102 public
 uptime mckoss.dyndns.org $SECRET
 uptime mawgrammy.dyndns.org $SECRET
 
@@ -73,7 +73,7 @@ while true; do
     trackpair StartPad 192.168.1.1 public 7
     trackpair Entertonement 67.136.217.100 public 1
     trackpair Impresys 67.136.217.101 $SECRET 7
-    # trackpair SlimTrader 67.136.217.102 public 7
+    trackpair SlimTrader 67.136.217.102 public 2
     trackpair Printer 192.168.1.2 public 1
     trackpair mckoss mckoss.dyndns.org $SECRET 7
     trackpair mawgrammy mawgrammy.dyndns.org $SECRET 7

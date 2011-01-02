@@ -117,8 +117,26 @@
   )
 (global-set-key [f5] 'lint-current-file)
 
+(defun ack-pf (pattern)
+  (interactive (list (read-from-minibuffer "Ack: ")))
+  (compile (concat "ack --nocolor --noheading \""
+                   pattern
+                   "\" ~/src/pageforest")))
+(global-set-key [f4] 'ack-pf)
+
+(defun ack-py (pattern)
+  (interactive (list (read-from-minibuffer "Ack: ")))
+  (compile (concat "ack --nocolor --noheading --py \""
+                   pattern
+                   "\" ~/src/pageforest")))
+
+(defun ack-js (pattern)
+  (interactive (list (read-from-minibuffer "Ack: ")))
+  (compile (concat "ack --nocolor --noheading --js \""
+                   pattern
+                   "\" ~/src/pageforest")))
 ; Do I have to define an intermediate function?
-(defun do-check () (interactive) (compile "check -v"))
+(defun do-check () (interactive) (compile "~/src/pageforest/tools/check.py -v || cat ~/src/pageforest/check.log"))
 (global-set-key [f6] 'do-check)
 
 ; Evaluate a region as a python expression and replace it with it's result
