@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+<title>
+    Chaining Demo
+</title>
+<style>
+pre {margin: 0; padding: 5px;}
+pre.input {background-color: #CCC;} 
+pre.output {background-color: #444; color: #FFF;}
+</style>
+<script id="sample" type="text/javascript">
+function Vector(x, y, z) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+}
+
+Vector.prototype.add = function (v2) {
+    var v = new Vector(this.x + v2.x,
+                       this.y + v2.y,
+                       this.z + v2.z);
+    return v;
+}
+
+Vector.prototype.equal = function (v2) {
+    return this.x == v2.x && this.y == v2.y && this.z == v2.z;
+}
+</script>
+<script type="text/javascript">
+Vector.prototype.toString = function() {
+    return '[' + this.x + ', ' + this. y + ', ' + this.z + ']';
+}
+
+function show(s) {
+    document.write('<pre>' + s + '</pre>');
+}
+
+function demo(s) {
+    document.write('<pre class="input">' + s + '</pre>');
+    document.write('<pre class="output">' + eval(s) + '</pre>')
+}
+
+</script>
+</head>
+<body>
+<h1><script type="text/javascript">document.write(document.title);</script></h1>
+<script>
+    show(document.getElementById('sample').innerHTML);
+    demo("v1 = new Vector(1, 2, 3);");
+    demo("v2 = new Vector(1, 2, 3);");
+    demo("v3 = new Vector(4, 5, 6);");
+    demo("v1.add(v3);");
+    demo("v1.add(v2).add(v3);")
+    demo("v1.equal(v2);");
+    demo("v1.equal(v3);");
+</script>
+</body>
+</html>

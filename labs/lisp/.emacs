@@ -158,5 +158,3 @@
 (global-set-key [f11] 'pep8)
 
 (global-set-key [f12] 'speedbar)
-
-(tool-bar-mode -1)
