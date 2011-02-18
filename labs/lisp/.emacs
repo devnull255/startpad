@@ -134,8 +134,8 @@
   (interactive (list (read-from-minibuffer "Ack: ")))
   (compile (concat "ack --nocolor --noheading --js \""
                    pattern
-                   "\" ~/src/pageforest")))
-; Do I have to define an intermediate function?
+                   "\" ~/src/pageforest/appengine/static/src/js")))
+
 (defun do-check () (interactive) (compile "~/src/pageforest/tools/check.py -v || cat ~/src/pageforest/check.log"))
 (global-set-key [f6] 'do-check)
 
