@@ -1,2 +1,17 @@
+<html>
+<head>
+<script type="text/javascript"
+        src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+<script>
+function test() {
+  $.ajax('http://mckoss.com', {
+    success: function() {alert('done');}
+  });
+}
+</script>
+<body>
 <a href="referer.html">Self</a>
 <p>Referer: '<script>document.write(document.referrer);</script>'
+<p><button onClick="test();">Test</button></p>
+</body>
+</html>
