@@ -10,3 +10,16 @@ bin/*
 .classpath
 .settings/*
 .project
+syntax: glob
+*.log
+*~
+\#*\#
+*.orig
+TAGS
+nosetests.xml
+coverage.xml
+.coverage
+.passwd
+.pf
+.DS_Store
+pferror.html
