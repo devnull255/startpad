@@ -1,0 +1,12 @@
+{
+        "name": "My First Extension",
+        "version": "1.0",
+        "description": "Whatever",
+        "permissions": ["tabs"],
+        "content_scripts": [
+            {
+            "matches": ["http://*/*", "file://*/*"],
+            "js": ["namespace.js", "contentscript.js"]
+            }
+        ]
+}

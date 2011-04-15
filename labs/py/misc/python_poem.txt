@@ -1,0 +1,76 @@
+Is it possible to construct English sentences purely from Python keywords?
+How about a poem written in Python keywords?
+
+The 30 keywords in Python are:
+
+    and       del       for       is        raise
+    assert    elif      from      lambda    return
+    break     else      global    not       try
+    class     except    if        or        while
+    continue  exec      import    pass      yield
+    def       finally   in        print
+
+    with (2.5)
+
+Here' is how they are organized grammatically:
+
+    verb (11): is raise(n) assert return break(n) try continue import(n) pass(n) yield print(n)
+    prep (4): for from except in with
+    conjunction (4): and or if while
+    adj (2): global else
+    adv (2): not finally
+    noun (3): class lambda exec
+    nonsense (2): elif def del
+
+Some sentence fragments:
+
+    yield not for print or raise,
+    except while
+    except for del, def finally raise from class x import and return if elif is not yield while
+
+Some extra special words (special methods and module names) that could be added to the pure Keywords:
+
+types/contsants: None, False, int, long, float, str, unicode, tuple, buffer, xrange, set, frozenset,
+    dict, file, list, object, set
+functions: abs, all, any, basestring, bin, bool, callable, chr, classmethod, cmp, compile, complex,
+    delattr, dir, divmod, enumerate, eval, execfile, file, filter, float, format, getattr, globals,
+    hasattr, hash, help, hex, id, input, int, isinstance, issubclass, iter, len, map, max, min, next,
+    oct, open, ord, pow, print, property, range, raw_input, reduce, reload, repr, reversed, round,
+    setattr, slice, sorted, staticmethod, sum, super, type, unichr, unicode, vars, xrange, zip,
+
+Even more module names here: http://docs.python.org/modindex.html
+
+------
+
+For comparison, the JavaScript keywords (ECMA script 262 spec dated December 2009):
+http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-262.pdf
+
+    break    do    instanceof  typeof  case    else   new       var       catch  finally
+    return   void  continue    for     switch  while  debugger  function  this   with
+    default  if    throw       delete  in      try
+
+    (why are get and set not listed in the spec as keywords?)
+
+defined constants:
+
+    true  false  null  undefined  NaN  Infinity
+
+and standard objects and types:
+
+    String  Array  Math  Number  Function  Object  Boolean  Null  Undefined
+
+And future reserved keywords:
+
+    class       enum  extends     super   const   export     import
+    implements  let   private     public  yield   interface  package  protected  static
+
+(see Dec meeting notes of the TC39 committee - https://mail.mozilla.org/pipermail/es5-discuss/2009-May/002691.html).
+
+This page (http://javascript.about.com/library/blreserved.htm) also lists:
+    abstract  boolean  byte  char       const  debugger  double  final  float
+    goto      int      long  namespace  native short     throws  use    volatile
+
+(no source for these keywords is given - but Rhino does prohibit some of them - like "throws"!).
+
+
+

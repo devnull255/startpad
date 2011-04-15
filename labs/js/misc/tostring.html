@@ -1,0 +1,68 @@
+<html>
+<head>
+<script>
+var divOut;
+
+var obj = {
+};
+
+function hello() {
+    return "hello";
+}
+
+function print(s) {
+    if (divOut == undefined) {
+        divOut = document.getElementById('output');
+    }
+
+    var d = document.createElement('div');
+    if (d.textContent != undefined) {
+        d.textContent = s;
+    } else {
+        d.innerText = s;
+    }
+    divOut.appendChild(d);
+}
+
+function printEval(s) {
+    print(s + ' = ' + eval(s));
+}
+
+function test() {
+    var names;
+
+    if (Object.getOwnPropertyNames) {
+        names = Object.getOwnPropertyNames(Object.prototype);
+    } else {
+        names = ['toString', 'toLocaleString', 'hasOwnProperty',
+                 'valueOf', 'constructor', 'propertyIsEnumerable',
+                 'isPrototypeOf', '__lookupGetter__', '__defineGetter__',
+                 '__defineSetter__', '__lookupSetter__'
+                ];
+    }
+
+    for (var i = 0; i < names.length; i++) {
+        var name = names[i];
+        if (name == 'hasOwnProperty' || name == 'propertyIsEnumerable' ||
+            !Object.prototype.hasOwnProperty(name)) {
+            continue;
+        }
+        obj[name] = hello;
+        printEval("obj.hasOwnProperty('" + name + "')");
+        printEval("obj.propertyIsEnumerable('" + name + "')");
+        print('.');
+    }
+}
+
+</script>
+</head>
+<body onload="test();">
+<h1>toString() override test</h1>
+<p style="width:450px;">This page demonstrates a bug that exists in IE8 - user defined properties of
+an object that are not enumerable (won't appear in a <i>for-in</i> loop.  All of the
+following statements should be true.  But in IE, user-defined properties that have the
+same name as some pre-defined properties will not be enumerable.</p>
+
+<div id="output"></div>
+</body>
+</html>
