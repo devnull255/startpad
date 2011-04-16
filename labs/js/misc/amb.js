@@ -1,4 +1,4 @@
-function ambRun(func) {
+function ambRunWorker(id, workers, func) {
     var choices = [];
     var index;
 
@@ -7,7 +7,9 @@ function ambRun(func) {
             fail();
         }
         if (index == choices.length) {
-            choices.push({i: 0,
+            var start = Math.floor(id * values.length / workers);
+            choices.push({i: start,
+                          start: start,
                           count: values.length});
         }
         var choice = choices[index++];
@@ -25,7 +27,14 @@ function ambRun(func) {
                 throw e;
             }
             var choice;
-            while ((choice = choices.pop()) && ++choice.i == choice.count) {}
+            while ((choice = choices.pop())) {
+                if (++choice.i == choice.count) {
+                    choice.i = 0;
+                }
+                if (choice.i != choice.start) {
+                    break;
+                }
+            }
             if (choice == undefined) {
                 return undefined;
             }
