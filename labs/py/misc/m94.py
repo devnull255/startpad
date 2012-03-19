@@ -50,6 +50,8 @@ class M94(object):
     'HELLO THERE'
     >>> m.translate_line('hello there', 1)
     'UTNCT QZRLF'
+    >>> m.decode('UTNCT QZRLF')
+    True
     """
     re_non_alpha = re.compile(r"[^A-Z]")
 
@@ -65,6 +67,15 @@ class M94(object):
             results.append(self.translate_line(part, offset))
 
         return '\n'.join(results)
+
+    def decode(self, message):
+        results = []
+        for i in range(0, len(message), 25):
+            part = message[i:i + 25]
+            options = [self.translate_line(part, offset) for offset in range(2, 25)]
+            results.append(options)
+
+        return results
 
     def translate_line(self, line, offset):
         line = self.strip(line)
