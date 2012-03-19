@@ -122,6 +122,8 @@ def main():
     else:
         message = sys.stdin.read()
 
+    print "Decoding: %s" % message
+
     if options.decode:
         print m.decode(message)
     else:
@@ -145,6 +147,12 @@ class M94(object):
     'NOWIS THETI MEFOR ALLGO ODMEN'
     >>> m.decode(m.encode('xxxxxxx'))
     'ODGNT AN'
+    >>> m = M94('John Quincy Adams')
+    >>> M94.strip(m.decode("TSFSJ QEPXY UGVBD DERUB UBKSP QWBUA AJQCV KFCEP SPRFL XLTKM FDIOW"))
+    'LANDEDONBEACHNOSIXATZEROFIVEONEZEROWITHOUTCASUALTIOGREM'
+    >>> m = M94('Naval District Cipher')
+    >>> m.decode("HVSPM FPDSF XOIWB EWXQY KUGCR")
+    'REQUE STBOA TFORC ASUAL TIESV'
     """
     re_non_alpha = re.compile(r"[^A-Z]")
 
@@ -162,22 +170,19 @@ class M94(object):
 
         return '\n'.join(results)
 
-    def decode(self, message, best=True):
+    def decode(self, message):
         results = []
         message = self.strip(message)
         for i in range(0, len(message), 25):
             part = message[i:i + 25]
             options = [self.translate_line(part, offset) for offset in range(0, 26)]
-            if best:
-                best_e = None
-                for option in options:
-                    e = bits(option)
-                    if best_e is None or e < best_e:
-                        best_e = e
-                        best_option = option
-                return best_option
-
-            results.append(options)
+            best_e = None
+            for option in options:
+                e = bits(option)
+                if best_e is None or e < best_e:
+                    best_e = e
+                    best_option = option
+            results.append(best_option)
 
         return '\n'.join(results)
 
