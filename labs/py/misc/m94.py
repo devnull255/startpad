@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
+import sys
 import re
 import random
 import logging
+from optparse import OptionParser
 
 """
 M-94 Cipher device simulator.
@@ -38,6 +40,33 @@ wheels = ['ABCEIGDJFVUYMHTQKZOLRXSPWN',
           'AYJPXMVKBQWUGLOSTECHNZFRID',
           'AZDNBUHYFWJLVGRCQMPSOEXTKI',
           ]
+
+
+def main():
+    parser = OptionParser(usage="usage: %prog [options] key [message]")
+    parser.add_option('-d', '--decode', action='store_true', dest='decode',
+                     help="Decode the given message (else encode)")
+    (options, args) = parser.parse_args()
+
+    if len(args) > 2:
+        raise TypeError("Too many arguments.")
+
+    if len(args) < 1:
+        key = raw_input("Key pass-phrase: ")
+    else:
+        key = args[0]
+
+    m = M94(key)
+
+    if len(args) == 2:
+        message = args[1]
+    else:
+        message = sys.stdin.read()
+
+    if options.decode:
+        print m.decode(message)
+    else:
+        print m.encode(message)
 
 
 class M94(object):
@@ -128,3 +157,10 @@ class M94(object):
     @staticmethod
     def group_letters(letters):
         return ' '.join([letters[i:i + 5] for i in range(0, len(letters), 5)])
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception, e:
+        print e.message
