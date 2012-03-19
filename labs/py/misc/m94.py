@@ -49,7 +49,7 @@ class M94(object):
     >>> m.translate_line('hello there', 0)
     'HELLO THERE'
     >>> m.translate_line('hello there', 1)
-    'XYZZY XYZZY'
+    'UTNCT QZRLF'
     """
     re_non_alpha = re.compile(r"[^A-Z]")
 
