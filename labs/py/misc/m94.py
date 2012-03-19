@@ -138,7 +138,7 @@ class M94(object):
     'HELLO THERE'
     >>> m.translate_line('hello there', 2)
     'WAVFY KCYJH'
-    >>> m.decode('WAVFY KCYJH')[0][-1]
+    >>> m.decode('WAVFY KCYJH')
     'HELLO THERE'
     """
     re_non_alpha = re.compile(r"[^A-Z]")
@@ -156,14 +156,23 @@ class M94(object):
 
         return '\n'.join(results)
 
-    def decode(self, message):
+    def decode(self, message, best=True):
         results = []
         for i in range(0, len(message), 25):
             part = message[i:i + 25]
-            options = [self.translate_line(part, offset) for offset in range(2, 25)]
+            options = [self.translate_line(part, offset) for offset in range(0, 26)]
+            if best:
+                best_e = None
+                for option in options:
+                    e = bits(option)
+                    if best_e is None or e < best_e:
+                        best_e = e
+                        best_option = option
+                return best_option
+
             results.append(options)
 
-        return results
+        return '\n'.join(results)
 
     def translate_line(self, line, offset):
         line = self.strip(line)
@@ -218,22 +227,33 @@ class M94(object):
         return ' '.join([letters[i:i + 5] for i in range(0, len(letters), 5)])
 
 
-def entropy(s):
-    """ Calculate the entropy of the string, w.r.t. English bigram frequencies.
+def bits(s):
+    """ Calculate the information content (in bits) of the string, w.r.t. English
+    bigram frequencies.
 
-    >>> entropy('a')
-    0
-    >>> entropy('ab') == math.log(20)
-    True
-    >>> entropy('abe') == math.log(20) + math.log(47)
-    True
+    Note that information is -log(p), where p is the probability of the bigram
+    occuring.
+
+        p = f/10000
+        bits = sum(-log(p))
+        bits = sum(log(10000) - log(f)) = N * log(10000) - sum(log(f)
+
+    >>> bits('a')
+    0.0
+    >>> bits('ab')
+    8.965784284662089
+    >>> bits('a long string of english')
+    144.71045192421278
+    >>> bits('twyxpqzyrklbdg')
+    156.22382219953494
     """
-    e = 0
+    ne = 0
     s = M94.strip(s)
     for i in range(len(s) - 1):
         (x, y) = [ord(c) - ord('A') for c in s[i:i + 2]]
-        e += math.log(bigrams[x][y])
-    return e
+        f = bigrams[x][y]
+        ne += math.log(bigrams[x][y]) if f else 0
+    return ((len(s) - 1) * math.log(10000) - ne) / math.log(2)
 
 
 if __name__ == '__main__':
