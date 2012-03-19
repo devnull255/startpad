@@ -48,10 +48,10 @@ class M94(object):
     >>> m = M94('general electric company')
     >>> m.translate_line('hello there', 0)
     'HELLO THERE'
-    >>> m.translate_line('hello there', 1)
-    'UTNCT QZRLF'
-    >>> m.decode('UTNCT QZRLF')
-    True
+    >>> m.translate_line('hello there', 2)
+    'WAVFY KCYJH'
+    >>> m.decode('WAVFY KCYJH')[0][-1]
+    'HELLO THERE'
     """
     re_non_alpha = re.compile(r"[^A-Z]")
 
