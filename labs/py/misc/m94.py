@@ -45,6 +45,7 @@ wheels = ['ABCEIGDJFVUYMHTQKZOLRXSPWN',
 # Bigram frequencies for English - count per 10,000 characters.
 # See http://homepages.math.uic.edu/~leon/mcs425-s08/handouts/char_freq2.pdf
 # bigrams[0][1] (20) is frequency for pair 'AB', for example.
+# We convert these into conditional probabilites P(XY | X)
 bigrams = [
     [1, 20, 33, 52, 0, 12, 18, 5, 39, 1, 12, 57, 26,
      181, 1, 20, 1, 75, 95, 104, 9, 20, 13, 1, 26, 1],
@@ -101,6 +102,19 @@ bigrams = [
     ]
 
 
+# Convert to bits per bigram based on conditional probability.
+log2 = math.log(2)
+never_bits = math.log(9981) / log2
+for x in range(26):
+    t = sum([bigrams[x][y] for y in range(26)])
+    for y in range(26):
+        f = bigrams[x][y]
+        if f > 0:
+            bigrams[x][y] = -math.log(float(f) / t) / log2
+        else:
+            bigrams[x][y] = never_bits
+
+
 def main():
     parser = OptionParser(usage="usage: %prog [options] key [message]")
     parser.add_option('-d', '--decode', action='store_true', dest='decode',
@@ -146,7 +160,7 @@ class M94(object):
     >>> m.decode(x)
     'NOWIS THETI MEFOR ALLGO ODMEN'
     >>> m.decode(m.encode('xxxxxxx'))
-    'ODGNT AN'
+    'QUPEU PL'
     >>> m = M94('John Quincy Adams')
     >>> M94.strip(m.decode("TSFSJ QEPXY UGVBD DERUB UBKSP QWBUA AJQCV KFCEP SPRFL XLTKM FDIOW"))
     'LANDEDONBEACHNOSIXATZEROFIVEONEZEROWITHOUTCASUALTIOGREM'
@@ -253,19 +267,18 @@ def bits(s):
     >>> bits('a')
     0.0
     >>> bits('ab')
-    8.965784284662089
+    5.362820525534263
     >>> bits('a long string of english')
-    144.71045192421278
+    64.17225113188248
     >>> bits('twyxpqzyrklbdg')
-    156.22382219953494
+    111.95065836232418
     """
-    ne = 0
+    b = 0.0
     s = M94.strip(s)
     for i in range(len(s) - 1):
         (x, y) = [ord(c) - ord('A') for c in s[i:i + 2]]
-        f = bigrams[x][y]
-        ne += math.log(bigrams[x][y]) if f else 0
-    return ((len(s) - 1) * math.log(10000) - ne) / math.log(2)
+        b +=  bigrams[x][y]
+    return b
 
 
 if __name__ == '__main__':
