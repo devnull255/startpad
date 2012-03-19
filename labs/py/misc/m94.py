@@ -140,6 +140,11 @@ class M94(object):
     'WAVFY KCYJH'
     >>> m.decode('WAVFY KCYJH')
     'HELLO THERE'
+    >>> x = m.encode("now is the time for all good men")
+    >>> m.decode(x)
+    'NOWIS THETI MEFOR ALLGO ODMEN'
+    >>> m.decode(m.encode('xxxxxxx'))
+    'ODGNT AN'
     """
     re_non_alpha = re.compile(r"[^A-Z]")
 
@@ -148,6 +153,7 @@ class M94(object):
 
     def encode(self, message):
         results = []
+        message = self.strip(message)
         for i in range(0, len(message), 25):
             part = message[i:i + 25]
             # Should not send the current line, or the one directly above or below.
@@ -158,6 +164,7 @@ class M94(object):
 
     def decode(self, message, best=True):
         results = []
+        message = self.strip(message)
         for i in range(0, len(message), 25):
             part = message[i:i + 25]
             options = [self.translate_line(part, offset) for offset in range(0, 26)]
