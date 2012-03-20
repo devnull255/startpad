@@ -136,8 +136,6 @@ def main():
     else:
         message = sys.stdin.read()
 
-    print "Decoding: %s" % message
-
     if options.decode:
         print m.decode(message)
     else:
@@ -151,9 +149,9 @@ class M94(object):
     'thisi sruno ntext'
     >>> m = M94('general electric company')
     >>> m.translate_line('HELLOTHERE', 0)
-    'HELLO THERE'
+    'HELLOTHERE'
     >>> m.translate_line('HELLOTHERE', 2)
-    'WAVFY KCYJH'
+    'WAVFYKCYJH'
     >>> m.decode('WAVFY KCYJH')
     'HELLO THERE'
     >>> x = m.encode("now is the time for all good men")
@@ -185,7 +183,7 @@ class M94(object):
             offset = random.randint(2, 24)
             results.append(self.translate_line(line, offset))
 
-        return '\n'.join(results)
+        return '\n'.join([self.group_letters(line) for line in results])
 
     def decode(self, message):
         results = []
@@ -199,7 +197,7 @@ class M94(object):
                     best_option = option
             results.append(best_option)
 
-        return '\n'.join(results)
+        return '\n'.join([self.group_letters(line) for line in results])
 
     def translate_line(self, line, offset):
         result = ''
@@ -207,7 +205,7 @@ class M94(object):
             wheel = wheels[self.order[i] - 1]
             j = (wheel.find(line[i]) + offset) % 26
             result += wheel[j]
-        return self.group_letters(result)
+        return result
 
     @staticmethod
     def order_from_phrase(phrase):
@@ -284,8 +282,6 @@ def bits(s):
     b = 0.0
     for i in range(len(s) - 1):
         (x, y) = [ord(c) - ord('A') for c in s[i:i + 2]]
-        if x < 0 or x > 25 or y < 0 or y > 25:
-            continue
         b +=  bigrams[x][y]
     return b
 
