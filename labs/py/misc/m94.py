@@ -162,20 +162,22 @@ class M94(object):
     >>> m.decode(m.encode('xxxxxxx'))
     'QUPEU PL'
     >>> m = M94('John Quincy Adams')
-    >>> M94.strip(m.decode("TSFSJ QEPXY UGVBD DERUB UBKSP QWBUA AJQCV KFCEP SPRFL XLTKM FDIOW"))
+    >>> M94.prepare_input(m.decode("TSFSJ QEPXY UGVBD DERUB UBKSP QWBUA AJQCV KFCEP SPRFL XLTKM FDIOW"))
     'LANDEDONBEACHNOSIXATZEROFIVEONEZEROWITHOUTCASUALTIOGREM'
     >>> m = M94('Naval District Cipher')
     >>> m.decode("HVSPM FPDSF XOIWB EWXQY KUGCR")
     'REQUE STBOA TFORC ASUAL TIESV'
     """
     re_non_alpha = re.compile(r"[^A-Z]")
+    digit_strings = ['ZERO', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE',
+                     'SIX', 'SEVEN', 'EIGHT', 'NINE']
 
     def __init__(self, phrase):
         self.order = self.order_from_phrase(phrase)
 
     def encode(self, message):
         results = []
-        message = self.strip(message)
+        message = self.prepare_input(message)
         for i in range(0, len(message), 25):
             part = message[i:i + 25]
             # Should not send the current line, or the one directly above or below.
@@ -186,7 +188,7 @@ class M94(object):
 
     def decode(self, message):
         results = []
-        message = self.strip(message)
+        message = self.prepare_input(message)
         for i in range(0, len(message), 25):
             part = message[i:i + 25]
             options = [self.translate_line(part, offset) for offset in range(0, 26)]
@@ -201,7 +203,7 @@ class M94(object):
         return '\n'.join(results)
 
     def translate_line(self, line, offset):
-        line = self.strip(line)
+        line = self.prepare_input(line)
         result = ''
         for i in range(len(line)):
             wheel = wheels[self.order[i] - 1]
@@ -217,7 +219,7 @@ class M94(object):
         >>> M94.order_from_phrase("general electric company")
         [11, 6, 17, 7, 22, 1, 14, 8, 15, 9, 3, 24, 23, 13, 4, 5, 20, 16, 21, 2, 18, 25, 12, 10, 19]
         """
-        phrase = M94.strip(phrase)
+        phrase = M94.prepare_input(phrase)
         if len(phrase) < 15:
             raise ValueError("Key too short - should be at least 15 characters (not %d)." %
                              len(phrase))
@@ -243,8 +245,17 @@ class M94(object):
         return order
 
     @staticmethod
-    def strip(s):
+    def prepare_input(s):
+        """ Convert string into array of 25-character lines for encoding.
+
+        >>> M94.prepare_input("this is an input string")
+        'THISISANINPUTSTRING'
+        >>> M94.prepare_input("meet me at 10 or 9")
+        'MEETMEATONEZEROORNINE'
+        """
         s = s.upper()
+        for digit in range(10):
+            s = s.replace(chr(ord('0') + digit), M94.digit_strings[digit])
         s = M94.re_non_alpha.sub('', s)
         return s
 
@@ -274,7 +285,8 @@ def bits(s):
     111.95065836232418
     """
     b = 0.0
-    s = M94.strip(s)
+    # TODO: Don't do this - just ignore bad chars and upcase lowers
+    s = M94.prepare_input(s)
     for i in range(len(s) - 1):
         (x, y) = [ord(c) - ord('A') for c in s[i:i + 2]]
         b +=  bigrams[x][y]
