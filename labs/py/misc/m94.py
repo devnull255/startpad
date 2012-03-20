@@ -150,9 +150,9 @@ class M94(object):
     >>> M94.group_letters('thisisrunontext')
     'thisi sruno ntext'
     >>> m = M94('general electric company')
-    >>> m.translate_line('hello there', 0)
+    >>> m.translate_line('HELLOTHERE', 0)
     'HELLO THERE'
-    >>> m.translate_line('hello there', 2)
+    >>> m.translate_line('HELLOTHERE', 2)
     'WAVFY KCYJH'
     >>> m.decode('WAVFY KCYJH')
     'HELLO THERE'
@@ -163,10 +163,13 @@ class M94(object):
     'QUPEU PL'
     >>> m = M94('John Quincy Adams')
     >>> M94.prepare_input(m.decode("TSFSJ QEPXY UGVBD DERUB UBKSP QWBUA AJQCV KFCEP SPRFL XLTKM FDIOW"))
-    'LANDEDONBEACHNOSIXATZEROFIVEONEZEROWITHOUTCASUALTIOGREM'
+    ['LANDEDONBEACHNOSIXATZEROF', 'IVEONEZEROWITHOUTCASUALTI', 'OGREM']
     >>> m = M94('Naval District Cipher')
     >>> m.decode("HVSPM FPDSF XOIWB EWXQY KUGCR")
     'REQUE STBOA TFORC ASUAL TIESV'
+    >>> x = m.encode("i need the 411")
+    >>> m.decode(x)
+    'INEED THEFO URONE ONE'
     """
     re_non_alpha = re.compile(r"[^A-Z]")
     digit_strings = ['ZERO', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE',
@@ -177,21 +180,17 @@ class M94(object):
 
     def encode(self, message):
         results = []
-        message = self.prepare_input(message)
-        for i in range(0, len(message), 25):
-            part = message[i:i + 25]
+        for line in self.prepare_input(message):
             # Should not send the current line, or the one directly above or below.
             offset = random.randint(2, 24)
-            results.append(self.translate_line(part, offset))
+            results.append(self.translate_line(line, offset))
 
         return '\n'.join(results)
 
     def decode(self, message):
         results = []
-        message = self.prepare_input(message)
-        for i in range(0, len(message), 25):
-            part = message[i:i + 25]
-            options = [self.translate_line(part, offset) for offset in range(0, 26)]
+        for line in self.prepare_input(message):
+            options = [self.translate_line(line, offset) for offset in range(0, 26)]
             best_e = None
             for option in options:
                 e = bits(option)
@@ -203,7 +202,6 @@ class M94(object):
         return '\n'.join(results)
 
     def translate_line(self, line, offset):
-        line = self.prepare_input(line)
         result = ''
         for i in range(len(line)):
             wheel = wheels[self.order[i] - 1]
@@ -219,15 +217,14 @@ class M94(object):
         >>> M94.order_from_phrase("general electric company")
         [11, 6, 17, 7, 22, 1, 14, 8, 15, 9, 3, 24, 23, 13, 4, 5, 20, 16, 21, 2, 18, 25, 12, 10, 19]
         """
-        phrase = M94.prepare_input(phrase)
+        phrase = M94.prepare_input(phrase)[0]
         if len(phrase) < 15:
             raise ValueError("Key too short - should be at least 15 characters (not %d)." %
                              len(phrase))
 
         if len(phrase) < 25:
             phrase = phrase + phrase
-
-        phrase = phrase[:25]
+            phrase = phrase[:25]
 
         order = [0] * 25
 
@@ -249,15 +246,15 @@ class M94(object):
         """ Convert string into array of 25-character lines for encoding.
 
         >>> M94.prepare_input("this is an input string")
-        'THISISANINPUTSTRING'
+        ['THISISANINPUTSTRING']
         >>> M94.prepare_input("meet me at 10 or 9")
-        'MEETMEATONEZEROORNINE'
+        ['MEETMEATONEZEROORNINE']
         """
         s = s.upper()
         for digit in range(10):
             s = s.replace(chr(ord('0') + digit), M94.digit_strings[digit])
         s = M94.re_non_alpha.sub('', s)
-        return s
+        return [s[i:i + 25] for i in range(0, len(s), 25)]
 
     @staticmethod
     def group_letters(letters):
@@ -275,20 +272,20 @@ def bits(s):
         bits = sum(-log(p))
         bits = sum(log(10000) - log(f)) = N * log(10000) - sum(log(f)
 
-    >>> bits('a')
+    >>> bits('A')
     0.0
-    >>> bits('ab')
+    >>> bits('AB')
     5.362820525534263
-    >>> bits('a long string of english')
+    >>> bits('ALONGSTRINGOFENGLISH')
     64.17225113188248
-    >>> bits('twyxpqzyrklbdg')
+    >>> bits('TWYXPQZYRKLBDG')
     111.95065836232418
     """
     b = 0.0
-    # TODO: Don't do this - just ignore bad chars and upcase lowers
-    s = M94.prepare_input(s)
     for i in range(len(s) - 1):
         (x, y) = [ord(c) - ord('A') for c in s[i:i + 2]]
+        if x < 0 or x > 25 or y < 0 or y > 25:
+            continue
         b +=  bigrams[x][y]
     return b
 
