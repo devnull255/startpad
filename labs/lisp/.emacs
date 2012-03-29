@@ -100,7 +100,7 @@
   (let (extention-alist fname suffix progName cmdStr)
     (setq extention-alist
           '(
-            ("py" . "lint8")
+            ("py" . "pep8 --max-line-length=100")
             ("js" . "jslint --strong")
             ("html" . "tidy.py")
             )
